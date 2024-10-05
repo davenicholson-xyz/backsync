@@ -5,7 +5,7 @@ use tokio::task;
 use tokio::time::{sleep, Duration};
 
 pub fn broadcst(broadcast_address: SocketAddr, msg: String) -> Result<()> {
-    let socket = UdpSocket::bind("0.0.0.0:0")?;
+    let socket = UdpSocket::bind("0.0.0.0:37878")?;
     socket.set_broadcast(true)?;
     println!("SERVER BCAST -> {}", msg);
     task::spawn(async move {
