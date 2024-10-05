@@ -1,3 +1,7 @@
+mod flags;
+mod network;
+
 fn main() {
-    println!("Hello, world!");
+    let flags = flags::cli_args();
+    let port = flags.port.unwrap_or(37878);
 }
