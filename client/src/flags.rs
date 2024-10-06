@@ -13,7 +13,6 @@ pub enum Commands {
         port: Option<i32>,
     },
     STOP,
-    STATUS,
     SET {
         #[arg(short, long)]
         wallpaper: Option<String>,

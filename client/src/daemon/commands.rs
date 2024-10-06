@@ -20,3 +20,10 @@ pub fn send_daemon(message: Message) -> Result<String> {
     let response = network::tcp::send_message(&local_tcp, message)?;
     Ok(response)
 }
+
+pub fn send_server(message: Message) -> Result<String> {
+    let port: Option<i32> = system::config::get("daemon_port")?;
+    let local_tcp = format!("127.0.0.1:{}", port.unwrap());
+    let response = network::tcp::send_message(&local_tcp, message)?;
+    Ok(response)
+}

@@ -1,5 +1,6 @@
+use std::ops::Deref;
+
 use anyhow::Result;
-use clap::builder::Str;
 use daemon::commands::{Command, Message};
 use flags::Commands;
 
@@ -24,18 +25,15 @@ async fn main() -> Result<()> {
         Some(Commands::STOP) => {
             println!("killing the daemon");
         }
-        Some(Commands::STATUS) => {
-            let daemon_port: Option<i32> = system::config::get("daemon_port")?;
-            let local_tcp = format!("127.0.0.1:{}", daemon_port.unwrap());
-            let _response = network::tcp::query_tcp(&local_tcp, "I AM A QUERY")?;
-        }
         Some(Commands::SET { wallpaper }) => {
-            let m = Message {
-                command: Command::SetWallpaper,
-                content: String::from("bars"),
-            };
-            let response = daemon::commands::send_daemon(m)?;
-            println!("{}", response);
+            if let Some(wp) = wallpaper {
+                let m = Message {
+                    command: Command::SetWallpaper,
+                    content: wp.deref().to_string(),
+                };
+                let response = daemon::commands::send_daemon(m)?;
+                println!("{}", response);
+            }
         }
         None => {}
     }

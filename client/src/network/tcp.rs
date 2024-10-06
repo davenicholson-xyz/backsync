@@ -85,7 +85,7 @@ fn create_tcp_listener(listener: TcpListener, sender: Sender<String>) -> Result<
 fn process_message(rx: Arc<Mutex<mpsc::Receiver<String>>>) -> Result<()> {
     loop {
         let message = rx.lock().unwrap().recv().unwrap();
-        println!("RCVD:{}", message);
+        println!("{}", message);
     }
 }
 
