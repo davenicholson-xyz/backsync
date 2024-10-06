@@ -1,10 +1,19 @@
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
-#[derive(Parser, Debug)]
+#[derive(Debug, Parser)]
 pub struct Flags {
-    /// Port to run server on
-    #[arg(short, long, env)]
-    pub port: Option<i64>,
+    #[command(subcommand)]
+    pub command: Option<Commands>,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum Commands {
+    START {
+        #[arg(short, long, env)]
+        port: Option<i32>,
+    },
+    STOP,
+    STATUS,
 }
 
 pub fn cli_args() -> Flags {
