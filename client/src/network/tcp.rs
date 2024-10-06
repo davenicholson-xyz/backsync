@@ -1,10 +1,11 @@
 use anyhow::Result;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::sync::mpsc::Sender;
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
+use std::time::Duration;
 
 use crate::system;
 
@@ -86,4 +87,18 @@ fn process_message(rx: Arc<Mutex<mpsc::Receiver<String>>>) -> Result<()> {
         let message = rx.lock().unwrap().recv().unwrap();
         println!("RCVD:{}", message);
     }
+}
+
+pub fn query_tcp(addr: &str, query: &str) -> Result<String> {
+    let mut stream = TcpStream::connect(addr)?;
+    stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+
+    stream.write_all(query.as_bytes())?;
+    stream.flush()?;
+
+    let mut buffer = [0; 1024];
+    let bytes_read = stream.read(&mut buffer)?;
+
+    let response = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+    Ok(response)
 }

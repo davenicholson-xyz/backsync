@@ -17,30 +17,19 @@ async fn main() -> Result<()> {
                 system::config::set(&cfg_file, "port", flg_port)?;
             }
             let cfg_port: Option<i32> = system::config::get(&cfg_file, "port")?;
-
+            #[cfg(target_family = "unix")]
             daemon::unix::spawn(cfg_port.unwrap_or(37878))?;
         }
         Some(Commands::STOP) => {
             println!("killing the daemon");
         }
         Some(Commands::STATUS) => {
-            println!("status of the daemon");
+            let daemon_port: Option<i32> = system::config::get(&cfg_file, "daemon_port")?;
+            let local_tcp = format!("127.0.0.1:{}", daemon_port.unwrap());
+            let _ = network::tcp::query_tcp(&local_tcp, "I AM A QUERY");
         }
         None => {}
     }
 
-    //network::udp::listen_for_broadcast(cfg_port.unwrap_or(37878))?;
-
-    //let port = flags.port.unwrap_or(37878);
-    //
-    //let udp_string = format!("0.0.0.0:{}", port);
-    //let socket = UdpSocket::bind(udp_string).await?;
-    //let mut buf = [0; 1024];
-    //
-    //println!("listening for udp on port {}", port);
-    //
-    //let (len, _addr) = socket.recv_from(&mut buf).await?;
-    //let msg = String::from_utf8_lossy(&buf[..len]);
-    //println!("Received: {}", msg);
     Ok(())
 }
