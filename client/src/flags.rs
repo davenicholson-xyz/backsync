@@ -14,6 +14,10 @@ pub enum Commands {
     },
     STOP,
     STATUS,
+    SET {
+        #[arg(short, long)]
+        wallpaper: Option<String>,
+    },
 }
 
 pub fn cli_args() -> Flags {

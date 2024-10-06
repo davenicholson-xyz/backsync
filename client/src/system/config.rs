@@ -1,11 +1,13 @@
+use crate::system;
 use anyhow::anyhow;
 use anyhow::Result;
 use serde::{de::DeserializeOwned, Serialize};
 use std::{fs, io::Write, path::Path};
 use toml::Value;
 
-pub fn get<T: DeserializeOwned>(filepath: &str, field: &str) -> Result<Option<T>> {
-    if Path::new(filepath).exists() {
+pub fn get<T: DeserializeOwned>(field: &str) -> Result<Option<T>> {
+    let filepath = system::files::config_file()?;
+    if Path::new(&filepath).exists() {
         let contents = fs::read_to_string(filepath)?;
         let config: Value = toml::from_str(&contents)?;
         if let Some(value) = config.get(field) {
@@ -17,9 +19,10 @@ pub fn get<T: DeserializeOwned>(filepath: &str, field: &str) -> Result<Option<T>
     Ok(None)
 }
 
-pub fn set<T: Serialize>(filepath: &str, field: &str, value: T) -> Result<()> {
-    let mut config: Value = if Path::new(filepath).exists() {
-        let contents = fs::read_to_string(filepath)?;
+pub fn set<T: Serialize>(field: &str, value: T) -> Result<()> {
+    let filepath = system::files::config_file()?;
+    let mut config: Value = if Path::new(&filepath).exists() {
+        let contents = fs::read_to_string(&filepath)?;
         toml::from_str(&contents)?
     } else {
         Value::Table(Default::default())

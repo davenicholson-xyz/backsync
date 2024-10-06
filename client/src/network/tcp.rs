@@ -7,15 +7,15 @@ use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
 
+use crate::daemon::commands::Message;
 use crate::system;
 
 pub fn connect_client(socket: SocketAddr) -> Result<()> {
     let server_stream = TcpStream::connect(socket)?;
     let local_listener = TcpListener::bind("127.0.0.1:0")?;
 
-    let config_file = system::files::config_file()?;
     let local_port: SocketAddr = local_listener.local_addr()?;
-    system::config::set(&config_file, "daemon_port", local_port.port())?;
+    system::config::set("daemon_port", local_port.port())?;
 
     let (tx, rx) = mpsc::channel();
     let rx = Arc::new(Mutex::new(rx));
@@ -87,6 +87,21 @@ fn process_message(rx: Arc<Mutex<mpsc::Receiver<String>>>) -> Result<()> {
         let message = rx.lock().unwrap().recv().unwrap();
         println!("RCVD:{}", message);
     }
+}
+
+pub fn send_message(addr: &str, message: Message) -> Result<String> {
+    let mut stream = TcpStream::connect(addr)?;
+    stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+    let serialized = serde_json::to_vec(&message).expect("Failed to serialize message");
+    stream.write_all(&serialized)?;
+
+    stream.flush()?;
+
+    let mut buffer = [0; 1024];
+    let bytes_read = stream.read(&mut buffer)?;
+
+    let response = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+    Ok(response)
 }
 
 pub fn query_tcp(addr: &str, query: &str) -> Result<String> {
