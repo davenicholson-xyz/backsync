@@ -16,7 +16,7 @@ async fn main() -> Result<()> {
     let local_ip = local_ip_address::local_ip()?;
     let port = flags.port.unwrap_or(37878);
     let broadcast_address: SocketAddr = format!("255.255.255.255:{}", port).parse()?;
-    let msg = format!("JOIN::{}:{}", local_ip, port);
+    let msg = format!("SVR::{}:{}", local_ip, port);
 
     network::udp::broadcast(broadcast_address, msg)?;
 
