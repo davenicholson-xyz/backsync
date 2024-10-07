@@ -4,7 +4,7 @@ use std::net::{SocketAddr, TcpStream};
 use std::thread;
 
 use crate::commands;
-use crate::commands::client::ClientCommand;
+use crate::commands::commands::ClientCommand;
 
 pub fn server_stream(socket: SocketAddr) -> Result<TcpStream> {
     let stream = TcpStream::connect(socket)?;

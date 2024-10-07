@@ -1,10 +1,8 @@
-pub mod client;
+pub mod commands;
 pub mod info;
-pub mod server;
 
 use anyhow::Result;
-use client::ClientCommand;
-use server::ServerCommand;
+use commands::{ClientCommand, ServerCommand};
 use std::{
     io::Write,
     net::TcpStream,

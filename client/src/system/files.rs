@@ -14,6 +14,7 @@ pub fn config_file() -> Result<String> {
     }
 }
 
+#[allow(dead_code)]
 pub fn cache_path() -> Result<PathBuf> {
     let crate_name = env!("CARGO_PKG_NAME");
     if let Some(mut home_dir) = homedir::my_home()? {

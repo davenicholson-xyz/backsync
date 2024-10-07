@@ -2,6 +2,8 @@ mod commands;
 mod flags;
 mod network;
 
+use commands::{commands::ClientCommand, send_to_client};
+use rand::Rng;
 use std::{
     fs::File,
     net::{SocketAddr, TcpListener, TcpStream},
@@ -54,6 +56,14 @@ async fn main() -> Result<()> {
     });
 
     loop {
-        tokio::time::sleep(Duration::from_secs(10)).await;
+        tokio::time::sleep(Duration::from_secs(20)).await;
+
+        let loop_clients = clients.clone();
+        let mut clients = loop_clients.lock().unwrap();
+        let client = clients.iter_mut().nth(0).unwrap();
+        let num = rand::thread_rng().gen_range(1..3);
+        let wp = format!("{}.jpg", num);
+        let command = ClientCommand::SetWallpaper { id: wp };
+        send_to_client(client, &command)?;
     }
 }

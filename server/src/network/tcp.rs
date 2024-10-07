@@ -11,7 +11,7 @@ use std::{
 };
 
 use crate::commands;
-use crate::commands::server::ServerCommand;
+use crate::commands::commands::ServerCommand;
 
 pub fn handle_client(listener: TcpListener, clients: Arc<Mutex<Vec<TcpStream>>>) -> Result<()> {
     let tcp_addr = listener.local_addr()?;

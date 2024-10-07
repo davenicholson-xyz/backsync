@@ -1,8 +1,7 @@
 use anyhow::Result;
-use client::ClientCommand;
+use commands::ClientCommand;
 
-pub mod client;
-pub mod server;
+pub mod commands;
 
 pub fn handle(command: ClientCommand) -> Result<()> {
     match command {
