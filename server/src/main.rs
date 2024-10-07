@@ -1,6 +1,7 @@
 mod commands;
 mod flags;
 mod network;
+mod system;
 
 use commands::{commands::ClientCommand, send_to_client};
 use rand::Rng;
@@ -60,10 +61,12 @@ async fn main() -> Result<()> {
 
         let loop_clients = clients.clone();
         let mut clients = loop_clients.lock().unwrap();
-        let client = clients.iter_mut().nth(0).unwrap();
-        let num = rand::thread_rng().gen_range(1..3);
-        let wp = format!("{}.jpg", num);
-        let command = ClientCommand::SetWallpaper { id: wp };
-        send_to_client(client, &command)?;
+        if clients.len() > 0 {
+            let client = clients.iter_mut().nth(0).unwrap();
+            let num = rand::thread_rng().gen_range(1..4);
+            let wp = format!("{}.jpg", num);
+            let command = ClientCommand::SetWallpaper { id: wp };
+            send_to_client(client, &command)?;
+        }
     }
 }

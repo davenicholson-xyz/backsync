@@ -4,12 +4,20 @@ use std::fmt;
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ClientCommand {
     Handshake,
-    SetWallpaper { id: String },
+    SetWallpaper {
+        id: String,
+    },
+    SendWallpaper {
+        id: String,
+        data: Vec<u8>,
+        set: bool,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ServerCommand {
     Handshake,
+    RequestWallpaper { id: String },
 }
 
 impl fmt::Display for ClientCommand {

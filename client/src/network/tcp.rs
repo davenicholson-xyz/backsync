@@ -13,21 +13,25 @@ pub fn server_stream(socket: SocketAddr) -> Result<TcpStream> {
     let mut stream_clone = stream.try_clone()?;
 
     thread::spawn(move || {
-        let mut buffer = [0; 1024];
+        let mut length_prefix = [0; 4];
         loop {
-            match stream_clone.read(&mut buffer) {
-                Ok(0) => {
-                    println!("connection closed");
-                    break;
-                }
-                Ok(bytes_read) => {
-                    let message = String::from_utf8_lossy(&buffer[..bytes_read]);
-                    let command =
-                        serde_json::from_str::<ClientCommand>(&message.to_string()).unwrap();
-                    commands::handle(command).unwrap();
+            match stream_clone.read_exact(&mut length_prefix) {
+                Ok(()) => {
+                    let message_length = u32::from_be_bytes(length_prefix) as usize;
+                    let mut buffer = vec![0; message_length];
+                    match stream_clone.read_exact(&mut buffer) {
+                        Ok(()) => {
+                            let command = serde_json::from_slice::<ClientCommand>(&buffer).unwrap();
+                            commands::handle(command).unwrap();
+                        }
+                        Err(e) => {
+                            error!("Error reading server: {}", e);
+                            break;
+                        }
+                    }
                 }
                 Err(e) => {
-                    error!("Error reading server: {}", e);
+                    error!("Error reading length prefix: {}", e);
                     break;
                 }
             }

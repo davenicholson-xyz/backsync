@@ -9,6 +9,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use crate::system::files;
+
 pub fn handle(command: ServerCommand, stream: &mut TcpStream) -> Result<()> {
     info!("Received: ServerCommand::{}", command);
     match command {
@@ -16,13 +18,19 @@ pub fn handle(command: ServerCommand, stream: &mut TcpStream) -> Result<()> {
             let reply = ClientCommand::Handshake;
             send_to_client(stream, &reply)?;
         }
+        ServerCommand::RequestWallpaper { id } => {
+            info!("CLIENT requested {}", id);
+            files::send_wallpaper(id, stream)?;
+        }
     }
     Ok(())
 }
 
 pub fn send_to_client(stream: &mut TcpStream, command: &ClientCommand) -> Result<()> {
-    info!("Sending: ClientCommand::{}", command);
     let serialized = serde_json::to_vec(&command)?;
+    let length = (serialized.len() as u32).to_be_bytes();
+
+    stream.write_all(&length)?;
     stream.write_all(&serialized)?;
     stream.flush()?;
     Ok(())

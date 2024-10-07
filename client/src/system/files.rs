@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::Write;
 use std::path::PathBuf;
 
 use anyhow::anyhow;
@@ -23,4 +25,12 @@ pub fn cache_path() -> Result<PathBuf> {
     } else {
         Err(anyhow!("Could not find users cache directory"))
     }
+}
+
+pub fn save_wallpaper(id: String, data: Vec<u8>) -> Result<()> {
+    let mut cachepath = cache_path()?;
+    cachepath.push(&id);
+    let mut file = File::create(cachepath)?;
+    file.write_all(&data)?;
+    Ok(())
 }

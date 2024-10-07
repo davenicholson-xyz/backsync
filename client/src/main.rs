@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{self, File};
 
 use anyhow::Result;
 use flags::Action;
@@ -16,6 +16,7 @@ extern crate log;
 extern crate simplelog;
 
 use simplelog::*;
+use system::files;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -33,6 +34,9 @@ async fn main() -> Result<()> {
         ),
     ])
     .unwrap();
+
+    let cachepath = files::cache_path()?;
+    fs::create_dir_all(cachepath)?;
 
     let flags = flags::cli_args();
 
