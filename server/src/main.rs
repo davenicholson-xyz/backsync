@@ -1,3 +1,4 @@
+mod commands;
 mod flags;
 mod network;
 
@@ -9,6 +10,7 @@ use std::{
 };
 
 use anyhow::Result;
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let flags = flags::cli_args();

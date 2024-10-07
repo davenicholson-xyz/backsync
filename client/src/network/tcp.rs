@@ -7,6 +7,7 @@ use std::{
     thread,
 };
 
+use crate::commands::server::ServerCommand;
 use crate::daemon::SERVER_SEND;
 
 pub fn server_stream(
@@ -15,7 +16,10 @@ pub fn server_stream(
     receiver_from_main: Receiver<String>,
 ) -> Result<JoinHandle<()>> {
     let mut stream = TcpStream::connect(socket)?;
-    stream.write_all(b"handshake")?;
+
+    let handshake = ServerCommand::Handshake;
+    let serialized = serde_json::to_vec(&handshake)?;
+    stream.write_all(&serialized)?;
 
     let handle = thread::spawn(move || {
         let mut buffer = [0; 1024];
@@ -44,11 +48,12 @@ pub fn server_stream(
     Ok(handle)
 }
 
-pub fn send_message_to_stream(message: String) -> Result<(), String> {
+pub fn send_command_to_stream(command: ServerCommand) -> Result<(), String> {
     if let Some(global_sender) = SERVER_SEND.get() {
         let sender = global_sender.lock().unwrap();
+        let serialized = serde_json::to_string(&command).unwrap();
         sender
-            .send(message)
+            .send(serialized)
             .map_err(|e| format!("Failed to send message: {:?}", e))
     } else {
         Err("Global sender is not set".into())

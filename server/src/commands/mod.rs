@@ -1,24 +1,25 @@
+pub mod client;
 pub mod info;
+pub mod server;
 
 use anyhow::Result;
-use std::{
-    net::TcpStream,
-    sync::{Arc, Mutex},
-};
+use client::ClientCommand;
+use server::ServerCommand;
+use std::{io::Write, net::TcpStream};
 
-use shared::{client::ClientMessage, server::ServerMessage};
-
-use crate::network;
-
-pub fn handle(message: ServerMessage, stream: &mut TcpStream) -> Result<()> {
-    dbg!(message);
+pub fn handle(command: ServerCommand, stream: &mut TcpStream) -> Result<()> {
+    match command {
+        ServerCommand::Handshake => {
+            println!("received handshake from client");
+            send_to_client(stream, ClientCommand::Handshake)?;
+        }
+    }
     Ok(())
 }
 
-pub fn send_all(clients: &Arc<Mutex<Vec<TcpStream>>>, message: &ClientMessage) -> Result<()> {
-    let tcp_clients = clients.lock().unwrap();
-    for client in tcp_clients.iter() {
-        network::messaging::send(client, &message)?;
-    }
+pub fn send_to_client(stream: &mut TcpStream, command: ClientCommand) -> Result<()> {
+    let serialized = serde_json::to_vec(&command)?;
+    stream.write_all(&serialized)?;
+    stream.flush()?;
     Ok(())
 }

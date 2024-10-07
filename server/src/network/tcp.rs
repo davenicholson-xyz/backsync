@@ -1,5 +1,7 @@
 use anyhow::anyhow;
 use anyhow::Result;
+use serde_json::from_slice;
+use std::io::ErrorKind;
 use std::io::{Read, Write};
 use std::net::SocketAddr;
 use std::thread;
@@ -8,6 +10,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use crate::commands;
+use crate::commands::server::ServerCommand;
+
 pub fn handle_client(listener: TcpListener, clients: Arc<Mutex<Vec<TcpStream>>>) -> Result<()> {
     let tcp_addr = listener.local_addr()?;
     println!("tcp listening on {}", tcp_addr);
@@ -15,7 +20,7 @@ pub fn handle_client(listener: TcpListener, clients: Arc<Mutex<Vec<TcpStream>>>)
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                println!("ner client connected from {}", tcp_addr);
+                println!("Client connected from {}", tcp_addr);
                 let clients = Arc::clone(&clients);
                 thread::spawn(move || {
                     let peer_addr = stream.peer_addr().unwrap();
@@ -50,14 +55,29 @@ fn client_connect(mut stream: TcpStream, clients: Arc<Mutex<Vec<TcpStream>>>) ->
                 break;
             }
             Ok(n) => {
-                println!("Received {} bytes from {}", n, peer_address);
-                stream.write_all(&buffer[..n])?;
+                let message = match from_slice::<ServerCommand>(&buffer[..n]) {
+                    Ok(msg) => msg,
+                    Err(e) => {
+                        println!(
+                            "failed to deserialise message from {}: {:?}",
+                            peer_address, e
+                        );
+                        continue;
+                    }
+                };
+
+                if let Err(e) = commands::handle(message, &mut stream) {
+                    println!("Error handling message from {}: {:?}", peer_address, e);
+                }
             }
             Err(e) => {
+                if e.kind() == ErrorKind::WouldBlock || e.kind() == ErrorKind::TimedOut {
+                    continue;
+                }
                 println!("Error reading from client {}: {:?}", peer_address, e);
                 remove_client(&peer_address, &clients)?;
                 break;
-            }
+            } //Err(e) => {
         }
     }
 
@@ -74,38 +94,38 @@ fn remove_client(peer_addr: &SocketAddr, clients: &Arc<Mutex<Vec<TcpStream>>>) -
     Ok(())
 }
 
-pub fn send_message(
-    clients: Arc<Mutex<Vec<TcpStream>>>,
-    target: &SocketAddr,
-    message: &str,
-) -> Result<()> {
-    let tcp_clients = clients.lock().unwrap();
-
-    for mut client in tcp_clients.iter() {
-        if let Ok(peer_addr) = client.peer_addr() {
-            if &peer_addr == target {
-                client.write_all(message.as_bytes())?;
-                println!("Send message to {}, {}", peer_addr, message);
-                return Ok(());
-            }
-        }
-    }
-    Ok(())
-}
-
-pub fn send_message_to_all_clients(
-    clients: Arc<Mutex<Vec<TcpStream>>>,
-    message: &str,
-) -> Result<()> {
-    let tcp_clients = clients.lock().unwrap();
-
-    for mut client in tcp_clients.iter() {
-        if let Err(e) = client.write_all(message.as_bytes()) {
-            println!("Error sending message to {}: {:?}", client.peer_addr()?, e);
-        } else {
-            println!("Send {} to {}", message, client.peer_addr().unwrap());
-        }
-    }
-
-    Ok(())
-}
+//pub fn send_message(
+//    clients: Arc<Mutex<Vec<TcpStream>>>,
+//    target: &SocketAddr,
+//    message: &str,
+//) -> Result<()> {
+//    let tcp_clients = clients.lock().unwrap();
+//
+//    for mut client in tcp_clients.iter() {
+//        if let Ok(peer_addr) = client.peer_addr() {
+//            if &peer_addr == target {
+//                client.write_all(message.as_bytes())?;
+//                println!("Send message to {}, {}", peer_addr, message);
+//                return Ok(());
+//            }
+//        }
+//    }
+//    Ok(())
+//}
+//
+//pub fn send_message_to_all_clients(
+//    clients: Arc<Mutex<Vec<TcpStream>>>,
+//    message: &str,
+//) -> Result<()> {
+//    let tcp_clients = clients.lock().unwrap();
+//
+//    for mut client in tcp_clients.iter() {
+//        if let Err(e) = client.write_all(message.as_bytes()) {
+//            println!("Error sending message to {}: {:?}", client.peer_addr()?, e);
+//        } else {
+//            println!("Send {} to {}", message, client.peer_addr().unwrap());
+//        }
+//    }
+//
+//    Ok(())
+//}

@@ -1,3 +1,5 @@
+use crate::commands;
+use crate::commands::client::ClientCommand;
 use crate::network;
 use crate::system;
 use anyhow::{anyhow, Result};
@@ -24,7 +26,8 @@ pub fn spawn(server_port: i32) -> Result<()> {
 
         thread::spawn(move || {
             while let Ok(receieved_message) = rx_stream_to_main.recv() {
-                println!("Received from TCP: {}", receieved_message);
+                let command: ClientCommand = serde_json::from_str(&receieved_message).unwrap();
+                commands::handle(command).unwrap();
             }
         });
     } else {

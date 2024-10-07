@@ -1,6 +1,7 @@
 use anyhow::Result;
 use flags::Action;
 
+mod commands;
 mod daemon;
 mod flags;
 mod network;
