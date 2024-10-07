@@ -1,61 +1,38 @@
 use anyhow::Result;
-use std::io::{Read, Write};
-use std::sync::mpsc::{Receiver, Sender};
-use std::thread::JoinHandle;
-use std::{
-    net::{SocketAddr, TcpStream},
-    thread,
-};
+use std::io::Read;
+use std::net::{SocketAddr, TcpStream};
+use std::thread;
 
-use crate::commands::server::ServerCommand;
-use crate::daemon::SERVER_SEND;
+use crate::commands;
+use crate::commands::client::ClientCommand;
 
-pub fn server_stream(
-    socket: SocketAddr,
-    sender_to_main: Sender<String>,
-    receiver_from_main: Receiver<String>,
-) -> Result<JoinHandle<()>> {
-    let mut stream = TcpStream::connect(socket)?;
+pub fn server_stream(socket: SocketAddr) -> Result<TcpStream> {
+    let stream = TcpStream::connect(socket)?;
+    info!("Connected to SERVER at {}", stream.peer_addr().unwrap());
 
-    let handshake = ServerCommand::Handshake;
-    let serialized = serde_json::to_vec(&handshake)?;
-    stream.write_all(&serialized)?;
+    let mut stream_clone = stream.try_clone()?;
 
-    let handle = thread::spawn(move || {
+    thread::spawn(move || {
         let mut buffer = [0; 1024];
         loop {
-            match stream.read(&mut buffer) {
+            match stream_clone.read(&mut buffer) {
                 Ok(0) => {
-                    println!("connection dropped");
+                    println!("connection closed");
                     break;
                 }
                 Ok(bytes_read) => {
                     let message = String::from_utf8_lossy(&buffer[..bytes_read]);
-                    sender_to_main.send(message.into_owned()).unwrap();
+                    let command =
+                        serde_json::from_str::<ClientCommand>(&message.to_string()).unwrap();
+                    commands::handle(command).unwrap();
                 }
                 Err(e) => {
-                    eprintln!("Error reading from client: {}", e);
-                }
-            }
-
-            if let Ok(msg_to_send) = receiver_from_main.recv() {
-                if let Err(err) = stream.write_all(msg_to_send.as_bytes()) {
-                    println!("Failed to send message to server: {}", err);
+                    error!("Error reading server: {}", e);
+                    break;
                 }
             }
         }
     });
-    Ok(handle)
-}
 
-pub fn send_command_to_stream(command: ServerCommand) -> Result<(), String> {
-    if let Some(global_sender) = SERVER_SEND.get() {
-        let sender = global_sender.lock().unwrap();
-        let serialized = serde_json::to_string(&command).unwrap();
-        sender
-            .send(serialized)
-            .map_err(|e| format!("Failed to send message: {:?}", e))
-    } else {
-        Err("Global sender is not set".into())
-    }
+    Ok(stream)
 }

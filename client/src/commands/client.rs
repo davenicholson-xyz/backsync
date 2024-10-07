@@ -3,4 +3,5 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ClientCommand {
     Handshake,
+    SetWallpaper { id: String },
 }

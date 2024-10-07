@@ -10,11 +10,11 @@ pub fn listen_for_broadcast(port: i32) -> Result<Option<SocketAddr>> {
     let udp_socket = UdpSocket::bind(format!("0.0.0.0:{}", port))?;
     let mut buf = [0; 1024];
 
-    println!("waiting for udp broadcast");
+    info!("UDP: Wainting for port {}", port);
 
     let (amt, src) = udp_socket.recv_from(&mut buf)?;
     let udp_message = str::from_utf8(&buf[..amt])?;
-    println!("received {} from {}", udp_message, src);
+    info!("RECEIVED {} from {}", udp_message, src);
 
     let prefix = "SVR::";
     if !udp_message.to_uppercase().starts_with(prefix) {

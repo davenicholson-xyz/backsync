@@ -7,7 +7,10 @@ pub mod server;
 pub fn handle(command: ClientCommand) -> Result<()> {
     match command {
         ClientCommand::Handshake => {
-            println!("received handshake from server");
+            info!("SERVER: 👋");
+        }
+        ClientCommand::SetWallpaper { id } => {
+            info!("SERVER sent wallaper SET request: {}", id);
         }
     }
     Ok(())

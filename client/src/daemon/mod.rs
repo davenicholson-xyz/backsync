@@ -1,35 +1,22 @@
-use crate::commands;
-use crate::commands::client::ClientCommand;
+use crate::commands::server::ServerCommand;
 use crate::network;
 use crate::system;
 use anyhow::{anyhow, Result};
 use once_cell::sync::OnceCell;
-use std::sync::mpsc::Sender;
+use std::io::Write;
+use std::net::TcpStream;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::{sync::mpsc, thread};
+use std::thread;
 
-pub static SERVER_SEND: OnceCell<Arc<Mutex<Sender<String>>>> = OnceCell::new();
+pub static SERVER_STREAM: OnceCell<Arc<Mutex<TcpStream>>> = OnceCell::new();
 
 pub fn spawn(server_port: i32) -> Result<()> {
     if let Some(udp) = network::udp::listen_for_broadcast(server_port)? {
         system::config::set("server_ip", udp.ip())?;
-
-        let (tx_stream_to_main, rx_stream_to_main) = mpsc::channel();
-        let (tx_main_to_stream, rx_main_to_stream) = mpsc::channel();
-
-        SERVER_SEND
-            .set(Arc::new(Mutex::new(tx_main_to_stream)))
-            .unwrap();
-
-        let _handle = network::tcp::server_stream(udp, tx_stream_to_main, rx_main_to_stream)?;
-
-        thread::spawn(move || {
-            while let Ok(receieved_message) = rx_stream_to_main.recv() {
-                let command: ClientCommand = serde_json::from_str(&receieved_message).unwrap();
-                commands::handle(command).unwrap();
-            }
-        });
+        let stream = network::tcp::server_stream(udp)?;
+        SERVER_STREAM.set(Arc::new(Mutex::new(stream))).unwrap();
+        send_to_server(ServerCommand::Handshake)?;
     } else {
         return Err(anyhow!("Failed to get UDP connection"));
     };
@@ -37,4 +24,14 @@ pub fn spawn(server_port: i32) -> Result<()> {
     loop {
         thread::park();
     }
+}
+pub fn send_to_server(command: ServerCommand) -> Result<()> {
+    if let Some(stream) = SERVER_STREAM.get() {
+        let mut stream = stream.lock().unwrap();
+        let message = serde_json::to_string(&command)?;
+        stream.write_all(message.as_bytes())?;
+    } else {
+        return Err(anyhow!("Global stream could not be initialised"));
+    }
+    Ok(())
 }

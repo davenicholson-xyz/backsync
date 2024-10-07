@@ -1,3 +1,5 @@
+use std::fs::File;
+
 use anyhow::Result;
 use flags::Action;
 
@@ -7,8 +9,31 @@ mod flags;
 mod network;
 mod system;
 
+use simplelog::CombinedLogger;
+
+#[macro_use]
+extern crate log;
+extern crate simplelog;
+
+use simplelog::*;
+
 #[tokio::main]
 async fn main() -> Result<()> {
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            File::create("bs-client.log").unwrap(),
+        ),
+    ])
+    .unwrap();
+
     let flags = flags::cli_args();
 
     match &flags.command {
@@ -20,7 +45,7 @@ async fn main() -> Result<()> {
             daemon::spawn(cfg_port.unwrap_or(37878))?;
         }
         Some(Action::STOP) => {
-            println!("killing the daemon");
+            info!("DAEMON killing");
         }
         None => {}
     }

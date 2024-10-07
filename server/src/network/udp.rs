@@ -7,7 +7,7 @@ use tokio::time::{sleep, Duration};
 pub fn broadcast(broadcast_address: SocketAddr, msg: String) -> Result<()> {
     let socket = UdpSocket::bind("0.0.0.0:0")?;
     socket.set_broadcast(true)?;
-    println!("SERVER BROADCAST {}", msg);
+    info!("UDP: {}", msg);
     task::spawn(async move {
         loop {
             let _ = socket.send_to(msg.as_bytes(), broadcast_address);

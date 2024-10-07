@@ -3,6 +3,7 @@ mod flags;
 mod network;
 
 use std::{
+    fs::File,
     net::{SocketAddr, TcpListener, TcpStream},
     sync::{Arc, Mutex},
     thread,
@@ -10,9 +11,31 @@ use std::{
 };
 
 use anyhow::Result;
+use simplelog::CombinedLogger;
+
+#[macro_use]
+extern crate log;
+extern crate simplelog;
+
+use simplelog::*;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            File::create("bs-server.log").unwrap(),
+        ),
+    ])
+    .unwrap();
+
     let flags = flags::cli_args();
 
     let local_ip = local_ip_address::local_ip()?;
