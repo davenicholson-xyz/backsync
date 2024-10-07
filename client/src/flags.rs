@@ -3,20 +3,16 @@ use clap::{Parser, Subcommand};
 #[derive(Debug, Parser)]
 pub struct Flags {
     #[command(subcommand)]
-    pub command: Option<Commands>,
+    pub command: Option<Action>,
 }
 
 #[derive(Debug, Subcommand)]
-pub enum Commands {
-    START {
+pub enum Action {
+    INIT {
         #[arg(short, long, env)]
         port: Option<i32>,
     },
     STOP,
-    SET {
-        #[arg(short, long)]
-        wallpaper: Option<String>,
-    },
 }
 
 pub fn cli_args() -> Flags {
