@@ -1,9 +1,9 @@
 mod commands;
 mod flags;
+mod http;
 mod network;
 mod system;
 
-use std::time::Duration;
 use system::config;
 
 use anyhow::Result;
@@ -20,12 +20,14 @@ async fn main() -> Result<()> {
     system::logger::start(&format!("{}.log", crate_name));
 
     config::flag_file_default(flags.storage, "storage", "nice".to_string())?;
-    let port = config::flag_file_default(flags.port, "port", 37878)? as i32;
+    let network_port = config::flag_file_default(flags.port, "port", 37878)? as i32;
 
-    network::udp::broadcast(port)?;
-    network::tcp::start(port)?;
+    network::udp::broadcast(network_port)?;
+    network::tcp::start(network_port)?;
 
-    loop {
-        tokio::time::sleep(Duration::from_secs(20)).await;
-    }
+    let http_port = config::flag_file_default(flags.web_port, "web_port", 3001)? as i32;
+    let http_server = http::server::start(http_port);
+    http_server.join().unwrap();
+
+    Ok(())
 }
