@@ -22,13 +22,13 @@ use system::files;
 async fn main() -> Result<()> {
     CombinedLogger::init(vec![
         TermLogger::new(
-            LevelFilter::Info,
+            LevelFilter::Debug,
             Config::default(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
         ),
         WriteLogger::new(
-            LevelFilter::Info,
+            LevelFilter::Debug,
             Config::default(),
             File::create("bs-client.log").unwrap(),
         ),

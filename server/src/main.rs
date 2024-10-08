@@ -4,9 +4,9 @@ mod network;
 mod system;
 
 use commands::{commands::ClientCommand, send_to_client};
-use rand::Rng;
+use rand::seq::IteratorRandom;
 use std::{
-    fs::File,
+    fs::{self, File},
     net::{SocketAddr, TcpListener, TcpStream},
     sync::{Arc, Mutex},
     thread,
@@ -56,17 +56,29 @@ async fn main() -> Result<()> {
         let _ = network::tcp::handle_client(listener, tcp_clients);
     });
 
-    loop {
-        tokio::time::sleep(Duration::from_secs(20)).await;
+    let loop_clients = clients.clone();
+    thread::spawn(move || loop {
+        thread::sleep(Duration::from_secs(5));
 
-        let loop_clients = clients.clone();
         let mut clients = loop_clients.lock().unwrap();
         if clients.len() > 0 {
-            let client = clients.iter_mut().nth(0).unwrap();
-            let num = rand::thread_rng().gen_range(1..4);
-            let wp = format!("{}.jpg", num);
-            let command = ClientCommand::SetWallpaper { id: wp };
-            send_to_client(client, &command)?;
+            let mut rng = rand::thread_rng();
+            let files = fs::read_dir("/Users/dave/projects/backsync/server/wallpaper").unwrap();
+            let file = files.choose(&mut rng).unwrap().unwrap();
+            let filepath = file.path();
+            let filename = filepath.file_name().unwrap();
+            let filename_os = filename.to_os_string();
+            let file_str = filename_os.to_str().unwrap();
+            let command = ClientCommand::SetWallpaper {
+                id: String::from(file_str),
+            };
+            for client in clients.iter_mut() {
+                send_to_client(client, &command).unwrap();
+            }
         }
+    });
+
+    loop {
+        tokio::time::sleep(Duration::from_secs(20)).await;
     }
 }

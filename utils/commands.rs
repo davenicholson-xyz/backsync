@@ -22,7 +22,19 @@ pub enum ServerCommand {
 
 impl fmt::Display for ClientCommand {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        match self {
+            ClientCommand::SendWallpaper { id, data, set } => {
+                let _ = data;
+                write!(
+                    f,
+                    "SendWallpaper {{ id: \"{}\", data: [DATA], set: {} }}",
+                    id, set
+                )
+            }
+            _ => {
+                write!(f, "{:?}", self)
+            }
+        }
     }
 }
 

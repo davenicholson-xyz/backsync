@@ -9,13 +9,13 @@ use crate::system::{
 pub mod commands;
 
 pub fn handle(command: ClientCommand) -> Result<()> {
-    info!("CLIENT received: {}", command);
+    info!("RCVD: {}", command);
     match command {
         ClientCommand::Handshake => {
-            info!("SERVER: 👋");
+            debug!("SERVER: 👋");
         }
         ClientCommand::SetWallpaper { id } => {
-            info!("SERVER sent wallaper SET request: {}", id);
+            debug!("SERVER sent wallaper SET request: {}", id);
             set_wallpaper(&id)?;
         }
         ClientCommand::SendWallpaper { id, data, set } => {
