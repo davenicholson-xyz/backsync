@@ -102,6 +102,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "homedir",
  "local-ip-address",
  "log",
  "rand",
@@ -109,6 +110,7 @@ dependencies = [
  "serde_json",
  "simplelog",
  "tokio",
+ "toml",
 ]
 
 [[package]]

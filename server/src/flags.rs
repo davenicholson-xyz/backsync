@@ -5,6 +5,9 @@ pub struct Flags {
     /// Port to run server on
     #[arg(short, long, env)]
     pub port: Option<i64>,
+    /// Localtion of wallpaper folder
+    #[arg(short, long, env)]
+    pub storage: Option<String>,
 }
 
 pub fn cli_args() -> Flags {

@@ -2,6 +2,7 @@ use crate::system;
 use anyhow::anyhow;
 use anyhow::Result;
 use serde::{de::DeserializeOwned, Serialize};
+use std::fs::File;
 use std::{fs, io::Write, path::Path};
 use toml::Value;
 
@@ -20,7 +21,10 @@ pub fn get<T: DeserializeOwned>(field: &str) -> Result<Option<T>> {
 }
 
 pub fn set<T: Serialize>(field: &str, value: T) -> Result<()> {
+    create_if_none()?;
+
     let filepath = system::files::config_file()?;
+
     let mut config: Value = if Path::new(&filepath).exists() {
         let contents = fs::read_to_string(&filepath)?;
         toml::from_str(&contents)?
@@ -54,4 +58,22 @@ pub fn exists(field: &str) -> Result<bool> {
         }
     }
     Ok(false)
+}
+
+pub fn set_if_none<T: Serialize>(field: &str, value: T) -> Result<()> {
+    if !exists(field)? {
+        set(field, value)?
+    }
+    Ok(())
+}
+
+fn create_if_none() -> Result<()> {
+    let config_path = system::files::config_path()?;
+    let config_file = system::files::config_file()?;
+
+    fs::create_dir_all(config_path)?;
+    if !Path::new(&config_file).exists() {
+        File::create(&config_file)?;
+    }
+    Ok(())
 }

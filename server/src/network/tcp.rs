@@ -1,17 +1,22 @@
 use anyhow::anyhow;
 use anyhow::Result;
 use serde_json::from_slice;
+//use std::fs;
 use std::io::ErrorKind;
 use std::io::Read;
 use std::net::SocketAddr;
 use std::thread;
+//use std::time::Duration;
 use std::{
     net::{TcpListener, TcpStream},
     sync::{Arc, Mutex},
 };
 
 use crate::commands;
+//use crate::commands::commands::ClientCommand;
 use crate::commands::commands::ServerCommand;
+//use crate::commands::send_to_client;
+//use rand::seq::IteratorRandom;
 
 pub fn handle_client(listener: TcpListener, clients: Arc<Mutex<Vec<TcpStream>>>) -> Result<()> {
     let tcp_addr = listener.local_addr()?;
@@ -91,5 +96,39 @@ fn remove_client(peer_addr: &SocketAddr, clients: &Arc<Mutex<Vec<TcpStream>>>) -
         _ => true,
     });
     info!("Client removed: {}", peer_addr);
+    Ok(())
+}
+
+pub fn start(port: i32) -> Result<()> {
+    let local_ip = local_ip_address::local_ip()?;
+    let listener = TcpListener::bind(format! {"{}:{}", local_ip, port})?;
+    let clients: Arc<Mutex<Vec<TcpStream>>> = Arc::new(Mutex::new(Vec::new()));
+
+    let tcp_clients = clients.clone();
+    thread::spawn(move || {
+        let _ = handle_client(listener, tcp_clients);
+    });
+
+    //let loop_clients = clients.clone();
+    //thread::spawn(move || loop {
+    //    thread::sleep(Duration::from_secs(5));
+    //
+    //    let mut clients = loop_clients.lock().unwrap();
+    //    if clients.len() > 0 {
+    //        let mut rng = rand::thread_rng();
+    //        let files = fs::read_dir("/Users/dave/projects/backsync/server/wallpaper").unwrap();
+    //        let file = files.choose(&mut rng).unwrap().unwrap();
+    //        let filepath = file.path();
+    //        let filename = filepath.file_name().unwrap();
+    //        let filename_os = filename.to_os_string();
+    //        let file_str = filename_os.to_str().unwrap();
+    //        let command = ClientCommand::SetWallpaper {
+    //            id: String::from(file_str),
+    //        };
+    //        for client in clients.iter_mut() {
+    //            send_to_client(client, &command).unwrap();
+    //        }
+    //    }
+    //});
     Ok(())
 }
