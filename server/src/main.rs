@@ -26,8 +26,7 @@ async fn main() -> Result<()> {
     network::tcp::start(network_port)?;
 
     let http_port = config::flag_file_default(flags.web_port, "web_port", 3001)? as i32;
-    let http_server = http::server::start(http_port);
-    http_server.join().unwrap();
+    http::server::start(http_port).await;
 
     Ok(())
 }
