@@ -6,14 +6,19 @@
   </head>
   <body>
 
-    <div x-data="clients()">
+    <div x-data="clients()" x-init="fetch_clients()">
       <h3>Client List</h3>
       <template x-for="client in data">
-        <p><span x-text="client.ip"></span></p>
+        <p>
+          <template x-if="client.connected_at != ''">
+            <span>ONLINE</span>
+          </template>
+          <span x-text="client.addr"></span> 
+          <span x-text="client.hostname"></span>
+        </p>
       </template>
       <div>
       </div>
-      <button @click="fetch_clients"></button>
     </div>
 
     <script src="static/js/main.js"></script>

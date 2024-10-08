@@ -53,3 +53,14 @@ pub async fn all() -> sqlx::Result<Vec<Stream>> {
         .await?;
     Ok(streams)
 }
+
+pub async fn get(addr: &str) -> sqlx::Result<Stream> {
+    let pool = super::pool();
+    let stream = sqlx::query_as::<_, Stream>(
+        "SELECT addr, hostname, connected_at FROM streams WHERE addr = ?",
+    )
+    .bind(addr)
+    .fetch_one(pool)
+    .await?;
+    Ok(stream)
+}
