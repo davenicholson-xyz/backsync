@@ -20,16 +20,8 @@ async fn main() -> Result<()> {
 
     let flags = flags::cli_args();
 
-    if let Some(flag_storage) = flags.storage {
-        config::set("storage", flag_storage)?;
-    }
-    config::set_if_none("storage", format!("/var/lib/{}", crate_name))?;
-
-    if let Some(flg_port) = flags.port {
-        system::config::set("port", flg_port)?;
-    }
-    let cfg_port: Option<i32> = system::config::get("port")?;
-    let port = cfg_port.unwrap_or(37878);
+    config::flag_file_default(flags.storage, "storage", "nice".to_string())?;
+    let port = config::flag_file_default(flags.port, "port", 37878)? as i32;
 
     network::udp::broadcast(port)?;
     network::tcp::start(port)?;

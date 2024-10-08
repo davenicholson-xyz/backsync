@@ -46,6 +46,24 @@ pub fn set<T: Serialize>(field: &str, value: T) -> Result<()> {
     Ok(())
 }
 
+pub fn flag_file_default<T>(flag: Option<T>, field: &str, default: T) -> Result<T>
+where
+    T: Serialize + DeserializeOwned + Clone,
+{
+    if let Some(flag_value) = flag {
+        set(field, flag_value.clone())?;
+        return Ok(flag_value);
+    }
+
+    if let Some(config_value) = get::<T>(field)? {
+        return Ok(config_value);
+    }
+
+    set(field, default.clone())?;
+    Ok(default)
+}
+
+#[allow(dead_code)]
 pub fn exists(field: &str) -> Result<bool> {
     let filepath = system::files::config_file()?;
     if Path::new(&filepath).exists() {
@@ -60,6 +78,7 @@ pub fn exists(field: &str) -> Result<bool> {
     Ok(false)
 }
 
+#[allow(dead_code)]
 pub fn set_if_none<T: Serialize>(field: &str, value: T) -> Result<()> {
     if !exists(field)? {
         set(field, value)?
