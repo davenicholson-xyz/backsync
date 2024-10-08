@@ -8,6 +8,8 @@ use crate::commands::{commands::ClientCommand, send_to_client};
 
 use homedir;
 
+use super::config;
+
 pub fn config_file() -> Result<String> {
     let crate_name = env!("CARGO_PKG_NAME");
     if let Some(mut home_dir) = homedir::my_home()? {
@@ -30,8 +32,8 @@ pub fn config_path() -> Result<PathBuf> {
 }
 
 pub fn send_wallpaper(id: String, stream: &mut TcpStream) -> Result<()> {
-    let filepath = format!("/Users/dave/projects/backsync/server/wallpaper/{}", id);
-    debug!("{}", filepath);
+    let storage = config::get::<String>("storage")?.unwrap();
+    let filepath = format!("{}/{}", storage, id);
     let mut file = File::open(filepath)?;
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
@@ -42,7 +44,6 @@ pub fn send_wallpaper(id: String, stream: &mut TcpStream) -> Result<()> {
         set: true,
     };
 
-    info!("about to send the wallpaper to the client");
     send_to_client(stream, &command)?;
     Ok(())
 }

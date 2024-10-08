@@ -3,11 +3,7 @@ pub mod info;
 
 use anyhow::Result;
 use commands::{ClientCommand, ServerCommand};
-use std::{
-    io::Write,
-    net::TcpStream,
-    sync::{Arc, Mutex},
-};
+use std::{io::Write, net::TcpStream};
 
 use crate::system::files;
 
@@ -36,14 +32,14 @@ pub fn send_to_client(stream: &mut TcpStream, command: &ClientCommand) -> Result
     Ok(())
 }
 
-#[allow(dead_code)]
-pub fn send_to_all_client(
-    clients: Arc<Mutex<Vec<TcpStream>>>,
-    command: &ClientCommand,
-) -> Result<()> {
-    let mut clients = clients.lock().unwrap();
-    for client in clients.iter_mut() {
-        send_to_client(client, command)?;
-    }
-    Ok(())
-}
+//#[allow(dead_code)]
+//pub fn send_to_all_client(
+//    clients: Arc<Mutex<Vec<TcpStream>>>,
+//    command: &ClientCommand,
+//) -> Result<()> {
+//    let mut clients = clients.lock().unwrap();
+//    for client in clients.iter_mut() {
+//        send_to_client(client, command)?;
+//    }
+//    Ok(())
+//}
