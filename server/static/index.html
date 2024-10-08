@@ -2,8 +2,19 @@
 <html lang="en">
   <head>
     <title>This is nice</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
   <body>
-    <h1>I am static... here me roar!</h1>
+    <div x-data="fetchData">
+      <div x-show="data">
+        <p>Data: <span x-text="data"></span></p>
+      </div>
+      <button x-on:click="fetchDataFromApi">
+        fetch data
+      </button>
+    </div>
+
+
+    <script src="static/js/main.js"></script>
   </body>
 </html>
