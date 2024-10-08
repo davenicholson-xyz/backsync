@@ -16,7 +16,7 @@ pub enum ClientCommand {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ServerCommand {
-    Handshake,
+    Handshake { hostname: String },
     RequestWallpaper { id: String },
 }
 

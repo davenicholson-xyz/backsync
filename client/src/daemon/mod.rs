@@ -16,7 +16,8 @@ pub fn spawn(server_port: i32) -> Result<()> {
         system::config::set("server_ip", udp.ip())?;
         let stream = network::tcp::server_stream(udp)?;
         SERVER_STREAM.set(Arc::new(Mutex::new(stream))).unwrap();
-        send_to_server(ServerCommand::Handshake)?;
+        let hostname = gethostname::gethostname().into_string().unwrap();
+        send_to_server(ServerCommand::Handshake { hostname })?;
     } else {
         return Err(anyhow!("Failed to get UDP connection"));
     };

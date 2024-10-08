@@ -10,7 +10,8 @@ use crate::system::files;
 pub fn handle(command: ServerCommand, stream: &mut TcpStream) -> Result<()> {
     info!("Received: ServerCommand::{}", command);
     match command {
-        ServerCommand::Handshake => {
+        ServerCommand::Handshake { hostname } => {
+            let _ = hostname;
             let reply = ClientCommand::Handshake;
             send_to_client(stream, &reply)?;
         }
