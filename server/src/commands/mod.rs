@@ -3,44 +3,37 @@ pub mod info;
 
 use anyhow::Result;
 use commands::{ClientCommand, ServerCommand};
-use std::{io::Write, net::TcpStream};
+use std::sync::Arc;
+use tokio::io::AsyncWriteExt;
+use tokio::net::TcpStream;
+use tokio::sync::Mutex;
 
-use crate::system::files;
+use crate::{database, system::files};
 
-pub fn handle(command: ServerCommand, stream: &mut TcpStream) -> Result<()> {
+pub async fn handle(command: ServerCommand, stream: Arc<Mutex<TcpStream>>) -> Result<()> {
     info!("Received: ServerCommand::{}", command);
     match command {
         ServerCommand::Handshake { hostname } => {
-            let _ = hostname;
+            database::stream::add(&stream, &hostname).await?;
             let reply = ClientCommand::Handshake;
-            send_to_client(stream, &reply)?;
+            send_to_client(stream, &reply).await?;
         }
         ServerCommand::RequestWallpaper { id } => {
             info!("CLIENT requested {}", id);
-            files::send_wallpaper(id, stream)?;
+            files::send_wallpaper(id, stream).await?;
         }
     }
     Ok(())
 }
 
-pub fn send_to_client(stream: &mut TcpStream, command: &ClientCommand) -> Result<()> {
+pub async fn send_to_client(stream: Arc<Mutex<TcpStream>>, command: &ClientCommand) -> Result<()> {
     let serialized = serde_json::to_vec(&command)?;
     let length = (serialized.len() as u32).to_be_bytes();
 
-    stream.write_all(&length)?;
-    stream.write_all(&serialized)?;
-    stream.flush()?;
+    let mut stream = stream.lock().await;
+    stream.write_all(&length).await?;
+    stream.write_all(&serialized).await?;
+    stream.flush().await?;
+
     Ok(())
 }
-
-//#[allow(dead_code)]
-//pub fn send_to_all_client(
-//    clients: Arc<Mutex<Vec<TcpStream>>>,
-//    command: &ClientCommand,
-//) -> Result<()> {
-//    let mut clients = clients.lock().unwrap();
-//    for client in clients.iter_mut() {
-//        send_to_client(client, command)?;
-//    }
-//    Ok(())
-//}

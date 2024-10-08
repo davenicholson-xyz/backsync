@@ -1,8 +1,12 @@
+use std::fs::File;
+use std::io::Read;
 use std::path::PathBuf;
-use std::{fs::File, io::Read, net::TcpStream};
+use std::sync::Arc;
 
 use anyhow::anyhow;
 use anyhow::Result;
+use tokio::net::TcpStream;
+use tokio::sync::Mutex;
 
 use crate::commands::{commands::ClientCommand, send_to_client};
 
@@ -31,7 +35,7 @@ pub fn config_path() -> Result<PathBuf> {
     }
 }
 
-pub fn send_wallpaper(id: String, stream: &mut TcpStream) -> Result<()> {
+pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result<()> {
     let storage = config::get::<String>("storage")?.unwrap();
     let filepath = format!("{}/{}", storage, id);
     let mut file = File::open(filepath)?;
@@ -44,6 +48,6 @@ pub fn send_wallpaper(id: String, stream: &mut TcpStream) -> Result<()> {
         set: true,
     };
 
-    send_to_client(stream, &command)?;
+    send_to_client(stream, &command).await?;
     Ok(())
 }
