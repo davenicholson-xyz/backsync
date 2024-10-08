@@ -21,6 +21,15 @@
       </div>
     </div>
 
+    <div>
+      <h3>Upload new wallpaper</h3>
+      <form action="/wallpaper/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" id="file" name="file" accept="image/*" required>
+        <br/><br/>
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+
     <script src="static/js/main.js"></script>
   </body>
 </html>

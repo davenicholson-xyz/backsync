@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.89"
-axum = { version = "0.7.7", features = ["query"] }
+axum = { version = "0.7.7", features = ["multipart", "query"] }
 clap = { version = "4.5.19", features = ["derive", "env"] }
 homedir = "0.3.4"
 hyper = "1.4.1"

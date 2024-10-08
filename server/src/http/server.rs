@@ -12,7 +12,8 @@ pub async fn http_server(port: i32) {
     let app = Router::new()
         .nest_service("/static", ServeDir::new("static"))
         .route_service("/", ServeFile::new("static/index.html"))
-        .merge(routes::streams::get_routes());
+        .merge(routes::streams::get_routes())
+        .merge(routes::wallpaper::get_routes());
 
     let port = port as u16;
     let addr = format!("127.0.0.1:{}", port);
