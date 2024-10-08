@@ -33,9 +33,19 @@ async fn main() -> Result<()> {
     let network_port = config::flag_file_default(flags.port, "port", 37878)? as i32;
     let http_port = config::flag_file_default(flags.web_port, "web_port", 3001)? as i32;
 
-    network::udp::broadcast(network_port)?;
-    network::tcp::start(network_port).await?;
-    http::server::start(http_port).await;
-
+    tokio::try_join!(
+        async {
+            network::udp::broadcast(network_port)?;
+            Ok::<_, anyhow::Error>(())
+        },
+        async {
+            network::tcp::start(network_port).await?;
+            Ok::<_, anyhow::Error>(())
+        },
+        async {
+            http::server::start(http_port).await;
+            Ok::<_, anyhow::Error>(())
+        }
+    )?;
     Ok(())
 }

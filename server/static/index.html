@@ -5,15 +5,16 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   </head>
   <body>
-    <div x-data="fetchData">
-      <div x-show="data">
-        <p>Data: <span x-text="data"></span></p>
-      </div>
-      <button x-on:click="fetchDataFromApi">
-        fetch data
-      </button>
-    </div>
 
+    <div x-data="clients()">
+      <h3>Client List</h3>
+      <template x-for="client in data">
+        <p><span x-text="client.ip"></span></p>
+      </template>
+      <div>
+      </div>
+      <button @click="fetch_clients"></button>
+    </div>
 
     <script src="static/js/main.js"></script>
   </body>

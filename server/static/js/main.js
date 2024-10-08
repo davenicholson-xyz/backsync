@@ -1,11 +1,12 @@
-function fetchData() {
+const clients = () => {
   return {
-    data: null,
-    fetchDataFromApi() {
-      fetch("/images/clone")
-        .then(response => response.json()).then(json => {
-          this.data = json.message;
-        }).catch(e => console.error("error fetching", e))
+    data: [
+      { ip: "127.0.23.23", connected: false },
+      { ip: "127.5.23.23", connected: true },
+      { ip: "127.992.23.23", connected: true },
+    ],
+    fetch_clients() {
+      console.log("fetch clients");
     }
   }
 }
