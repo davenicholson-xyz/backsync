@@ -1,5 +1,3 @@
-use std::fs::{self, File};
-
 use anyhow::Result;
 use flags::Action;
 
@@ -9,44 +7,23 @@ mod flags;
 mod network;
 mod system;
 
-use simplelog::CombinedLogger;
-
 #[macro_use]
 extern crate log;
 extern crate simplelog;
 
-use simplelog::*;
-use system::files;
+use system::config;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    CombinedLogger::init(vec![
-        TermLogger::new(
-            LevelFilter::Debug,
-            Config::default(),
-            TerminalMode::Mixed,
-            ColorChoice::Auto,
-        ),
-        WriteLogger::new(
-            LevelFilter::Debug,
-            Config::default(),
-            File::create("bs-client.log").unwrap(),
-        ),
-    ])
-    .unwrap();
-
-    let cachepath = files::cache_path()?;
-    fs::create_dir_all(cachepath)?;
-
     let flags = flags::cli_args();
+    let crate_name = env!("CARGO_PKG_NAME");
+
+    system::logger::start(&format!("{}.log", crate_name));
 
     match &flags.command {
         Some(Action::INIT { port }) => {
-            if let Some(flg_port) = *port {
-                system::config::set("port", flg_port)?;
-            }
-            let cfg_port: Option<i32> = system::config::get("port")?;
-            daemon::spawn(cfg_port.unwrap_or(37878))?;
+            let server_port = config::flag_file_default(*port, "port", 37878)?;
+            daemon::spawn(server_port)?;
         }
         Some(Action::STOP) => {
             info!("DAEMON killing");

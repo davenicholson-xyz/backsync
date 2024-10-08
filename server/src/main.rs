@@ -1,4 +1,5 @@
 mod commands;
+mod database;
 mod flags;
 mod http;
 mod network;
