@@ -8,9 +8,10 @@ use anyhow::Result;
 use tokio::net::TcpStream;
 use tokio::sync::Mutex;
 
-use crate::commands::{commands::ClientCommand, send_to_client};
-
 use homedir;
+
+use crate::commands::send_to_client;
+use crate::commands::ClientCommand;
 
 use super::config;
 

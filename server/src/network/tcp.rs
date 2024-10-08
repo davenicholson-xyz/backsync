@@ -1,6 +1,5 @@
 use crate::commands;
-use crate::commands::commands::ServerCommand;
-use crate::commands::info;
+use crate::commands::ServerCommand;
 use crate::database;
 use anyhow::anyhow;
 use anyhow::Result;
