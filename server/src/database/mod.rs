@@ -1,4 +1,5 @@
 pub mod stream;
+pub mod wallpaper;
 use std::sync::OnceLock;
 
 use anyhow::anyhow;
@@ -6,18 +7,19 @@ use anyhow::Result;
 use sqlx::migrate::MigrateDatabase;
 use sqlx::SqlitePool;
 
+use crate::system::config;
+
 pub static DB_POOL: OnceLock<SqlitePool> = OnceLock::new();
 
 pub async fn init() -> Result<()> {
-    //let storage = config::get::<String>("storage")?.unwrap();
-    //dbg!(&storage);
-    //let pool = SqlitePool::connect(("sqlite://{}/store.db", storage)).await?;
-    let conn_string = format!("/Users/dave/.config/backsync-server/store.db");
+    let storage = config::get::<String>("storage")?.unwrap();
+    dbg!(&storage);
+    let conn_string = format!("sqlite://{}/store.db", storage);
     if !sqlx::Sqlite::database_exists(&conn_string).await? {
         sqlx::Sqlite::create_database(&conn_string).await?
     }
 
-    let pool = SqlitePool::connect("sqlite:///Users/dave/.config/backsync-server/store.db").await?;
+    let pool = SqlitePool::connect(&conn_string).await?;
     DB_POOL
         .set(pool)
         .map_err(|_| anyhow!("Database already initialized"))?;

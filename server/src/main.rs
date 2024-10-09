@@ -4,6 +4,7 @@ mod flags;
 mod http;
 mod network;
 mod system;
+mod utils;
 
 use system::{config, files};
 
@@ -21,15 +22,11 @@ async fn main() -> Result<()> {
     system::logger::start(&format!("{}.log", crate_name));
 
     #[cfg(target_family = "unix")]
-    let default_app_path = format!(
-        "{}",
-        files::config_path()?
-            .into_os_string()
-            .into_string()
-            .unwrap(),
-    );
+    let default_app_path = files::cache_path()?.into_os_string().into_string().unwrap();
     config::flag_file_default(flags.storage, "storage", default_app_path)?;
+
     database::init().await?;
+
     let network_port = config::flag_file_default(flags.port, "port", 37878)? as i32;
     let http_port = config::flag_file_default(flags.web_port, "web_port", 3001)? as i32;
 
