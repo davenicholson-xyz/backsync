@@ -23,28 +23,10 @@ pub async fn init() -> Result<()> {
     DB_POOL
         .set(pool)
         .map_err(|_| anyhow!("Database already initialized"))?;
-    startup().await?;
 
     Ok(())
 }
 
 pub fn pool() -> &'static SqlitePool {
     DB_POOL.get().expect("Database pool is not initialized")
-}
-
-async fn startup() -> Result<()> {
-    let pool = pool();
-    sqlx::query(
-        r#"
-        CREATE TABLE IF NOT EXISTS streams (
-            id INTEGER PRIMARY KEY,
-            addr TEXT NOT NULL UNIQUE,
-            hostname TEXT NOT NULL,
-            connected_at TEXT
-        )
-        "#,
-    )
-    .execute(pool)
-    .await?;
-    Ok(())
 }

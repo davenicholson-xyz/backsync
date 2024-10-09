@@ -1,3 +1,4 @@
+use axum::extract::DefaultBodyLimit;
 use axum::Router;
 use tower_http::services::{ServeDir, ServeFile};
 
@@ -13,7 +14,8 @@ pub async fn http_server(port: i32) {
         .nest_service("/static", ServeDir::new("static"))
         .route_service("/", ServeFile::new("static/index.html"))
         .merge(routes::streams::get_routes())
-        .merge(routes::wallpaper::get_routes());
+        .merge(routes::wallpaper::get_routes())
+        .layer(DefaultBodyLimit::max(10 * 1024 * 1024));
 
     let port = port as u16;
     let addr = format!("127.0.0.1:{}", port);

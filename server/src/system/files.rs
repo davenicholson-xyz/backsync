@@ -15,6 +15,12 @@ use image::ImageFormat;
 use tokio::net::TcpStream;
 use tokio::sync::Mutex;
 
+use image::ImageReader;
+
+use axum::extract::Multipart;
+
+use crate::system::files;
+use crate::utils;
 use homedir;
 
 use crate::commands::send_to_client;
@@ -95,6 +101,57 @@ pub fn save_image(img: &DynamicImage, path: &PathBuf) -> Result<()> {
         .map_err(|e| anyhow!("Failed to write thumbnail to file: {}", e))?;
 
     Ok(())
+}
+
+//#[derive(Debug)]
+pub struct UploadData {
+    pub id: String,
+    pub filename: String,
+    pub extension: String,
+}
+
+pub async fn upload_image(mut multipart: Multipart) -> Result<UploadData> {
+    let storage_dir = config::get::<String>("storage").unwrap().unwrap();
+
+    let mut upload_dir = PathBuf::from(storage_dir);
+    upload_dir.push("wallpaper");
+    files::create_directory(&upload_dir).await.unwrap();
+
+    let mut thumb_dir = upload_dir.clone();
+    thumb_dir.push(".thumb");
+    files::create_directory(&thumb_dir).await.unwrap();
+
+    let file_id = utils::seed(8);
+
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        let filename = field.file_name().unwrap().to_string();
+        let data = field.bytes().await?;
+
+        let file_ext = files::ext_from_path(&filename)?;
+
+        let file_path = upload_dir.join(format!("{}.{}", file_id, file_ext));
+        let thumb_path = thumb_dir.join(format!("{}.{}", file_id, file_ext));
+
+        let mut file_contents = Vec::new();
+
+        file_contents.extend_from_slice(&data);
+        let img = ImageReader::new(Cursor::new(&file_contents))
+            .with_guessed_format()?
+            .decode()?;
+
+        let thumbnail = img.thumbnail(300, 300);
+
+        files::save_image(&img, &file_path).unwrap();
+        files::save_image(&thumbnail, &thumb_path).unwrap();
+
+        return Ok(UploadData {
+            id: file_id,
+            filename,
+            extension: file_ext,
+        });
+    }
+
+    Err(anyhow!("no file"))
 }
 
 pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result<()> {
