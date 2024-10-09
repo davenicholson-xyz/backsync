@@ -32,4 +32,6 @@ pub fn get_routes() -> Router {
     Router::new()
         .route("/streams", get(fetch_all))
         .route("/streams/:addr", get(fetch))
+    //.route("/streams/set/:wallpaper_id", get(send_wallpaper_to_all_streams))
+    //.route("/streams/:addr/set/:wallpaper_id", get(send_wallpaper_to_stream))
 }

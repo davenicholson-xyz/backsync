@@ -3,14 +3,12 @@ use std::fs;
 use std::fs::File;
 use std::io::Cursor;
 use std::io::Read;
-use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
 use anyhow::anyhow;
 use anyhow::Result;
-use image::DynamicImage;
 use image::ImageFormat;
 use tokio::net::TcpStream;
 use tokio::sync::Mutex;
@@ -19,6 +17,8 @@ use image::ImageReader;
 
 use axum::extract::Multipart;
 
+use crate::database;
+use crate::database::wallpaper::Wallpaper;
 use crate::system::files;
 use crate::utils;
 use homedir;
@@ -76,41 +76,7 @@ pub async fn create_directory(path: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-pub fn save_image(img: &DynamicImage, path: &PathBuf) -> Result<()> {
-    let mut buffer = Vec::new();
-    let mut cursor = Cursor::new(&mut buffer);
-
-    let ext = match path.extension().and_then(|ext| ext.to_str()) {
-        Some("png") => Ok(ImageFormat::Png),
-        Some("jpeg") | Some("jpg") => Ok(ImageFormat::Jpeg),
-        Some("gif") => Ok(ImageFormat::Gif),
-        Some("bmp") => Ok(ImageFormat::Bmp),
-        Some("ico") => Ok(ImageFormat::Ico),
-        Some("tiff") => Ok(ImageFormat::Tiff),
-        Some("webp") => Ok(ImageFormat::WebP),
-        _ => Err("Unknown image format".to_string()),
-    }
-    .map_err(|e| anyhow!(e))?;
-
-    img.write_to(&mut cursor, ext)
-        .map_err(|e| anyhow!("Failed to encode thumbnail: {}", e))?;
-
-    let mut file =
-        File::create(&path).map_err(|e| anyhow!("Failed to create thumbnail file: {}", e))?;
-    file.write_all(&buffer)
-        .map_err(|e| anyhow!("Failed to write thumbnail to file: {}", e))?;
-
-    Ok(())
-}
-
-//#[derive(Debug)]
-pub struct UploadData {
-    pub id: String,
-    pub filename: String,
-    pub extension: String,
-}
-
-pub async fn upload_image(mut multipart: Multipart) -> Result<UploadData> {
+pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
     let storage_dir = config::get::<String>("storage").unwrap().unwrap();
 
     let mut upload_dir = PathBuf::from(storage_dir);
@@ -130,7 +96,7 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<UploadData> {
         let file_ext = files::ext_from_path(&filename)?;
 
         let file_path = upload_dir.join(format!("{}.{}", file_id, file_ext));
-        let thumb_path = thumb_dir.join(format!("{}.{}", file_id, file_ext));
+        let thumb_path = thumb_dir.join(format!("{}.jpg", file_id));
 
         let mut file_contents = Vec::new();
 
@@ -141,10 +107,12 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<UploadData> {
 
         let thumbnail = img.thumbnail(300, 300);
 
-        files::save_image(&img, &file_path).unwrap();
-        files::save_image(&thumbnail, &thumb_path).unwrap();
+        img.save(&file_path)?;
+        thumbnail
+            .to_rgb8()
+            .save_with_format(&thumb_path, ImageFormat::Jpeg)?;
 
-        return Ok(UploadData {
+        return Ok(Wallpaper {
             id: file_id,
             filename,
             extension: file_ext,
@@ -155,8 +123,12 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<UploadData> {
 }
 
 pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result<()> {
+    let wallpaper = database::wallpaper::get(&id).await?;
     let storage = config::get::<String>("storage")?.unwrap();
-    let filepath = format!("{}/{}", storage, id);
+    let filepath = format!(
+        "{}/wallpaper/{}.{}",
+        storage, wallpaper.id, wallpaper.extension
+    );
     let mut file = File::open(filepath)?;
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
@@ -166,7 +138,6 @@ pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result
         data: buffer,
         set: true,
     };
-
     send_to_client(stream, &command).await?;
     Ok(())
 }
