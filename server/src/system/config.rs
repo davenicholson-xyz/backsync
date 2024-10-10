@@ -1,15 +1,16 @@
-use crate::system;
 use anyhow::anyhow;
 use anyhow::Result;
 use serde::{de::DeserializeOwned, Serialize};
-use std::fs::File;
 use std::{fs, io::Write, path::Path};
 use toml::Value;
 
+use super::files;
+use super::paths;
+
 pub fn get<T: DeserializeOwned>(field: &str) -> Result<Option<T>> {
-    let filepath = system::files::config_file()?;
-    if Path::new(&filepath).exists() {
-        let contents = fs::read_to_string(filepath)?;
+    let config_file = paths::config_path("config.toml");
+    if Path::new(&config_file).exists() {
+        let contents = fs::read_to_string(config_file)?;
         let config: Value = toml::from_str(&contents)?;
         if let Some(value) = config.get(field) {
             if let Ok(deserialized) = value.clone().try_into() {
@@ -21,12 +22,10 @@ pub fn get<T: DeserializeOwned>(field: &str) -> Result<Option<T>> {
 }
 
 pub fn set<T: Serialize>(field: &str, value: T) -> Result<()> {
-    create_if_none()?;
+    let config_file = paths::config_path("config.toml");
 
-    let filepath = system::files::config_file()?;
-
-    let mut config: Value = if Path::new(&filepath).exists() {
-        let contents = fs::read_to_string(&filepath)?;
+    let mut config: Value = if Path::new(&config_file).exists() {
+        let contents = fs::read_to_string(&config_file)?;
         toml::from_str(&contents)?
     } else {
         Value::Table(Default::default())
@@ -40,7 +39,7 @@ pub fn set<T: Serialize>(field: &str, value: T) -> Result<()> {
     }
 
     let updated_content = toml::to_string(&config)?;
-    let mut file = fs::File::create(filepath)?;
+    let mut file = fs::File::create(config_file)?;
     file.write_all(updated_content.as_bytes())?;
 
     Ok(())
@@ -63,11 +62,10 @@ where
     Ok(default)
 }
 
-#[allow(dead_code)]
 pub fn exists(field: &str) -> Result<bool> {
-    let filepath = system::files::config_file()?;
-    if Path::new(&filepath).exists() {
-        let contents = fs::read_to_string(filepath)?;
+    let config_file = paths::config_path("config.toml");
+    if Path::new(&config_file).exists() {
+        let contents = fs::read_to_string(config_file)?;
         let config: Value = toml::from_str(&contents)?;
         if let Some(_value) = config.get(field) {
             return Ok(true);
@@ -78,21 +76,9 @@ pub fn exists(field: &str) -> Result<bool> {
     Ok(false)
 }
 
-#[allow(dead_code)]
 pub fn set_if_none<T: Serialize>(field: &str, value: T) -> Result<()> {
     if !exists(field)? {
         set(field, value)?
-    }
-    Ok(())
-}
-
-fn create_if_none() -> Result<()> {
-    let config_path = system::files::config_path()?;
-    let config_file = system::files::config_file()?;
-
-    fs::create_dir_all(config_path)?;
-    if !Path::new(&config_file).exists() {
-        File::create(&config_file)?;
     }
     Ok(())
 }

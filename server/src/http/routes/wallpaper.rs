@@ -1,5 +1,5 @@
 use crate::database::wallpaper::Wallpaper;
-use crate::system::files;
+use crate::system::{files, paths};
 use crate::{database, utils};
 use axum::body::Bytes;
 use axum::extract::Path;
@@ -7,8 +7,8 @@ use axum::response::IntoResponse;
 use axum::routing::{delete, get};
 use axum::Json;
 use axum::{extract::Multipart, routing::post, Router};
-use files::PathBufExt;
 use hyper::{header, StatusCode};
+use paths::PathBufExt;
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
@@ -24,7 +24,7 @@ pub struct FetchThumbParams {
 }
 
 pub async fn upload(multipart: Multipart) -> Json<Wallpaper> {
-    let wallpaper = files::upload_image(multipart).await.unwrap();
+    let wallpaper = files::wallpaper::upload_image(multipart).await.unwrap();
     database::wallpaper::add(&wallpaper).await.unwrap();
     Json(wallpaper)
 }
@@ -36,7 +36,7 @@ pub async fn fetch_all() -> Json<WallpapersResponse> {
 }
 
 pub async fn fetch_thumbnail(Path(id): Path<String>) -> impl IntoResponse {
-    let thumbs_dir = files::storage_path("wallpaper/.thumbs").make_string();
+    let thumbs_dir = paths::storage_path("wallpaper/.thumbs").make_string();
     let thumb_file = format!("{}/{}.jpg", thumbs_dir, id);
 
     match File::open(thumb_file).await {
@@ -63,7 +63,7 @@ pub async fn fetch_thumbnail(Path(id): Path<String>) -> impl IntoResponse {
 
 pub async fn delete_wallpaper(Path(filename): Path<String>) -> StatusCode {
     let (id, ext) = utils::split_filename(&filename).unwrap();
-    files::delete_wallpaper(&id, &ext).await.unwrap();
+    files::wallpaper::delete_wallpaper(&id, &ext).await.unwrap();
     database::wallpaper::delete(&id).await.unwrap();
     StatusCode::OK
 }

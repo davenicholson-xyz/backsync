@@ -60,7 +60,7 @@ pub async fn handle(command: ServerCommand, stream: Arc<Mutex<TcpStream>>) -> Re
         }
         ServerCommand::RequestWallpaper { id } => {
             info!("CLIENT requested {}", id);
-            files::send_wallpaper(id, stream).await?;
+            files::wallpaper::send_wallpaper(id, stream).await?;
         }
     }
     Ok(())

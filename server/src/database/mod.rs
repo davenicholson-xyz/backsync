@@ -13,7 +13,6 @@ pub static DB_POOL: OnceLock<SqlitePool> = OnceLock::new();
 
 pub async fn init() -> Result<()> {
     let storage = config::get::<String>("storage")?.unwrap();
-    dbg!(&storage);
     let conn_string = format!("sqlite://{}/store.db", storage);
     if !sqlx::Sqlite::database_exists(&conn_string).await? {
         sqlx::Sqlite::create_database(&conn_string).await?

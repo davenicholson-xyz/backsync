@@ -1,5 +1,4 @@
 use std::ffi::OsStr;
-use std::fs;
 use std::fs::remove_file;
 use std::fs::File;
 use std::io::Cursor;
@@ -46,18 +45,6 @@ pub fn config_file() -> Result<String> {
         Ok(home_dir.into_os_string().into_string().unwrap())
     } else {
         Err(anyhow!("Could not find users config directory"))
-    }
-}
-
-#[allow(dead_code)]
-pub fn cache_path() -> Result<PathBuf> {
-    let crate_name = env!("CARGO_PKG_NAME");
-    if let Some(mut home_dir) = homedir::my_home()? {
-        home_dir.push(format!(".cache/{}", crate_name));
-        fs::create_dir_all(&home_dir)?;
-        Ok(home_dir)
-    } else {
-        Err(anyhow!("Could not find users cache directory"))
     }
 }
 
@@ -137,30 +124,30 @@ pub fn storage_path(additional_path: &str) -> PathBuf {
     return storage_path;
 }
 
-pub async fn delete_wallpaper(id: &str, ext: &str) -> Result<()> {
-    let wallpaper_path = storage_path(&format!("wallpaper/{}.{}", id, ext));
-    let thumbnail_path = storage_path(&format!("wallpaper/.thumbs/{}.jpg", id));
-    remove_file(wallpaper_path)?;
-    remove_file(thumbnail_path)?;
-    Ok(())
-}
-
-pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result<()> {
-    let wallpaper = database::wallpaper::get(&id).await?;
-    let storage = config::get::<String>("storage")?.unwrap();
-    let filepath = format!(
-        "{}/wallpaper/{}.{}",
-        storage, wallpaper.id, wallpaper.extension
-    );
-    let mut file = File::open(filepath)?;
-    let mut buffer = Vec::new();
-    file.read_to_end(&mut buffer)?;
-
-    let command = ClientCommand::SendWallpaper {
-        id,
-        data: buffer,
-        set: true,
-    };
-    send_to_client(stream, &command).await?;
-    Ok(())
-}
+//pub async fn delete_wallpaper(id: &str, ext: &str) -> Result<()> {
+//    let wallpaper_path = storage_path(&format!("wallpaper/{}.{}", id, ext));
+//    let thumbnail_path = storage_path(&format!("wallpaper/.thumbs/{}.jpg", id));
+//    remove_file(wallpaper_path)?;
+//    remove_file(thumbnail_path)?;
+//    Ok(())
+//}
+//
+//pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result<()> {
+//    let wallpaper = database::wallpaper::get(&id).await?;
+//    let storage = config::get::<String>("storage")?.unwrap();
+//    let filepath = format!(
+//        "{}/wallpaper/{}.{}",
+//        storage, wallpaper.id, wallpaper.extension
+//    );
+//    let mut file = File::open(filepath)?;
+//    let mut buffer = Vec::new();
+//    file.read_to_end(&mut buffer)?;
+//
+//    let command = ClientCommand::SendWallpaper {
+//        id,
+//        data: buffer,
+//        set: true,
+//    };
+//    send_to_client(stream, &command).await?;
+//    Ok(())
+//}

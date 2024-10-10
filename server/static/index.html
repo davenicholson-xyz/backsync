@@ -12,6 +12,7 @@
           <div>
             <img :src="`/wallpapers/thumbnail/${wallpaper.id}`" />
             <button @click="deleteImage(wallpaper.id, wallpaper.extension)">delete</button>
+            <button @click="setImage(wallpaper.id)">set on clients</button>
           </div>
         </template>
       </div>
@@ -19,7 +20,7 @@
         <h3>Upload new wallpaper</h3>
         <form @submit.prevent="uploadImage">
           <input type="file" id="file" name="file" accept="image/*" @change="handleFileUpload">
-          <button type="submit">Upload</button>
+          <button type="submit" x-if="wallpapers.selectedFile != null">Upload</button>
         </form>
       </div>
     </div>
