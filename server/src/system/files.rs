@@ -1,5 +1,6 @@
 use std::ffi::OsStr;
 use std::fs;
+use std::fs::remove_file;
 use std::fs::File;
 use std::io::Cursor;
 use std::io::Read;
@@ -27,6 +28,16 @@ use crate::commands::send_to_client;
 use crate::commands::ClientCommand;
 
 use super::config;
+
+pub trait PathBufExt {
+    fn make_string(&self) -> String;
+}
+
+impl PathBufExt for PathBuf {
+    fn make_string(&self) -> String {
+        self.clone().into_os_string().into_string().unwrap()
+    }
+}
 
 pub fn config_file() -> Result<String> {
     let crate_name = env!("CARGO_PKG_NAME");
@@ -77,14 +88,10 @@ pub async fn create_directory(path: &PathBuf) -> Result<()> {
 }
 
 pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
-    let storage_dir = config::get::<String>("storage").unwrap().unwrap();
+    let upload_dir = storage_path("wallpaper");
+    let thumb_dir = storage_path("wallpaper/.thumbs");
 
-    let mut upload_dir = PathBuf::from(storage_dir);
-    upload_dir.push("wallpaper");
     files::create_directory(&upload_dir).await.unwrap();
-
-    let mut thumb_dir = upload_dir.clone();
-    thumb_dir.push(".thumb");
     files::create_directory(&thumb_dir).await.unwrap();
 
     let file_id = utils::seed(8);
@@ -120,6 +127,22 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
     }
 
     Err(anyhow!("no file"))
+}
+
+pub fn storage_path(additional_path: &str) -> PathBuf {
+    let storage = config::get::<String>("storage").unwrap().unwrap();
+    let mut storage_path = PathBuf::new();
+    storage_path.push(storage);
+    storage_path.push(additional_path);
+    return storage_path;
+}
+
+pub async fn delete_wallpaper(id: &str, ext: &str) -> Result<()> {
+    let wallpaper_path = storage_path(&format!("wallpaper/{}.{}", id, ext));
+    let thumbnail_path = storage_path(&format!("wallpaper/.thumbs/{}.jpg", id));
+    remove_file(wallpaper_path)?;
+    remove_file(thumbnail_path)?;
+    Ok(())
 }
 
 pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result<()> {

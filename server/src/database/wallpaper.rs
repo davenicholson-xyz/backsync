@@ -10,7 +10,7 @@ pub struct Wallpaper {
     pub extension: String,
 }
 
-pub async fn add(wallpaper: Wallpaper) -> Result<()> {
+pub async fn add(wallpaper: &Wallpaper) -> Result<()> {
     let pool = super::pool();
     sqlx::query(
         r#"
@@ -19,9 +19,9 @@ pub async fn add(wallpaper: Wallpaper) -> Result<()> {
         VALUES (?, ?, ?)
     "#,
     )
-    .bind(wallpaper.id)
-    .bind(wallpaper.filename)
-    .bind(wallpaper.extension)
+    .bind(&wallpaper.id)
+    .bind(&wallpaper.filename)
+    .bind(&wallpaper.extension)
     .execute(pool)
     .await?;
     Ok(())
@@ -44,4 +44,13 @@ pub async fn get(id: &str) -> sqlx::Result<Wallpaper> {
     .fetch_one(pool)
     .await?;
     Ok(wallpaper)
+}
+
+pub async fn delete(id: &str) -> Result<()> {
+    let pool = super::pool();
+    sqlx::query("DELETE FROM wallpapers WHERE id = ?")
+        .bind(id)
+        .execute(pool)
+        .await?;
+    Ok(())
 }

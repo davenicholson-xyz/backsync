@@ -1,14 +1,13 @@
-use std::path::PathBuf;
-
-use crate::database;
 use crate::database::wallpaper::Wallpaper;
-use crate::system::{config, files};
+use crate::system::files;
+use crate::{database, utils};
 use axum::body::Bytes;
 use axum::extract::Path;
-use axum::response::{IntoResponse, Redirect};
-use axum::routing::get;
+use axum::response::IntoResponse;
+use axum::routing::{delete, get};
 use axum::Json;
 use axum::{extract::Multipart, routing::post, Router};
+use files::PathBufExt;
 use hyper::{header, StatusCode};
 use serde::{Deserialize, Serialize};
 use tokio::fs::File;
@@ -24,10 +23,10 @@ pub struct FetchThumbParams {
     id: String,
 }
 
-pub async fn upload(multipart: Multipart) -> Redirect {
-    let data = files::upload_image(multipart).await.unwrap();
-    database::wallpaper::add(data).await.unwrap();
-    Redirect::to("/")
+pub async fn upload(multipart: Multipart) -> Json<Wallpaper> {
+    let wallpaper = files::upload_image(multipart).await.unwrap();
+    database::wallpaper::add(&wallpaper).await.unwrap();
+    Json(wallpaper)
 }
 
 pub async fn fetch_all() -> Json<WallpapersResponse> {
@@ -37,13 +36,8 @@ pub async fn fetch_all() -> Json<WallpapersResponse> {
 }
 
 pub async fn fetch_thumbnail(Path(id): Path<String>) -> impl IntoResponse {
-    // PUT THESE INTO A FUNCTION EACH
-    let storage_dir = config::get::<String>("storage").unwrap().unwrap();
-    let mut upload_dir = PathBuf::from(storage_dir);
-    upload_dir.push("wallpaper");
-    let mut thumb_dir = upload_dir.clone();
-    thumb_dir.push(".thumb");
-    let thumb_file = thumb_dir.join(format!("{}.jpg", id));
+    let thumbs_dir = files::storage_path("wallpaper/.thumbs").make_string();
+    let thumb_file = format!("{}/{}.jpg", thumbs_dir, id);
 
     match File::open(thumb_file).await {
         Ok(mut file) => {
@@ -67,9 +61,17 @@ pub async fn fetch_thumbnail(Path(id): Path<String>) -> impl IntoResponse {
     }
 }
 
+pub async fn delete_wallpaper(Path(filename): Path<String>) -> StatusCode {
+    let (id, ext) = utils::split_filename(&filename).unwrap();
+    files::delete_wallpaper(&id, &ext).await.unwrap();
+    database::wallpaper::delete(&id).await.unwrap();
+    StatusCode::OK
+}
+
 pub fn get_routes() -> Router {
     Router::new()
         .route("/wallpapers", get(fetch_all))
         .route("/wallpapers/upload", post(upload))
         .route("/wallpapers/thumbnail/:id", get(fetch_thumbnail))
+        .route("/wallpapers/delete/:filename", delete(delete_wallpaper))
 }

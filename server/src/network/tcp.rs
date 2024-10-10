@@ -3,6 +3,7 @@ use crate::commands::ServerCommand;
 use crate::database;
 use anyhow::anyhow;
 use anyhow::Result;
+use once_cell::sync::Lazy;
 use serde_json::from_slice;
 use std::io::ErrorKind;
 use std::net::SocketAddr;
@@ -11,10 +12,10 @@ use tokio::io::AsyncReadExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::Mutex;
 
-pub async fn handle_client(
-    listener: TcpListener,
-    clients: Arc<Mutex<Vec<Arc<Mutex<TcpStream>>>>>,
-) -> Result<()> {
+pub static CLIENTS: Lazy<Arc<Mutex<Vec<Arc<Mutex<TcpStream>>>>>> =
+    Lazy::new(|| Arc::new(Mutex::new(Vec::new())));
+
+pub async fn handle_client(listener: TcpListener) -> Result<()> {
     let tcp_addr = listener.local_addr()?;
     info!("TCP listening on {}", tcp_addr);
 
@@ -22,10 +23,9 @@ pub async fn handle_client(
         match listener.accept().await {
             Ok((stream, addr)) => {
                 info!("CLIENT connected: {}", addr);
-                let clients = Arc::clone(&clients);
                 let stream = Arc::new(Mutex::new(stream));
                 tokio::spawn(async move {
-                    if let Err(e) = client_connect(Arc::clone(&stream), clients).await {
+                    if let Err(e) = client_connect(Arc::clone(&stream)).await {
                         error!("Error handling client: {}: {:?}", addr, e);
                     }
                 });
@@ -37,15 +37,12 @@ pub async fn handle_client(
     }
 }
 
-async fn client_connect(
-    stream: Arc<Mutex<TcpStream>>,
-    clients: Arc<Mutex<Vec<Arc<Mutex<TcpStream>>>>>,
-) -> Result<()> {
+async fn client_connect(stream: Arc<Mutex<TcpStream>>) -> Result<()> {
     let peer_address = stream.lock().await.peer_addr()?;
     let mut buffer = [0; 1024];
 
     {
-        let mut tcp_clients = clients.lock().await;
+        let mut tcp_clients = CLIENTS.lock().await;
         tcp_clients.push(Arc::clone(&stream));
     }
 
@@ -55,7 +52,7 @@ async fn client_connect(
             Ok(0) => {
                 info!("CLIENT disconnected: {}", peer_address);
                 drop(stream_guard);
-                remove_client(&peer_address, &clients).await?;
+                remove_client(&peer_address).await?;
                 break;
             }
             Ok(n) => {
@@ -81,7 +78,7 @@ async fn client_connect(
                     continue;
                 }
                 error!("Error reading from client {}: {:?}", peer_address, e);
-                remove_client(&peer_address, &clients).await?;
+                remove_client(&peer_address).await?;
                 break;
             } //Err(e) => {
         }
@@ -90,11 +87,8 @@ async fn client_connect(
     Ok(())
 }
 
-async fn remove_client(
-    peer_addr: &SocketAddr,
-    clients: &Arc<Mutex<Vec<Arc<Mutex<TcpStream>>>>>,
-) -> Result<()> {
-    let mut tcp_clients = clients.lock().await;
+async fn remove_client(peer_addr: &SocketAddr) -> Result<()> {
+    let mut tcp_clients = CLIENTS.lock().await;
     let mut i = 0;
     while i < tcp_clients.len() {
         let client = &tcp_clients[i];
@@ -112,9 +106,6 @@ async fn remove_client(
 pub async fn start(port: i32) -> Result<()> {
     let local_ip = local_ip_address::local_ip()?;
     let listener = TcpListener::bind(format! {"{}:{}", local_ip, port}).await?;
-    let clients: Arc<Mutex<Vec<Arc<Mutex<TcpStream>>>>> = Arc::new(Mutex::new(Vec::new()));
-
-    let tcp_clients = clients.clone();
-    handle_client(listener, tcp_clients).await?;
+    handle_client(listener).await?;
     Ok(())
 }

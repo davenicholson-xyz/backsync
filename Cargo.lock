@@ -261,6 +261,7 @@ dependencies = [
  "image",
  "local-ip-address",
  "log",
+ "once_cell",
  "rand",
  "serde",
  "serde_json",
