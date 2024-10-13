@@ -19,14 +19,20 @@ pub async fn handle(command: Command) -> Result<()> {
             let hostname = gethostname::gethostname().into_string().unwrap();
             send_to_server(Command::ClientInfo { ip, hostname }).await?;
         }
-        Command::SetWallpaper { id } => {
-            debug!("SERVER sent wallaper SET request: {}", id);
-            set_wallpaper(&id)?;
+        Command::SetWallpaper { filename } => {
+            info!("SERVER sent wallaper SET request: {}", filename);
+            set_wallpaper(&filename).await?;
         }
-        Command::SendWallpaper { id, data, set } => {
-            files::save_wallpaper(id.clone(), data)?;
+        Command::SendWallpaper {
+            filename,
+            data,
+            set,
+        } => {
+            files::save_wallpaper(filename.clone(), data)?;
             if set {
-                wallpaper::set_wallpaper(&id)?;
+                let parts: Vec<&str> = filename.split(".").collect();
+                let code = parts.first().unwrap().to_string();
+                wallpaper::set_wallpaper(&code).await?;
             }
         }
         Command::Welcome => {

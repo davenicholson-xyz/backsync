@@ -5,8 +5,8 @@ use sqlx::FromRow;
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct Wallpaper {
-    pub id: String,
-    pub filename: String,
+    pub id: i32,
+    pub code: String,
     pub extension: String,
 }
 
@@ -15,12 +15,11 @@ pub async fn add(wallpaper: &Wallpaper) -> Result<()> {
     sqlx::query(
         r#"
         INSERT INTO wallpapers 
-        (id, filename, extension)
-        VALUES (?, ?, ?)
+        (code, extension)
+        VALUES (?, ?)
     "#,
     )
-    .bind(&wallpaper.id)
-    .bind(&wallpaper.filename)
+    .bind(&wallpaper.code)
     .bind(&wallpaper.extension)
     .execute(pool)
     .await?;
@@ -35,19 +34,19 @@ pub async fn all() -> sqlx::Result<Vec<Wallpaper>> {
     Ok(streams)
 }
 
-pub async fn get(id: &str) -> sqlx::Result<Wallpaper> {
+pub async fn get(code: &str) -> sqlx::Result<Wallpaper> {
     let pool = super::pool();
-    let wallpaper = sqlx::query_as::<_, Wallpaper>("SELECT * FROM wallpapers WHERE id = ?")
-        .bind(id)
+    let wallpaper = sqlx::query_as::<_, Wallpaper>("SELECT * FROM wallpapers WHERE code = ?")
+        .bind(code)
         .fetch_one(pool)
         .await?;
     Ok(wallpaper)
 }
 
-pub async fn delete(id: &str) -> Result<()> {
+pub async fn delete(code: &str) -> Result<()> {
     let pool = super::pool();
-    sqlx::query("DELETE FROM wallpapers WHERE id = ?")
-        .bind(id)
+    sqlx::query("DELETE FROM wallpapers WHERE code = ?")
+        .bind(code)
         .execute(pool)
         .await?;
     Ok(())

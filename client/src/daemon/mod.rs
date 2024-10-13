@@ -27,7 +27,6 @@ pub async fn spawn(server_port: i32) -> Result<()> {
             while let Some(message) = incoming_rx.recv().await {
                 let data = DataPacket::from_raw(message).unwrap();
                 let command: Command = serde_json::from_slice(data.data()).unwrap();
-                dbg!(&command);
                 commands::handle(command).await.unwrap();
             }
         });

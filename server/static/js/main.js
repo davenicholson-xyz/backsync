@@ -1,13 +1,8 @@
-// const button = document.querySelector("button");
-// button.addEventListener('click', (e) => {
-//   e.target.disabled = true;
-// })
-
 const clients = () => {
   return {
     data: [],
     async fetch_clients() {
-      await fetch("/streams").then(response => response.json()).then(data => this.data = data.streams)
+      await fetch("/clients").then(response => response.json()).then(data => this.data = data.streams)
     }
   }
 };
@@ -32,6 +27,7 @@ const wallpapers = () => {
 
       let formData = new FormData();
       formData.append('image', this.selectedFile);
+      this.selectedFile = null;
 
       try {
         let response = await fetch("/wallpapers/upload", {
@@ -42,7 +38,6 @@ const wallpapers = () => {
         if (response.ok) {
           let new_image = await response.json();
           this.wallpapers.push(new_image);
-          this.selectedFile = null;
         } else {
           alert('image upload failed');
         }
@@ -52,11 +47,11 @@ const wallpapers = () => {
       }
 
     },
-    async deleteImage(id, ext) {
+    async deleteImage(code, ext) {
       try {
-        let response = await fetch(`/wallpapers/delete/${id}.${ext}`, { method: "DELETE" });
+        let response = await fetch(`/wallpapers/delete/${code}.${ext}`, { method: "DELETE" });
         if (response.ok) {
-          this.wallpapers = this.wallpapers.filter(w => w.id !== id);
+          this.wallpapers = this.wallpapers.filter(w => w.code !== code);
         } else {
           alert("failed to delete image");
         }

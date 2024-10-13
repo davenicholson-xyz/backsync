@@ -1,4 +1,11 @@
+use std::net::IpAddr;
+use std::str::FromStr;
+
+use crate::commands::command::Command;
+use crate::commands::send_to_client;
+use crate::database::clients::Client;
 use crate::database::wallpaper::Wallpaper;
+use crate::system::files::wallpaper::send_wallpaper;
 use crate::system::{files, paths};
 use crate::{database, utils};
 use axum::body::Bytes;
@@ -20,7 +27,7 @@ pub struct WallpapersResponse {
 
 #[derive(Serialize, Deserialize)]
 pub struct FetchThumbParams {
-    id: String,
+    code: String,
 }
 
 pub async fn upload(multipart: Multipart) -> Json<Wallpaper> {
@@ -35,9 +42,9 @@ pub async fn fetch_all() -> Json<WallpapersResponse> {
     Json(response)
 }
 
-pub async fn fetch_thumbnail(Path(id): Path<String>) -> impl IntoResponse {
+pub async fn fetch_thumbnail(Path(code): Path<String>) -> impl IntoResponse {
     let thumbs_dir = paths::storage_path("wallpaper/.thumbs").make_string();
-    let thumb_file = format!("{}/{}.jpg", thumbs_dir, id);
+    let thumb_file = format!("{}/{}.jpg", thumbs_dir, code);
 
     match File::open(thumb_file).await {
         Ok(mut file) => {
@@ -61,23 +68,32 @@ pub async fn fetch_thumbnail(Path(id): Path<String>) -> impl IntoResponse {
     }
 }
 
-pub async fn delete_wallpaper(Path(filename): Path<String>) -> StatusCode {
-    let (id, ext) = utils::split_filename(&filename).unwrap();
-    files::wallpaper::delete_wallpaper(&id, &ext).await.unwrap();
-    database::wallpaper::delete(&id).await.unwrap();
+pub async fn delete_wallpaper(Path(code): Path<String>) -> StatusCode {
+    let (code, ext) = utils::split_filename(&code).unwrap();
+    files::wallpaper::delete_wallpaper(&code, &ext)
+        .await
+        .unwrap();
+    database::wallpaper::delete(&code).await.unwrap();
     StatusCode::OK
 }
 
-//pub async fn set(Path(id): Path<String>) -> StatusCode {
-//    info!("setting wallpaper route");
-//    set_wallpaper_all(&id).await.unwrap();
-//    StatusCode::OK
-//}
+pub async fn set(Path(filename): Path<String>) -> StatusCode {
+    let clients = database::clients::all().await.unwrap();
+    for client in clients {
+        let ip = IpAddr::from_str(&client.addr).unwrap();
+        let command = Command::SetWallpaper {
+            filename: filename.clone(),
+        };
+        send_to_client(ip, &command).await.unwrap();
+    }
+
+    StatusCode::OK
+}
 pub fn get_routes() -> Router {
     Router::new()
         .route("/wallpapers", get(fetch_all))
-        //.route("/wallpapers/set/:id", get(set))
+        .route("/wallpapers/set/:filename", get(set))
         .route("/wallpapers/upload", post(upload))
-        .route("/wallpapers/thumbnail/:id", get(fetch_thumbnail))
-        .route("/wallpapers/delete/:filename", delete(delete_wallpaper))
+        .route("/wallpapers/thumbnail/:code", get(fetch_thumbnail))
+        .route("/wallpapers/delete/:code", delete(delete_wallpaper))
 }

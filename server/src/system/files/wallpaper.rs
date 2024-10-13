@@ -1,26 +1,24 @@
 use std::fs::File;
 use std::io::Cursor;
 use std::io::Read;
-use std::sync::Arc;
+use std::net::IpAddr;
+use std::path::Path;
 
 use anyhow::anyhow;
 use image::ImageFormat;
-use tokio::net::TcpStream;
-use tokio::sync::Mutex;
 
 use image::ImageReader;
 
 use axum::extract::Multipart;
 
 use crate::commands::command::Command;
+use crate::commands::send_to_client;
 use crate::database::wallpaper::Wallpaper;
 use crate::system::config;
-use crate::system::files;
 use crate::system::paths;
 use crate::system::paths::storage_path;
 use crate::utils;
 
-use crate::commands::send_to_client;
 use anyhow::Result;
 
 use crate::database;
@@ -33,32 +31,33 @@ pub async fn delete_wallpaper(id: &str, ext: &str) -> Result<()> {
     Ok(())
 }
 
-pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result<()> {
-    let wallpaper = database::wallpaper::get(&id).await?;
+pub async fn send_wallpaper(code: String, ip: IpAddr) -> Result<()> {
+    info!("SENDING wallpaper.... {}", code);
+    let wallpaper = database::wallpaper::get(&code).await?;
     let storage = config::get::<String>("storage")?.unwrap();
     let filepath = format!(
         "{}/wallpaper/{}.{}",
-        storage, wallpaper.id, wallpaper.extension
+        storage, wallpaper.code, wallpaper.extension
     );
-    let mut file = File::open(filepath)?;
+    let mut file = File::open(&filepath)?;
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
 
+    let filepath_p = Path::new(&filepath);
+    let filename_p = filepath_p.file_name().unwrap();
+
     let command = Command::SendWallpaper {
-        id,
+        filename: String::from(filename_p.to_str().unwrap()),
         data: buffer,
         set: true,
     };
-    //send_to_client(stream, &command).await?;
+    send_to_client(ip, &command).await?;
     Ok(())
 }
 
 pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
     let upload_dir = storage_path("wallpaper");
     let thumb_dir = storage_path("wallpaper/.thumbs");
-
-    files::create_directory(&upload_dir).await.unwrap();
-    files::create_directory(&thumb_dir).await.unwrap();
 
     let file_id = utils::seed(8);
 
@@ -86,8 +85,8 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
             .save_with_format(&thumb_path, ImageFormat::Jpeg)?;
 
         return Ok(Wallpaper {
-            id: file_id,
-            filename,
+            id: 0,
+            code: file_id,
             extension: file_ext,
         });
     }

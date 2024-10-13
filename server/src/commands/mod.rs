@@ -1,6 +1,7 @@
 pub mod command;
 
 use crate::network::tcp::data::DataPacket;
+use crate::system::files;
 use crate::{database, network};
 use anyhow::Result;
 use command::Command;
@@ -16,9 +17,9 @@ pub async fn handle(command: Command, ip: IpAddr) -> Result<()> {
         Command::ClientInfo { ip, hostname } => {
             database::clients::insert(&ip, &hostname).await?;
         }
-        Command::RequestWallpaper { id } => {
-            debug!("CLIENT requested wallpaperi {}", id);
-            //files::wallpaper::send_wallpaper(id, stream).await?;
+        Command::RequestWallpaper { code } => {
+            debug!("CLIENT requested wallpaperi {}", code);
+            files::wallpaper::send_wallpaper(code, ip).await?;
         }
         _ => {
             debug!("Command not implemented on the server: {}", command);

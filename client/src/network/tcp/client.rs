@@ -1,4 +1,4 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, usize};
 
 use anyhow::Result;
 use tokio::{
@@ -19,21 +19,40 @@ pub async fn start(
     let (write_tx, mut write_rx) = mpsc::channel::<Vec<u8>>(10);
 
     tokio::spawn(async move {
-        let mut buffer = [0; 1024];
         loop {
-            match reader.read(&mut buffer).await {
-                Ok(0) => {
-                    println!("connection closed by server");
-                    break;
-                }
-                Ok(n) => {
-                    incoming_tx.send(buffer[..n].to_vec()).await?;
-                }
-                Err(e) => {
-                    eprintln!("error reading from server: {:?}", e);
-                    break;
-                }
+            let mut length_buffer = [0u8; 4];
+            if let Err(e) = reader.read_exact(&mut length_buffer).await {
+                eprintln!("failed to read length of data: {}", e);
+                break;
             }
+
+            let length = u32::from_be_bytes(length_buffer) as usize;
+            let mut message_buffer = vec![0u8; length + 4];
+            message_buffer[..4].copy_from_slice(&length_buffer);
+
+            if let Err(e) = reader.read_exact(&mut message_buffer[4..]).await {
+                eprintln!("failed to read the message: {:?}", e);
+                break;
+            }
+
+            if let Err(e) = incoming_tx.send(message_buffer).await {
+                eprintln!("failed to send message to the channel: {:?}", e);
+                break;
+            }
+
+            //match reader.read(&mut buffer).await {
+            //    Ok(0) => {
+            //        println!("connection closed by server");
+            //        break;
+            //    }
+            //    Ok(n) => {
+            //        incoming_tx.send(buffer[..n].to_vec()).await?;
+            //    }
+            //    Err(e) => {
+            //        eprintln!("error reading from server: {:?}", e);
+            //        break;
+            //    }
+            //}
         }
 
         Ok::<(), anyhow::Error>(())

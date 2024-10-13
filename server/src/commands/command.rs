@@ -5,13 +5,13 @@ use std::fmt;
 pub enum Command {
     Handshake,
     RequestWallpaper {
-        id: String,
+        code: String,
     },
     SetWallpaper {
-        id: String,
+        filename: String,
     },
     SendWallpaper {
-        id: String,
+        filename: String,
         data: Vec<u8>,
         set: bool,
     },
@@ -25,12 +25,16 @@ pub enum Command {
 impl fmt::Display for Command {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Command::SendWallpaper { id, data, set } => {
+            Command::SendWallpaper {
+                filename,
+                data,
+                set,
+            } => {
                 let _ = data;
                 write!(
                     f,
                     "SendWallpaper {{ id: \"{}\", data: [DATA], set: {} }}",
-                    id, set
+                    filename, set
                 )
             }
             _ => {
