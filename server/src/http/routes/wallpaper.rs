@@ -68,9 +68,15 @@ pub async fn delete_wallpaper(Path(filename): Path<String>) -> StatusCode {
     StatusCode::OK
 }
 
+//pub async fn set(Path(id): Path<String>) -> StatusCode {
+//    info!("setting wallpaper route");
+//    set_wallpaper_all(&id).await.unwrap();
+//    StatusCode::OK
+//}
 pub fn get_routes() -> Router {
     Router::new()
         .route("/wallpapers", get(fetch_all))
+        //.route("/wallpapers/set/:id", get(set))
         .route("/wallpapers/upload", post(upload))
         .route("/wallpapers/thumbnail/:id", get(fetch_thumbnail))
         .route("/wallpapers/delete/:filename", delete(delete_wallpaper))

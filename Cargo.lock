@@ -238,6 +238,7 @@ dependencies = [
  "clap",
  "gethostname",
  "homedir",
+ "local-ip-address",
  "log",
  "once_cell",
  "serde",

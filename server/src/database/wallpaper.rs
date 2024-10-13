@@ -29,7 +29,7 @@ pub async fn add(wallpaper: &Wallpaper) -> Result<()> {
 
 pub async fn all() -> sqlx::Result<Vec<Wallpaper>> {
     let pool = super::pool();
-    let streams = sqlx::query_as::<_, Wallpaper>("SELECT id, filename, extension FROM wallpapers")
+    let streams = sqlx::query_as::<_, Wallpaper>("SELECT * FROM wallpapers")
         .fetch_all(pool)
         .await?;
     Ok(streams)
@@ -37,12 +37,10 @@ pub async fn all() -> sqlx::Result<Vec<Wallpaper>> {
 
 pub async fn get(id: &str) -> sqlx::Result<Wallpaper> {
     let pool = super::pool();
-    let wallpaper = sqlx::query_as::<_, Wallpaper>(
-        "SELECT id, filename, extension FROM wallpapers WHERE id = ?",
-    )
-    .bind(id)
-    .fetch_one(pool)
-    .await?;
+    let wallpaper = sqlx::query_as::<_, Wallpaper>("SELECT * FROM wallpapers WHERE id = ?")
+        .bind(id)
+        .fetch_one(pool)
+        .await?;
     Ok(wallpaper)
 }
 

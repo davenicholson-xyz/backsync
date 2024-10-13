@@ -2,8 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum ClientCommand {
+pub enum Command {
     Handshake,
+    RequestWallpaper {
+        id: String,
+    },
     SetWallpaper {
         id: String,
     },
@@ -12,18 +15,17 @@ pub enum ClientCommand {
         data: Vec<u8>,
         set: bool,
     },
+    ClientInfo {
+        ip: String,
+        hostname: String,
+    },
+    Welcome,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub enum ServerCommand {
-    Handshake { hostname: String },
-    RequestWallpaper { id: String },
-}
-
-impl fmt::Display for ClientCommand {
+impl fmt::Display for Command {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ClientCommand::SendWallpaper { id, data, set } => {
+            Command::SendWallpaper { id, data, set } => {
                 let _ = data;
                 write!(
                     f,
@@ -35,11 +37,5 @@ impl fmt::Display for ClientCommand {
                 write!(f, "{:?}", self)
             }
         }
-    }
-}
-
-impl fmt::Display for ServerCommand {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
     }
 }

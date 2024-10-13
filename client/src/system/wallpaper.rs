@@ -1,8 +1,9 @@
-use std::process::Command;
-
 use anyhow::Result;
 
-use crate::{commands::commands::ServerCommand, daemon::send_to_server, system};
+use crate::{
+    //commands::{command::Command, send_to_server},
+    system,
+};
 
 use super::files;
 
@@ -12,15 +13,15 @@ pub fn set_wallpaper(img: &str) -> Result<()> {
     cachepath.push(img);
     if !cachepath.exists() {
         debug!("WP {} does not exist in cache. Requesting...", img);
-        send_to_server(ServerCommand::RequestWallpaper {
-            id: String::from(img),
-        })?;
+        //send_to_server(Command::RequestWallpaper {
+        //    id: String::from(img),
+        //})?;
     } else {
         info!("SETTING: {}", img);
         if let Some(script) = system::config::get::<String>("post_script")? {
             let parsed_command = shlex::split(&script).expect("Failed to parse external script");
             if let Some((command, args)) = parsed_command.split_first() {
-                let _status = Command::new(command)
+                let _status = std::process::Command::new(command)
                     .args(args)
                     .arg(cachepath.display().to_string())
                     .status()

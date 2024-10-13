@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
             Ok::<_, anyhow::Error>(())
         },
         async {
-            network::tcp::start(network_port).await?;
+            network::start_tcp(network_port).await?;
             Ok::<_, anyhow::Error>(())
         },
         async {

@@ -13,7 +13,7 @@ pub async fn http_server(port: i32) {
     let app = Router::new()
         .nest_service("/static", ServeDir::new("static"))
         .route_service("/", ServeFile::new("static/index.html"))
-        .merge(routes::streams::get_routes())
+        .merge(routes::clients::get_routes())
         .merge(routes::wallpaper::get_routes())
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024));
 

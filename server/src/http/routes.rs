@@ -1,2 +1,2 @@
-pub mod streams;
+pub mod clients;
 pub mod wallpaper;

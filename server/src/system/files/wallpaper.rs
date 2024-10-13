@@ -12,6 +12,7 @@ use image::ImageReader;
 
 use axum::extract::Multipart;
 
+use crate::commands::command::Command;
 use crate::database::wallpaper::Wallpaper;
 use crate::system::config;
 use crate::system::files;
@@ -20,7 +21,6 @@ use crate::system::paths::storage_path;
 use crate::utils;
 
 use crate::commands::send_to_client;
-use crate::commands::ClientCommand;
 use anyhow::Result;
 
 use crate::database;
@@ -44,12 +44,12 @@ pub async fn send_wallpaper(id: String, stream: Arc<Mutex<TcpStream>>) -> Result
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
 
-    let command = ClientCommand::SendWallpaper {
+    let command = Command::SendWallpaper {
         id,
         data: buffer,
         set: true,
     };
-    send_to_client(stream, &command).await?;
+    //send_to_client(stream, &command).await?;
     Ok(())
 }
 
@@ -94,3 +94,14 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
 
     Err(anyhow!("no file"))
 }
+
+//pub async fn set_wallpaper_all(id: &str) -> Result<()> {
+//    info!("set wallpaper all fn");
+//    let clients = CLIENTS.lock().await;
+//    for client in clients.iter() {
+//        let c = Arc::clone(client);
+//        //send_to_client(c, &Command::SetWallpaper { id: id.to_string() }).await?;
+//        send_to_client(c, &Command::Welcome).await?;
+//    }
+//    Ok(())
+//}

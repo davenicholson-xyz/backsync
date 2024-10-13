@@ -1,8 +1,8 @@
 use anyhow::Result;
 use flags::Action;
 
-mod commands;
-mod daemon;
+pub mod commands;
+pub mod daemon;
 mod flags;
 mod network;
 mod system;
@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     match &flags.command {
         Some(Action::INIT { port }) => {
             let server_port = config::flag_file_default(*port, "port", 37878)?;
-            daemon::spawn(server_port)?;
+            daemon::spawn(server_port).await?;
         }
         Some(Action::STOP) => {
             info!("DAEMON killing");

@@ -1,4 +1,4 @@
-pub mod stream;
+pub mod clients;
 pub mod wallpaper;
 use std::sync::OnceLock;
 
@@ -19,6 +19,9 @@ pub async fn init() -> Result<()> {
     }
 
     let pool = SqlitePool::connect(&conn_string).await?;
+
+    sqlx::migrate!("./migrations").run(&pool).await?;
+
     DB_POOL
         .set(pool)
         .map_err(|_| anyhow!("Database already initialized"))?;

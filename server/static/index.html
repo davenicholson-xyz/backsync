@@ -8,11 +8,11 @@
 
     <div x-data="wallpapers()" x-init="fetchWallpapers()">
       <div style="display: flex; gap: 10px;">
-        <template x-for="wallpaper in wallpapers">
+        <template x-for="wallpaper in wallpapers" :key="wallpaper.id">
           <div>
             <img :src="`/wallpapers/thumbnail/${wallpaper.id}`" />
-            <button @click="deleteImage(wallpaper.id, wallpaper.extension)">delete</button>
-            <button @click="setImage(wallpaper.id)">set on clients</button>
+            <!-- <button @click="deleteImage(wallpaper.id, wallpaper.extension)">delete</button> -->
+            <button x-on:click="setWallpaper(wallpaper.id)">set on clients</button>
           </div>
         </template>
       </div>
@@ -20,7 +20,9 @@
         <h3>Upload new wallpaper</h3>
         <form @submit.prevent="uploadImage">
           <input type="file" id="file" name="file" accept="image/*" @change="handleFileUpload">
-          <button type="submit" x-if="wallpapers.selectedFile != null">Upload</button>
+          <!-- <template x-if="wallpapers.selectedFile != null"> -->
+          <button type="submit" >Upload</button>
+          <!-- </template> -->
         </form>
       </div>
     </div>

@@ -4,7 +4,6 @@ use serde::{de::DeserializeOwned, Serialize};
 use std::{fs, io::Write, path::Path};
 use toml::Value;
 
-use super::files;
 use super::paths;
 
 pub fn get<T: DeserializeOwned>(field: &str) -> Result<Option<T>> {
@@ -60,25 +59,4 @@ where
 
     set(field, default.clone())?;
     Ok(default)
-}
-
-pub fn exists(field: &str) -> Result<bool> {
-    let config_file = paths::config_path("config.toml");
-    if Path::new(&config_file).exists() {
-        let contents = fs::read_to_string(config_file)?;
-        let config: Value = toml::from_str(&contents)?;
-        if let Some(_value) = config.get(field) {
-            return Ok(true);
-        } else {
-            return Ok(false);
-        }
-    }
-    Ok(false)
-}
-
-pub fn set_if_none<T: Serialize>(field: &str, value: T) -> Result<()> {
-    if !exists(field)? {
-        set(field, value)?
-    }
-    Ok(())
 }

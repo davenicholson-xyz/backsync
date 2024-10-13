@@ -1,29 +1,38 @@
 use anyhow::Result;
-use commands::ClientCommand;
+use command::Command;
 
-use crate::system::{
-    files,
-    wallpaper::{self, set_wallpaper},
+use crate::{
+    daemon::send_to_server,
+    system::{
+        files,
+        wallpaper::{self, set_wallpaper},
+    },
 };
 
-pub mod commands;
+pub mod command;
 
-pub fn handle(command: ClientCommand) -> Result<()> {
-    info!("RCVD: {}", command);
+pub async fn handle(command: Command) -> Result<()> {
+    info!("Received Command::{}", &command);
     match command {
-        ClientCommand::Handshake => {
-            debug!("SERVER: 👋");
+        Command::Handshake => {
+            let ip = local_ip_address::local_ip()?.to_string();
+            let hostname = gethostname::gethostname().into_string().unwrap();
+            send_to_server(Command::ClientInfo { ip, hostname }).await?;
         }
-        ClientCommand::SetWallpaper { id } => {
+        Command::SetWallpaper { id } => {
             debug!("SERVER sent wallaper SET request: {}", id);
             set_wallpaper(&id)?;
         }
-        ClientCommand::SendWallpaper { id, data, set } => {
+        Command::SendWallpaper { id, data, set } => {
             files::save_wallpaper(id.clone(), data)?;
             if set {
                 wallpaper::set_wallpaper(&id)?;
             }
         }
+        Command::Welcome => {
+            info! {"WLCM"};
+        }
+        _ => {}
     }
     Ok(())
 }

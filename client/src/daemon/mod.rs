@@ -1,38 +1,56 @@
-use crate::commands::commands::ServerCommand;
-use crate::network;
-use crate::system;
-use anyhow::{anyhow, Result};
-use once_cell::sync::OnceCell;
-use std::io::Write;
-use std::net::TcpStream;
 use std::sync::Arc;
-use std::sync::Mutex;
-use std::thread;
 
-pub static SERVER_STREAM: OnceCell<Arc<Mutex<TcpStream>>> = OnceCell::new();
+use crate::{
+    commands::{self, command::Command},
+    network::{
+        self,
+        tcp::{self, data::DataPacket},
+    },
+};
+use anyhow::{anyhow, Result};
+use once_cell::sync::Lazy;
+use tokio::sync::Mutex;
 
-pub fn spawn(server_port: i32) -> Result<()> {
+static SEND_DATA: Lazy<Arc<Mutex<Option<Box<dyn Fn(Vec<u8>) + Send + Sync>>>>> =
+    Lazy::new(|| Arc::new(Mutex::new(None)));
+
+pub async fn spawn(server_port: i32) -> Result<()> {
     if let Some(udp) = network::udp::listen_for_broadcast(server_port)? {
-        system::config::set("server_ip", udp.ip())?;
-        let stream = network::tcp::server_stream(udp)?;
-        SERVER_STREAM.set(Arc::new(Mutex::new(stream))).unwrap();
-        let hostname = gethostname::gethostname().into_string().unwrap();
-        send_to_server(ServerCommand::Handshake { hostname })?;
+        let (mut incoming_rx, send_data) = tcp::client::start(&udp.to_string()).await.unwrap();
+
+        let mut send_data_guard = SEND_DATA.lock().await;
+        *send_data_guard = Some(Box::new(move |data: Vec<u8>| {
+            let _ = send_data(data);
+        }));
+
+        tokio::spawn(async move {
+            while let Some(message) = incoming_rx.recv().await {
+                let data = DataPacket::from_raw(message).unwrap();
+                let command: Command = serde_json::from_slice(data.data()).unwrap();
+                dbg!(&command);
+                commands::handle(command).await.unwrap();
+            }
+        });
     } else {
         return Err(anyhow!("Failed to get UDP connection"));
     };
 
-    loop {
-        thread::park();
-    }
-}
-pub fn send_to_server(command: ServerCommand) -> Result<()> {
-    if let Some(stream) = SERVER_STREAM.get() {
-        let mut stream = stream.lock().unwrap();
-        let message = serde_json::to_string(&command)?;
-        stream.write_all(message.as_bytes())?;
-    } else {
-        return Err(anyhow!("Global stream could not be initialised"));
-    }
+    tokio::signal::ctrl_c()
+        .await
+        .expect("Failed to listen for ctrl+c");
+
     Ok(())
+}
+
+pub async fn send_to_server(command: Command) -> Result<()> {
+    info!("SENDING TO SERVER: {:?}", &command);
+    let command_string = serde_json::to_string(&command)?;
+    let data = DataPacket::from_str(&command_string);
+    let send_data = SEND_DATA.lock().await;
+    if let Some(ref send_data_fn) = *send_data {
+        send_data_fn(data.to_raw());
+        Ok(())
+    } else {
+        Err(anyhow!("send data function not initialising"))
+    }
 }

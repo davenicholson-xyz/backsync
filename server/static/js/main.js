@@ -6,8 +6,8 @@
 const clients = () => {
   return {
     data: [],
-    fetch_clients() {
-      fetch("/streams").then(response => response.json()).then(data => this.data = data.streams)
+    async fetch_clients() {
+      await fetch("/streams").then(response => response.json()).then(data => this.data = data.streams)
     }
   }
 };
@@ -18,6 +18,10 @@ const wallpapers = () => {
     selectedFile: null,
     handleFileUpload(e) {
       this.selectedFile = e.target.files[0];
+    },
+    async setWallpaper(id) {
+      // console.log('setting image');
+      await fetch(`/wallpapers/set/${id}`);
     },
     async uploadImage() {
 

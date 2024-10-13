@@ -2,36 +2,36 @@ use axum::{extract::Path, response::IntoResponse, routing::get, Json, Router};
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
 
-use crate::database::{self, stream::Stream};
+use crate::database::{self, clients::Client};
 
 #[derive(Serialize, Deserialize)]
-pub struct StreamsResponse {
-    streams: Vec<Stream>,
+pub struct ClientResponse {
+    streams: Vec<Client>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct StreamParams {
+pub struct ClientParams {
     addr: String,
 }
 
-pub async fn fetch_all() -> Json<StreamsResponse> {
-    let streams = database::stream::all().await.unwrap();
-    let response = StreamsResponse { streams };
+pub async fn fetch_all() -> Json<ClientResponse> {
+    let streams = database::clients::all().await.unwrap();
+    let response = ClientResponse { streams };
     Json(response)
 }
 
 pub async fn fetch(Path(addr): Path<String>) -> impl IntoResponse {
-    let response = database::stream::get(&addr).await;
+    let response = database::clients::get(&addr).await;
     match response {
         Ok(stream) => Json(stream).into_response(),
-        Err(_) => (StatusCode::NOT_FOUND, "Stream not found").into_response(),
+        Err(_) => (StatusCode::NOT_FOUND, "Clienti not found").into_response(),
     }
 }
 
 pub fn get_routes() -> Router {
     Router::new()
-        .route("/streams", get(fetch_all))
-        .route("/streams/:addr", get(fetch))
+        .route("/clients", get(fetch_all))
+        .route("/clients/:addr", get(fetch))
     //.route("/streams/set/:wallpaper_id", get(send_wallpaper_to_all_streams))
     //.route("/streams/:addr/set/:wallpaper_id", get(send_wallpaper_to_stream))
 }
