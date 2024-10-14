@@ -1,5 +1,7 @@
 use axum::extract::DefaultBodyLimit;
 use axum::Router;
+use tower_http::cors::Any;
+use tower_http::cors::CorsLayer;
 use tower_http::services::{ServeDir, ServeFile};
 
 use super::routes;
@@ -10,11 +12,17 @@ pub async fn start(port: i32) {
 }
 
 pub async fn http_server(port: i32) {
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_headers(Any)
+        .allow_headers(Any);
+
     let app = Router::new()
         .nest_service("/static", ServeDir::new("static"))
         .route_service("/", ServeFile::new("static/index.html"))
         .merge(routes::clients::get_routes())
         .merge(routes::wallpaper::get_routes())
+        .layer(cors)
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024));
 
     let port = port as u16;

@@ -2,6 +2,7 @@ pub mod clients;
 pub mod wallpaper;
 use std::sync::OnceLock;
 
+use crate::database;
 use anyhow::anyhow;
 use anyhow::Result;
 use sqlx::migrate::MigrateDatabase;
@@ -25,6 +26,8 @@ pub async fn init() -> Result<()> {
     DB_POOL
         .set(pool)
         .map_err(|_| anyhow!("Database already initialized"))?;
+
+    database::clients::startup_clean().await?;
 
     Ok(())
 }

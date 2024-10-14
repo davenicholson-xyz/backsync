@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.89"
-axum = { version = "0.7.7", features = ["multipart", "query"] }
+axum = { version = "0.7.7", features = ["multipart", "query", "ws"] }
 clap = { version = "4.5.19", features = ["derive", "env"] }
 homedir = "0.3.4"
 hyper = "1.4.1"
@@ -21,4 +21,7 @@ simplelog = "0.12.2"
 sqlx = { version = "0.8.2", features = ["runtime-tokio", "runtime-tokio-native-tls", "sqlite"] }
 tokio = { version = "1.40.0", features = ["full"] }
 toml = "0.8.19"
-tower-http = { version = "0.6.1", features = ["fs", "limit"] }
+tower-http = { version = "0.6.1", features = ["fs", "limit", "cors"] }
+axum-extra = "0.4"
+tokio-tungstenite = "0.18"
+futures = "0.3"

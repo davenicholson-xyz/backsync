@@ -34,6 +34,10 @@ async fn main() -> Result<()> {
         async {
             http::server::start(http_port).await;
             Ok::<_, anyhow::Error>(())
+        },
+        async {
+            http::websocket::start().await?;
+            Ok::<_, anyhow::Error>(())
         }
     )?;
     Ok(())

@@ -76,9 +76,28 @@ pub async fn all() -> sqlx::Result<Vec<Client>> {
 
 pub async fn get(addr: &str) -> sqlx::Result<Client> {
     let pool = super::pool();
-    let client = sqlx::query_as::<_, Client>("SELECT * FROM clients WHERE addr = ?")
+    let client = sqlx::query_as::<_, Client>(
+    r#"
+        SELECT clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        FROM clients 
+        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+        WHERE addr = ?;
+    "#
+        )
         .bind(addr)
         .fetch_one(pool)
         .await?;
     Ok(client)
+}
+
+pub async fn startup_clean() -> Result<()> {
+    let pool = super::pool();
+    sqlx::query(
+        r#"
+        UPDATE clients SET connected_at = NULL
+    "#,
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
 }
