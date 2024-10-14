@@ -38,7 +38,7 @@ async fn main() -> Result<()> {
         async {
             http::websocket::start().await?;
             Ok::<_, anyhow::Error>(())
-        }
+        },
     )?;
     Ok(())
 }

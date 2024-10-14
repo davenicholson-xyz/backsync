@@ -1,45 +1,63 @@
+use std::{net::SocketAddr, sync::Arc};
+
 use anyhow::Result;
 use futures::{SinkExt, StreamExt};
-use tokio::net::TcpListener;
-use tokio_tungstenite::accept_async;
+use tokio::{net::TcpListener, sync::broadcast};
+use tokio_tungstenite::{accept_async, tungstenite::Message};
+
 pub async fn start() -> Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:3002").await?;
+    let addr = "127.0.0.1:3002".parse::<SocketAddr>().unwrap();
+    let listener = TcpListener::bind(&addr).await.expect("Failed to bind");
+
+    // Create a broadcast channel
+    let (tx, _) = broadcast::channel::<String>(100);
+    let tx = Arc::new(tx); // Arc to share across tasks
+
+    println!("Listening on: {}", addr);
 
     while let Ok((stream, _)) = listener.accept().await {
-        // Spawn a new task for each connection
+        let tx = tx.clone();
+        let mut rx = tx.subscribe(); // Each client gets its own receiver
+
         tokio::spawn(async move {
-            // Upgrade the TCP connection to a WebSocket connection asynchronously
-            let ws_stream = accept_async(stream).await.unwrap();
-            println!("New WebSocket connection established!");
+            let ws_stream = accept_async(stream)
+                .await
+                .expect("Error during WebSocket handshake");
+            println!("New WebSocket connection established");
 
-            let (mut write, mut read) = ws_stream.split();
+            // Split the WebSocket into sender and receiver
+            let (mut ws_sender, mut ws_receiver) = ws_stream.split();
 
-            // Echo incoming messages back to the client
-            while let Some(Ok(msg)) = read.next().await {
-                println!("Received message: {}", msg);
+            // Spawn a task to handle incoming messages from the client
+            let tx_inner = tx.clone();
+            tokio::spawn(async move {
+                while let Some(Ok(msg)) = ws_receiver.next().await {
+                    if let Message::Text(text) = msg {
+                        // Parse the incoming message
+                        parse_message(text.clone()).await;
+                        // Broadcast the message to all clients
+                        let _ = tx_inner.send(text.clone());
+                    }
+                }
+            });
 
-                if msg.is_text() || msg.is_binary() {
-                    // Echo the message back to the client
-                    write.send(msg).await.unwrap();
+            // Continuously send broadcast messages to the client
+            while let Ok(message) = rx.recv().await {
+                if ws_sender.send(Message::Text(message)).await.is_err() {
+                    break; // Client disconnected
                 }
             }
         });
     }
 
-    //for stream in server.incoming() {
-    //    tokio::spawn(async move {
-    //        let stream = stream.unwrap();
-    //        let mut websocket = accept(stream).unwrap();
-    //        println!("new socket astablished");
-    //        loop {
-    //            let msg = websocket.read_message().unwrap();
-    //            println!("received message: {}", msg);
-    //
-    //            if msg.is_text() || msg.is_binary() {
-    //                websocket.write_message(msg).unwrap();
-    //            }
-    //        }
-    //    });
-    //}
     Ok(())
+}
+
+async fn parse_message(msg: String) {
+    // Parse and handle the message, e.g., parse JSON or commands
+    println!("Received message: {}", msg);
+}
+
+async fn broadcast_message(tx: Arc<broadcast::Sender<String>>, message: String) {
+    let _ = tx.send(message);
 }

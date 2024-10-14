@@ -1,3 +1,26 @@
+// Open a WebSocket connection
+        const socket = new WebSocket('ws://127.0.0.1:3002');
+
+        // Listen for messages from the server
+        socket.onmessage = function(event) {
+            console.log('Message from server ', event.data);
+        };
+
+        // Send a message to the server
+        socket.onopen = function() {
+            socket.send('Hello, Server!');
+        };
+
+        // Handle connection errors
+        socket.onerror = function(error) {
+            console.log('WebSocket Error: ', error);
+        };
+
+        // Handle WebSocket closure
+        socket.onclose = function() {
+            console.log('WebSocket connection closed');
+        };
+
 const clients = () => {
   return {
     data: [],
@@ -5,7 +28,11 @@ const clients = () => {
       await fetch("/clients").then(response => response.json()).then(data => {
         this.data = data.streams;
       })
-    }
+    },
+    init() {
+    this.fetch_clients();
+      setInterval(() =>  this.fetch_clients(), 5000);
+  }
   }
 };
 
@@ -67,25 +94,3 @@ const wallpapers = () => {
   }
 }
 
-const socket = new WebSocket('ws://127.0.0.1:3002');
-
-// Listen for messages from the server
-socket.onmessage = function(event) {
-  console.log('Message from server ', event.data);
-};
-
-// Send a message to the server
-socket.onopen = function() {
-  console.log('ws open');
-  socket.send('Hello, Server!');
-};
-
-// Handle connection errors
-socket.onerror = function(error) {
-  console.log('WebSocket Error: ', error);
-};
-
-// Handle WebSocket closure
-socket.onclose = function() {
-  console.log('WebSocket connection closed');
-};
