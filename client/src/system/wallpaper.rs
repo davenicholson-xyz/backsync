@@ -30,6 +30,12 @@ pub async fn set_wallpaper(img: &str) -> Result<()> {
         } else {
             setwallpaper::from_file(&cachepath.into_os_string().into_string().unwrap())?;
         }
+        let (code, _ext) =
+            utils::paths::split_filename(img).expect("could not get path, ext from filename");
+        send_to_server(Command::ConfirmWallpaper {
+            code: code.to_string(),
+        })
+        .await?;
     }
     Ok(())
 }

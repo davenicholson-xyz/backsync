@@ -52,6 +52,7 @@ pub async fn send_wallpaper(code: String, ip: IpAddr) -> Result<()> {
         set: true,
     };
     send_to_client(ip, &command).await?;
+
     Ok(())
 }
 

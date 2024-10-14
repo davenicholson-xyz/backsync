@@ -4,6 +4,8 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
+use crate::http;
+
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct Client {
     pub addr: String,
@@ -26,6 +28,7 @@ pub async fn insert(ip: &str, hostname: &str) -> Result<()> {
     .bind(hostname)
     .execute(pool)
     .await?;
+    http::websocket::client_update().await?;
     Ok(())
 }
 
@@ -57,6 +60,7 @@ pub async fn remove(ip: IpAddr) -> Result<()> {
     .bind(&ip.to_string())
     .execute(pool)
     .await?;
+    http::websocket::client_update().await?;
     Ok(())
 }
 
@@ -67,6 +71,21 @@ pub async fn all() -> sqlx::Result<Vec<Client>> {
         SELECT clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id;
+    "#
+        )
+        .fetch_all(pool)
+        .await?;
+    Ok(clients)
+}
+
+pub async fn all_online() -> sqlx::Result<Vec<Client>> {
+    let pool = super::pool();
+    let clients = sqlx::query_as::<_, Client>(
+    r#"
+        SELECT clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        FROM clients 
+        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+        WHERE connected_at != '';
     "#
         )
         .fetch_all(pool)

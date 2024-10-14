@@ -75,10 +75,10 @@ pub async fn delete_wallpaper(Path(code): Path<String>) -> StatusCode {
     StatusCode::OK
 }
 
-pub async fn set(Path(code): Path<String>) -> StatusCode {
+pub async fn set(Path(code): Path<String>) -> impl IntoResponse {
     let wp = database::wallpaper::get(&code).await.unwrap();
     let filename = format!("{}.{}", wp.code, wp.extension);
-    let clients = database::clients::all().await.unwrap();
+    let clients = database::clients::all_online().await.unwrap();
     for client in clients {
         let ip = IpAddr::from_str(&client.addr).unwrap();
         let command = Command::SetWallpaper {
@@ -90,7 +90,7 @@ pub async fn set(Path(code): Path<String>) -> StatusCode {
             .unwrap();
     }
 
-    StatusCode::OK
+    (StatusCode::OK, "this is it").into_response()
 }
 pub fn get_routes() -> Router {
     Router::new()

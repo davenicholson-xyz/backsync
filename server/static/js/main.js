@@ -1,40 +1,34 @@
-// Open a WebSocket connection
-        const socket = new WebSocket('ws://127.0.0.1:3002');
+document.addEventListener('alpine:init', () => {
+  Alpine.store('clients', {
+    data: []
+  })
 
-        // Listen for messages from the server
-        socket.onmessage = function(event) {
-            console.log('Message from server ', event.data);
-        };
+  const socket = new WebSocket('ws://127.0.0.1:3002');
 
-        // Send a message to the server
-        socket.onopen = function() {
-            socket.send('Hello, Server!');
-        };
+  socket.onmessage = function(event) {
+    let data = JSON.parse(event.data);
+    switch (data.subject) {
+      case "clients_update":
+        Alpine.store('clients').data = [...data.clients];
+        break;
+      default:
+        break;
+    }
+  };
 
-        // Handle connection errors
-        socket.onerror = function(error) {
-            console.log('WebSocket Error: ', error);
-        };
+  socket.onopen = function() {
+    console.log("WebSocket connection");
+  };
 
-        // Handle WebSocket closure
-        socket.onclose = function() {
-            console.log('WebSocket connection closed');
-        };
+  socket.onerror = function(error) {
+    console.log('WebSocket Error: ', error);
+  };
 
-const clients = () => {
-  return {
-    data: [],
-    async fetch_clients() {
-      await fetch("/clients").then(response => response.json()).then(data => {
-        this.data = data.streams;
-      })
-    },
-    init() {
-    this.fetch_clients();
-      setInterval(() =>  this.fetch_clients(), 5000);
-  }
-  }
-};
+  socket.onclose = function() {
+    console.log('WebSocket connection closed');
+  };
+
+});
 
 const wallpapers = () => {
   return {
@@ -44,8 +38,8 @@ const wallpapers = () => {
       this.selectedFile = e.target.files[0];
     },
     async setWallpaper(id) {
-      // console.log('setting image');
       await fetch(`/wallpapers/set/${id}`);
+      await new Promise(r => setTimeout(r, 2000));
     },
     async uploadImage() {
 

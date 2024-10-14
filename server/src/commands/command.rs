@@ -15,6 +15,9 @@ pub enum Command {
         data: Vec<u8>,
         set: bool,
     },
+    ConfirmWallpaper {
+        code: String,
+    },
     ClientInfo {
         ip: String,
         hostname: String,

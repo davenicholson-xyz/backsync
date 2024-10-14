@@ -21,18 +21,18 @@
         <form @submit.prevent="uploadImage">
           <input type="file" id="file" name="file" accept="image/*" @change="handleFileUpload">
           <template x-if="selectedFile != null">
-          <button type="submit" >Upload</button>
+            <button type="submit" >Upload</button>
           </template>
         </form>
       </div>
     </div>
 
-    <div x-data="clients()">
+    <div x-data="$store.clients">
       <h3>Client List</h3>
       <template x-for="client in data">
         <p>
           <template x-if="client.connected_at != ''">
-            <span>ONLINE</span>
+            <span style="color:green;font-weight:bold;">@</span>
           </template>
           <span x-text="client.addr"></span> 
           <span x-text="client.hostname"></span>
