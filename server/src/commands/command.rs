@@ -19,7 +19,6 @@ pub enum Command {
         ip: String,
         hostname: String,
     },
-    Welcome,
 }
 
 impl fmt::Display for Command {

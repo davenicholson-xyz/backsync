@@ -2,7 +2,10 @@ const clients = () => {
   return {
     data: [],
     async fetch_clients() {
-      await fetch("/clients").then(response => response.json()).then(data => this.data = data.streams)
+      await fetch("/clients").then(response => response.json()).then(data => {
+        console.log(data);
+        this.data = data.streams;
+      })
     }
   }
 };

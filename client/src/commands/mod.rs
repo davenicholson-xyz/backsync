@@ -30,13 +30,8 @@ pub async fn handle(command: Command) -> Result<()> {
         } => {
             files::save_wallpaper(filename.clone(), data)?;
             if set {
-                let parts: Vec<&str> = filename.split(".").collect();
-                let code = parts.first().unwrap().to_string();
-                wallpaper::set_wallpaper(&code).await?;
+                wallpaper::set_wallpaper(&filename).await?;
             }
-        }
-        Command::Welcome => {
-            info! {"WLCM"};
         }
         _ => {}
     }

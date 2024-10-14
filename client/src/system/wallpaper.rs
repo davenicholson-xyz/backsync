@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::{commands::command::Command, daemon::send_to_server, system};
+use crate::{commands::command::Command, daemon::send_to_server, system, utils};
 
 use super::files;
 
@@ -10,14 +10,12 @@ pub async fn set_wallpaper(img: &str) -> Result<()> {
     cachepath.push(format!("{}", img));
     if !cachepath.exists() {
         info!("WP {} does not exist in cache. Requesting...", img);
-        let filepath = cachepath.as_path();
-        let filename = filepath.file_stem().unwrap();
-        println!("filename: {}", filename.to_str().unwrap());
+        let (code, _ext) =
+            utils::paths::split_filename(img).expect("could not get path, ext from filename");
         send_to_server(Command::RequestWallpaper {
-            code: String::from(filename.to_str().unwrap()),
+            code: String::from(code),
         })
-        .await
-        .unwrap();
+        .await?;
     } else {
         info!("SETTING: {}", img);
         if let Some(script) = system::config::get::<String>("post_script")? {

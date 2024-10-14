@@ -3,9 +3,7 @@ use std::str::FromStr;
 
 use crate::commands::command::Command;
 use crate::commands::send_to_client;
-use crate::database::clients::Client;
 use crate::database::wallpaper::Wallpaper;
-use crate::system::files::wallpaper::send_wallpaper;
 use crate::system::{files, paths};
 use crate::{database, utils};
 use axum::body::Bytes;
@@ -77,7 +75,9 @@ pub async fn delete_wallpaper(Path(code): Path<String>) -> StatusCode {
     StatusCode::OK
 }
 
-pub async fn set(Path(filename): Path<String>) -> StatusCode {
+pub async fn set(Path(code): Path<String>) -> StatusCode {
+    let wp = database::wallpaper::get(&code).await.unwrap();
+    let filename = format!("{}.{}", wp.code, wp.extension);
     let clients = database::clients::all().await.unwrap();
     for client in clients {
         let ip = IpAddr::from_str(&client.addr).unwrap();
@@ -85,6 +85,9 @@ pub async fn set(Path(filename): Path<String>) -> StatusCode {
             filename: filename.clone(),
         };
         send_to_client(ip, &command).await.unwrap();
+        database::clients::set_wallpaper(&ip.to_string(), &wp.code)
+            .await
+            .unwrap();
     }
 
     StatusCode::OK

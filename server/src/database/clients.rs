@@ -9,6 +9,7 @@ pub struct Client {
     pub addr: String,
     pub hostname: String,
     pub connected_at: String,
+    pub wallpaper_code: Option<String>,
 }
 
 pub async fn insert(ip: &str, hostname: &str) -> Result<()> {
@@ -23,6 +24,22 @@ pub async fn insert(ip: &str, hostname: &str) -> Result<()> {
     )
     .bind(ip)
     .bind(hostname)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn set_wallpaper(ip: &str, code: &str) -> Result<()> {
+    let pool = super::pool();
+    sqlx::query(
+        r#"
+        UPDATE clients
+        SET wallpaper = (SELECT id FROM wallpapers WHERE code = ?)
+        WHERE addr = ?
+    "#,
+    )
+    .bind(&code.to_string())
+    .bind(&ip.to_string())
     .execute(pool)
     .await?;
     Ok(())
@@ -45,7 +62,13 @@ pub async fn remove(ip: IpAddr) -> Result<()> {
 
 pub async fn all() -> sqlx::Result<Vec<Client>> {
     let pool = super::pool();
-    let clients = sqlx::query_as::<_, Client>("SELECT * FROM clients")
+    let clients = sqlx::query_as::<_, Client>(
+    r#"
+        SELECT clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        FROM clients 
+        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id;
+    "#
+        )
         .fetch_all(pool)
         .await?;
     Ok(clients)

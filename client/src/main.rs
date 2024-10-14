@@ -7,6 +7,8 @@ mod flags;
 mod network;
 mod system;
 
+mod utils;
+
 #[macro_use]
 extern crate log;
 extern crate simplelog;
