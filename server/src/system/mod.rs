@@ -3,7 +3,7 @@ pub mod files;
 pub mod logger;
 pub mod paths;
 
-use std::path::PathBuf;
+use std::{fs::File, path::PathBuf};
 
 use anyhow::Result;
 use paths::PathBufExt;
@@ -14,6 +14,14 @@ pub async fn init() -> Result<()> {
     let flags = super::flags::cli_args();
     let crate_name = env!("CARGO_PKG_NAME");
     let homedir = homedir::my_home()?.unwrap().make_string();
+
+    let mut config_path = paths::config_path("");
+
+    files::create_directory(&config_path).await.unwrap();
+    config_path.push("config.toml");
+    if !config_path.exists() {
+        File::create(config_path)?;
+    }
 
     #[cfg(target_family = "unix")]
     let default_path = format!("{}/.local/share/{}", homedir, crate_name);
