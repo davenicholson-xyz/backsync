@@ -1,40 +1,47 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <title>This is nice</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<html lang="en" class="sl-theme-dark">
 
-    <link rel="stylesheet" href="static/css/uikit.min.css" />
-    <script src="static/js/uikit.min.js"></script>
-    <script src="static/js/uikit-icons.min.js"></script>
+<head>
+  <title>This is nice</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  </head>
-  <body x-data="router()">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/themes/dark.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.17.1/cdn/shoelace-autoloader.js"></script>
 
-    <div x-data="$store.clients">
-      <h3>Client List</h3>
-      <template x-for="client in data">
-        <p>
-          <template x-if="client.connected_at != ''">
-            <span style="color:green;font-weight:bold;">@</span>
-          </template>
-          <span x-text="client.addr"></span> 
-          <span x-text="client.hostname"></span>
-          <img :src="`/wallpapers/thumbnail/${client.wallpaper_code}`"  width='80px'/>
-        </p>
-      </template>
-      <div>
+  <link rel="stylesheet" href="static/css/main.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body x-data="router()">
+
+  <div class="container">
+
+
+  <div x-data="$store.clients">
+    <template x-for="client in data">
+      <p>
+        <template x-if="client.connected_at != ''">
+          <span style="color:green;font-weight:bold;">@</span>
+        </template>
+        <span x-text="client.id"></span>
+        <span x-text="client.addr"></span>
+        <span x-text="client.hostname"></span>
+        <img :src="`/wallpapers/thumbnail/${client.wallpaper_code}`" width='80px' />
+      </p>
+    </template>
 
     <div>
-
       <nav>
-        <ul><a href="/" @click.prevent="navigate('home', '')">home</a></ul>
+        <ul><a href="/" @click.prevent="navigate('home', '/')">home</a></ul>
         <ul><a href="/papers" @click.prevent="navigate('papers', '/papers')">papers</a></ul>
       </nav>
 
       <main x-html="pageContent"></main>
-
     </div>
+
+
+  </div>
     <script src="static/js/main.js"></script>
-  </body>
+</body>
+
 </html>

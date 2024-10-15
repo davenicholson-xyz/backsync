@@ -8,6 +8,7 @@ use crate::http;
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct Client {
+    pub id: i32,
     pub addr: String,
     pub hostname: String,
     pub connected_at: String,
@@ -68,7 +69,7 @@ pub async fn all() -> sqlx::Result<Vec<Client>> {
     let pool = super::pool();
     let clients = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.id, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id;
     "#
@@ -82,7 +83,7 @@ pub async fn all_online() -> sqlx::Result<Vec<Client>> {
     let pool = super::pool();
     let clients = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.id, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
         WHERE connected_at != '';
