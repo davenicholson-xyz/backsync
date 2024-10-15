@@ -23,9 +23,8 @@
     <div>
 
       <nav>
-        <ul><a href="#" @click.prevent="navigate('home')">home</a></ul>
-        <ul><a href="#" @click.prevent="navigate('papers')">papers</a></ul>
-        <ul><a href="#" @click.prevent="navigate('papers')">wallhaven</a></ul>
+        <ul><a href="/" @click.prevent="navigate('home', '')">home</a></ul>
+        <ul><a href="/papers" @click.prevent="navigate('papers', '/papers')">papers</a></ul>
       </nav>
 
       <main x-html="pageContent"></main>
