@@ -1,3 +1,25 @@
+function router() {
+  return {
+    currentPage: 'home',
+    pageContent: '',
+
+    navigate(page) {
+      this.currentPage = page;
+      this.loadPageContent(page);
+    },
+
+    async loadPageContent(page) {
+      console.log('navgating');
+      const response = await fetch(`/static/pages/${page}.html`);
+      this.pageContent = await response.text();
+    },
+
+    init() {
+      this.loadPageContent(this.currentPage);
+    }
+  }
+}
+
 document.addEventListener('alpine:init', () => {
   Alpine.store('clients', {
     data: []
