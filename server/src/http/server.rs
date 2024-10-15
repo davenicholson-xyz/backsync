@@ -1,4 +1,5 @@
 use axum::extract::DefaultBodyLimit;
+use axum::routing::get_service;
 use axum::Router;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
@@ -22,6 +23,7 @@ pub async fn http_server(port: i32) {
         .route_service("/", ServeFile::new("static/index.html"))
         .merge(routes::clients::get_routes())
         .merge(routes::wallpaper::get_routes())
+        .fallback_service(get_service(ServeFile::new("static/index.html")))
         .layer(cors)
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024));
 

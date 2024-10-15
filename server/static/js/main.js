@@ -54,7 +54,6 @@ document.addEventListener('alpine:init', () => {
   };
 
   socket.onopen = function() {
-    console.log("WebSocket connection");
   };
 
   socket.onerror = function(error) {
