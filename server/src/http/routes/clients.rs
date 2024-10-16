@@ -1,8 +1,13 @@
+use std::{net::IpAddr, str::FromStr};
+
 use axum::{extract::Path, response::IntoResponse, routing::get, Json, Router};
 use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
 
-use crate::database::{self, clients::Client};
+use crate::{
+    commands::{command::Command, send_to_client},
+    database::{self, clients::Client},
+};
 
 #[derive(Serialize, Deserialize)]
 pub struct ClientResponse {
@@ -28,10 +33,27 @@ pub async fn fetch(Path(addr): Path<String>) -> impl IntoResponse {
     }
 }
 
+pub async fn set_wallpaper(Path((id, code)): Path<(i32, String)>) -> impl IntoResponse {
+    let wp = database::wallpaper::get(&code).await.unwrap();
+    let filename = format!("{}.{}", wp.code, wp.extension);
+    let client = database::clients::get_by_id(id).await.unwrap();
+    if client.connected_at != "" {
+        let ip = IpAddr::from_str(&client.addr).unwrap();
+        let command = Command::SetWallpaper {
+            filename: filename.clone(),
+        };
+        send_to_client(ip, &command).await.unwrap();
+        database::clients::set_wallpaper(&ip.to_string(), &wp.code)
+            .await
+            .unwrap();
+    }
+
+    (StatusCode::OK, "this is it").into_response()
+}
+
 pub fn get_routes() -> Router {
     Router::new()
         .route("/clients", get(fetch_all))
         .route("/clients/:addr", get(fetch))
-    //.route("/streams/set/:wallpaper_id", get(send_wallpaper_to_all_streams))
-    //.route("/streams/:addr/set/:wallpaper_id", get(send_wallpaper_to_stream))
+        .route("/clients/:id/set/:code", get(set_wallpaper))
 }

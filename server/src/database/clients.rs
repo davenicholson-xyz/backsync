@@ -110,6 +110,22 @@ pub async fn get(addr: &str) -> sqlx::Result<Client> {
     Ok(client)
 }
 
+pub async fn get_by_id(id: i32) -> sqlx::Result<Client> {
+    let pool = super::pool();
+    let client = sqlx::query_as::<_, Client>(
+    r#"
+        SELECT clients.id, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        FROM clients 
+        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+        WHERE clients.id = ?;
+    "#
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await?;
+    Ok(client)
+}
+
 pub async fn startup_clean() -> Result<()> {
     let pool = super::pool();
     sqlx::query(

@@ -124,3 +124,40 @@ const wallpapers = () => {
   }
 }
 
+function dragAndDrop() {
+  return {
+    draggedWallpaper: null,
+    hoveredClientId: null,
+
+    dragStart(event) {
+      this.draggedWallpaper = event.target.closest('[data-wallpaper-code]').getAttribute('data-wallpaper-code');
+      const dragThumbnailImage = document.getElementById('drag-thumbnail-image');
+      dragThumbnailImage.src = event.target.src;
+      // dragThumbnailImage.src = event.target.querySelector('img').src;
+      dragThumbnailImage.style.display = 'block';
+      event.dataTransfer.setDragImage(dragThumbnailImage, 25, 25);
+    },
+
+    dragEnd() {
+      this.draggedWallpaper = null;
+      document.getElementById('drag-thumbnail-image').style.display = 'none';
+      this.hoveredClientId = null;
+    },
+
+    dragEnter(clientId) {
+      this.hoveredClientId = clientId;
+    },
+
+    dragLeave() {
+      this.hoveredClientId = null;
+    },
+
+    async dropWallpaper(event) {
+      const clientId = event.target.closest('[data-client-id]').getAttribute('data-client-id');
+      if (clientId && this.draggedWallpaper) {
+        await fetch(`/clients/${clientId}/set/${this.draggedWallpaper}`);
+        await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+  }
+}
