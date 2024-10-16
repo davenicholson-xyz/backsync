@@ -4,11 +4,12 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-use crate::http;
+use crate::{http, utils};
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct Client {
     pub id: i32,
+    pub uuid: String,
     pub addr: String,
     pub hostname: String,
     pub connected_at: String,
@@ -17,14 +18,18 @@ pub struct Client {
 
 pub async fn insert(ip: &str, hostname: &str) -> Result<()> {
     let pool = super::pool();
+    let uuid = utils::seed(12);
     sqlx::query(
         r#"
-        INSERT INTO clients (addr, hostname, connected_at)
-        VALUES (?, ?, datetime('now'))
+        INSERT INTO clients (uuid, addr, hostname, connected_at)
+        VALUES (?, ?, ?, datetime('now'))
+        ON CONFLICT(uuid) 
+        DO UPDATE SET connected_at = datetime('now')
         ON CONFLICT(addr) 
         DO UPDATE SET connected_at = datetime('now')
     "#,
     )
+    .bind(uuid)
     .bind(ip)
     .bind(hostname)
     .execute(pool)
@@ -69,7 +74,7 @@ pub async fn all() -> sqlx::Result<Vec<Client>> {
     let pool = super::pool();
     let clients = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.id, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id;
     "#
@@ -83,7 +88,7 @@ pub async fn all_online() -> sqlx::Result<Vec<Client>> {
     let pool = super::pool();
     let clients = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.id, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
         WHERE connected_at != '';
@@ -94,11 +99,11 @@ pub async fn all_online() -> sqlx::Result<Vec<Client>> {
     Ok(clients)
 }
 
-pub async fn get(addr: &str) -> sqlx::Result<Client> {
+pub async fn get_by_addr(addr: &str) -> sqlx::Result<Client> {
     let pool = super::pool();
     let client = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
         WHERE addr = ?;
@@ -110,11 +115,27 @@ pub async fn get(addr: &str) -> sqlx::Result<Client> {
     Ok(client)
 }
 
+pub async fn get_by_uuid(uuid: &str) -> sqlx::Result<Client> {
+    let pool = super::pool();
+    let client = sqlx::query_as::<_, Client>(
+    r#"
+        SELECT clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        FROM clients 
+        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+        WHERE uuid = ?;
+    "#
+        )
+        .bind(uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(client)
+}
+
 pub async fn get_by_id(id: i32) -> sqlx::Result<Client> {
     let pool = super::pool();
     let client = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.id, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
         WHERE clients.id = ?;

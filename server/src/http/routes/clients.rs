@@ -26,7 +26,7 @@ pub async fn fetch_all() -> Json<ClientResponse> {
 }
 
 pub async fn fetch(Path(addr): Path<String>) -> impl IntoResponse {
-    let response = database::clients::get(&addr).await;
+    let response = database::clients::get_by_addr(&addr).await;
     match response {
         Ok(stream) => Json(stream).into_response(),
         Err(_) => (StatusCode::NOT_FOUND, "Clienti not found").into_response(),
