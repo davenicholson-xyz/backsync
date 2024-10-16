@@ -1,4 +1,4 @@
-use std::{net::IpAddr, str::FromStr};
+use std::{collections::HashMap, net::IpAddr, str::FromStr};
 
 use axum::{extract::Path, response::IntoResponse, routing::get, Json, Router};
 use hyper::StatusCode;
@@ -33,6 +33,19 @@ pub async fn fetch(Path(addr): Path<String>) -> impl IntoResponse {
     }
 }
 
+pub async fn update(Path(params): Path<HashMap<String, String>>) -> impl IntoResponse {
+    let uuid = params.get("uuid").unwrap();
+    let field = params.get("field").unwrap();
+    let value = params.get("value").unwrap();
+    let _ = database::clients::update_field(&uuid, &field, &value).await;
+    (StatusCode::OK, "this is it").into_response()
+}
+
+pub async fn delete(Path(uuid): Path<String>) -> impl IntoResponse {
+    let _ = database::clients::delete(&uuid).await;
+    (StatusCode::OK, "this is it").into_response()
+}
+
 pub async fn set_wallpaper(Path((id, code)): Path<(i32, String)>) -> impl IntoResponse {
     let wp = database::wallpaper::get(&code).await.unwrap();
     let filename = format!("{}.{}", wp.code, wp.extension);
@@ -56,4 +69,6 @@ pub fn get_routes() -> Router {
         .route("/clients", get(fetch_all))
         .route("/clients/:addr", get(fetch))
         .route("/clients/:id/set/:code", get(set_wallpaper))
+        .route("/clients/:uuid/update/:field/:value", get(update))
+        .route("/clients/:uuid/delete", get(delete))
 }

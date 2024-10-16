@@ -66,6 +66,46 @@ document.addEventListener('alpine:init', () => {
 
 });
 
+const clients = () => {
+  return {
+    get data() {
+      return this.$store.clients.data;
+    },
+    renameDialog(uuid, hostname) {
+      const dialog = document.getElementById('dialog-rename');
+      const nameInput = dialog.querySelector('sl-input');
+      nameInput.value = hostname;
+
+      const renameButton = dialog.querySelector('sl-button[slot="footer"]');
+      renameButton.addEventListener('click', () => {
+        let value = nameInput.value;
+        this.rename(uuid, value);
+      });
+      dialog.show();
+    },
+    async rename(uuid, new_name) {
+      await fetch(`/clients/${uuid}/update/hostname/${new_name}`);
+      const dialog = document.getElementById('dialog-rename');
+      dialog.hide();
+    },
+    deleteDialog(uuid, hostname) {
+      const dialog = document.getElementById('dialog-delete');
+      const nameSpan = dialog.querySelector('span');
+      nameSpan.innerText = hostname;
+      const deleteButton = dialog.querySelector('sl-button[slot="footer"]');
+      deleteButton.addEventListener('click', () => {
+        this.delete(uuid);
+      });
+      dialog.show();
+    },
+    async delete(uuid) {
+      await fetch(`/clients/${uuid}/delete`);
+      const dialog = document.getElementById('dialog-delete');
+      dialog.hide();
+    }
+  }
+}
+
 const wallpapers = () => {
   return {
     wallpapers: [],

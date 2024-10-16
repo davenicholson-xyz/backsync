@@ -13,8 +13,9 @@
   <body x-data="router()">
     <div class="container" x-data="dragAndDrop()">
 
-      <div x-data="$store.clients" class="clients">
-        <template x-for="client in data">
+      <!-- <div x-data="$store.clients" class="clients"> -->
+      <div x-data="clients()" class="clients">
+        <template x-for="client in $store.clients.data">
           <div class="client" 
             :class="{'highlight': client.id == hoveredClientId}"
             :data-client-id="client.id" 
@@ -22,21 +23,6 @@
             @dragleave="dragLeave"
             @dragover.prevent 
             @drop="dropWallpaper($event)">
-
-            <!-- <div class="badge"> -->
-            <!--   <template x-if="client.connected_at != ''"> -->
-            <!--     <sl-tooltip :content="client.connected_at"> -->
-            <!--       <sl-badge variant="success" pill pulse class="online">&nbsp;&nbsp;</sl-badge> -->
-            <!--     </sl-tooltip> -->
-            <!--   </template> -->
-            <!--   <template x-if="client.connected_at == ''"> -->
-            <!--     <div> -->
-            <!--     <sl-tooltip content="Offline"> -->
-            <!--       <sl-badge variant="danger" pill class="online">&nbsp;&nbsp;</sl-badge> -->
-            <!--     </sl-tooltip> -->
-            <!--     </div> -->
-            <!--   </template> -->
-            <!-- </div> -->
 
             <div>
               <template x-if="client.wallpaper_code">
@@ -55,11 +41,17 @@
                 </sl-button>
                 <sl-menu>
                   <sl-menu-item disabled x-text="client.addr"></sl-menu-item>
-                  <sl-menu-item>Rename</sl-menu-item>
                   <sl-divider></sl-divider>
-                  <sl-menu-item type="checkbox" checked>Checkbox</sl-menu-item>
+                  <sl-menu-item @click="renameDialog(client.uuid, client.hostname)">
+                    Lock 
+                    <sl-icon slot="prefix" library="fa" name="far-lock"></sl-icon>
+                  </sl-menu-item>
                   <sl-divider></sl-divider>
-                  <sl-menu-item>
+                  <sl-menu-item @click="renameDialog(client.uuid, client.hostname)">
+                    Rename
+                    <sl-icon slot="prefix" name="pencil"></sl-icon>
+                  </sl-menu-item>
+                  <sl-menu-item @click="deleteDialog(client.uuid, client.hostname)">
                     Delete
                     <sl-icon slot="prefix" name="trash3"></sl-icon>
                   </sl-menu-item>
@@ -85,6 +77,15 @@
         <img id="drag-thumbnail-image">
     </div>
 
+    <sl-dialog label="Rename client" class="dialog-overview" id="dialog-rename">
+      <sl-input></sl-input>
+      <sl-button slot="footer" variant="primary">Rename</sl-button>
+    </sl-dialog>
+
+    <sl-dialog label="Delete client" class="dialog-overview" id="dialog-delete">
+      Are you sure you want to delete <span></span>?
+      <sl-button slot="footer" variant="danger">Delete</sl-button>
+    </sl-dialog>
     <script src="static/js/main.js"></script>
   </body>
 

@@ -41,6 +41,30 @@ pub async fn insert(uuid: &str, ip: &str, hostname: &str) -> Result<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
+pub async fn update_field(uuid: &str, field: &str, value: &str) -> Result<()> {
+    let pool = super::pool();
+    let query = format!("UPDATE clients SET {} = $1 WHERE uuid = $2", field);
+    sqlx::query(&query)
+        .bind(value)
+        .bind(uuid)
+        .execute(pool)
+        .await?;
+    http::websocket::client_update().await?;
+
+    Ok(())
+}
+
+pub async fn delete(uuid: &str) -> Result<()> {
+    let pool = super::pool();
+    sqlx::query("DELETE FROM clients WHERE uuid = ?")
+        .bind(uuid)
+        .execute(pool)
+        .await?;
+    http::websocket::client_update().await?;
+    Ok(())
+}
+
 pub async fn set_wallpaper(ip: &str, code: &str) -> Result<()> {
     let pool = super::pool();
     sqlx::query(
