@@ -22,25 +22,35 @@
             @dragleave="dragLeave"
             @dragover.prevent 
             @drop="dropWallpaper($event)">
-            <div class="badge">
-              <template x-if="client.connected_at != ''">
-                <sl-tooltip :content="client.connected_at">
-                  <sl-badge variant="success" pill pulse class="online">&nbsp;&nbsp;</sl-badge>
-                </sl-tooltip>
+
+            <!-- <div class="badge"> -->
+            <!--   <template x-if="client.connected_at != ''"> -->
+            <!--     <sl-tooltip :content="client.connected_at"> -->
+            <!--       <sl-badge variant="success" pill pulse class="online">&nbsp;&nbsp;</sl-badge> -->
+            <!--     </sl-tooltip> -->
+            <!--   </template> -->
+            <!--   <template x-if="client.connected_at == ''"> -->
+            <!--     <div> -->
+            <!--     <sl-tooltip content="Offline"> -->
+            <!--       <sl-badge variant="danger" pill class="online">&nbsp;&nbsp;</sl-badge> -->
+            <!--     </sl-tooltip> -->
+            <!--     </div> -->
+            <!--   </template> -->
+            <!-- </div> -->
+
+            <div>
+              <template x-if="client.wallpaper_code">
+                <img :src="`/wallpapers/thumbnail/${client.wallpaper_code}`" />
               </template>
-              <template x-if="client.connected_at == ''">
-                <div>
-                <sl-tooltip content="Offline">
-                  <sl-badge variant="danger" pill class="online">&nbsp;&nbsp;</sl-badge>
-                </sl-tooltip>
-                </div>
+              <template x-if="!client.wallpaper_code">
+                <img src="/static/images/missing.png" />
               </template>
             </div>
-            <img :src="`/wallpapers/thumbnail/${client.wallpaper_code}`" width='180px' />
+
             <div class="action">
               <sl-dropdown style="width:100%;">
                 <sl-button size="small" style="width: 100%;" class="clientb" slot="trigger" caret>
-                  <sl-icon slot="prefix" name="laptop"></sl-icon>
+                  <sl-icon slot="prefix" name="laptop" :class="{'online': client.connected_at != ''}"></sl-icon>
                   <span x-text="client.hostname"></span>
                 </sl-button>
                 <sl-menu>

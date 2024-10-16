@@ -17,6 +17,7 @@ body {
 }
 
 .client {
+  width: 200px;
   position: relative;
 }
 
@@ -26,12 +27,17 @@ body {
   left: -7px;
 }
 
+.client .online {
+  color: #66FF00;
+}
+
 .client .action {
-  margin-top: 6px;
+  padding: 2px;
+  margin-top: 3px;
 }
 
 .client img {
-  width: 200px;
+  width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
   padding: 2px;
@@ -41,6 +47,7 @@ body {
 .client.highlight img {
   border: 3px dashed lightblue;
 }
+
 
 #drag-thumbnail {
   position: absolute;

@@ -15,8 +15,7 @@ pub async fn handle(command: Command, ip: IpAddr) -> Result<()> {
             send_to_client(ip, &cmd).await?;
         }
         Command::ClientInfo { uuid, ip, hostname } => {
-            let _ = uuid;
-            database::clients::insert(&ip, &hostname).await?;
+            database::clients::insert(&uuid, &ip, &hostname).await?;
         }
         Command::RequestWallpaper { code } => {
             debug!("CLIENT requested wallpaper {}", code);

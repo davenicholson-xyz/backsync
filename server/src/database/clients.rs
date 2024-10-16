@@ -4,7 +4,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-use crate::{http, utils};
+use crate::http;
 
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct Client {
@@ -16,23 +16,23 @@ pub struct Client {
     pub wallpaper_code: Option<String>,
 }
 
-pub async fn insert(ip: &str, hostname: &str) -> Result<()> {
+pub async fn insert(uuid: &str, ip: &str, hostname: &str) -> Result<()> {
     let pool = super::pool();
-
-    //TODO: Client generates a uuid. check that. if ip different then change it.
-    let uuid = utils::seed(12);
 
     sqlx::query(
         r#"
-        INSERT INTO clients (uuid, addr, hostname, connected_at)
-        VALUES (?, ?, ?, datetime('now'))
+        INSERT INTO 
+            clients (uuid, addr, hostname, connected_at)
+        VALUES 
+            (?, ?, ?, datetime('now'))
         ON CONFLICT(uuid) 
-        DO UPDATE SET connected_at = datetime('now')
-        ON CONFLICT(addr) 
-        DO UPDATE SET connected_at = datetime('now')
+        DO UPDATE SET 
+            addr = excluded.addr,
+            connected_at = datetime('now')
+
     "#,
     )
-    .bind(uuid.clone())
+    .bind(uuid)
     .bind(ip)
     .bind(hostname)
     .execute(pool)
