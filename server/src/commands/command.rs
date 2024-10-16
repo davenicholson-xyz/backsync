@@ -19,8 +19,12 @@ pub enum Command {
         code: String,
     },
     ClientInfo {
+        uuid: String,
         ip: String,
         hostname: String,
+    },
+    ClientConfirm {
+        uuid: String,
     },
 }
 

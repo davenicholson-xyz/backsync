@@ -18,7 +18,10 @@ pub struct Client {
 
 pub async fn insert(ip: &str, hostname: &str) -> Result<()> {
     let pool = super::pool();
+
+    //TODO: Client generates a uuid. check that. if ip different then change it.
     let uuid = utils::seed(12);
+
     sqlx::query(
         r#"
         INSERT INTO clients (uuid, addr, hostname, connected_at)
@@ -29,12 +32,12 @@ pub async fn insert(ip: &str, hostname: &str) -> Result<()> {
         DO UPDATE SET connected_at = datetime('now')
     "#,
     )
-    .bind(uuid)
+    .bind(uuid.clone())
     .bind(ip)
     .bind(hostname)
     .execute(pool)
     .await?;
-    http::websocket::client_update().await?;
+
     Ok(())
 }
 
@@ -115,6 +118,7 @@ pub async fn get_by_addr(addr: &str) -> sqlx::Result<Client> {
     Ok(client)
 }
 
+#[allow(dead_code)]
 pub async fn get_by_uuid(uuid: &str) -> sqlx::Result<Client> {
     let pool = super::pool();
     let client = sqlx::query_as::<_, Client>(

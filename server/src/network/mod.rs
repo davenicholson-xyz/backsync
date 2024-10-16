@@ -17,7 +17,6 @@ pub async fn start_tcp(network_port: i32) -> Result<()> {
             if !data.is_empty() {
                 let data = DataPacket::from_raw(data).unwrap();
                 let command: Command = serde_json::from_slice(data.data()).unwrap();
-                dbg!(&command);
                 commands::handle(command, client_addr.ip()).await.unwrap();
             }
         }

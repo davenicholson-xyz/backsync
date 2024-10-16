@@ -14,7 +14,8 @@ pub async fn handle(command: Command, ip: IpAddr) -> Result<()> {
             let cmd = Command::Handshake;
             send_to_client(ip, &cmd).await?;
         }
-        Command::ClientInfo { ip, hostname } => {
+        Command::ClientInfo { uuid, ip, hostname } => {
+            let _ = uuid;
             database::clients::insert(&ip, &hostname).await?;
         }
         Command::RequestWallpaper { code } => {

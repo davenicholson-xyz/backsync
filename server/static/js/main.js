@@ -135,7 +135,7 @@ function dragAndDrop() {
       dragThumbnailImage.src = event.target.src;
       // dragThumbnailImage.src = event.target.querySelector('img').src;
       dragThumbnailImage.style.display = 'block';
-      event.dataTransfer.setDragImage(dragThumbnailImage, 25, 25);
+      event.dataTransfer.setDragImage(dragThumbnailImage, 60, 25);
     },
 
     dragEnd() {
