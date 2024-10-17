@@ -2,6 +2,12 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Serialize, Deserialize, Debug)]
+pub enum DaemonCommand {
+    Lock,
+    Unlock,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Command {
     Handshake,
     RequestWallpaper {

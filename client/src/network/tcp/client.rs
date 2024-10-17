@@ -18,7 +18,6 @@ pub async fn start(
     let mut stream = TcpStream::connect(server_addr).await?;
 
     // Initial message to kick off data transfer with UUID
-    //let uuid = config::get::<String>("uuid").unwrap().unwrap();
     let uuid = utils::get_seed();
     let ip = utils::local_ip();
     let hostname = utils::hostname();
