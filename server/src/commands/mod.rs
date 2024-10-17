@@ -23,10 +23,10 @@ pub async fn handle(command: Command) -> Result<()> {
             http::websocket::client_update().await?;
         }
         Command::ClientLock { uuid } => {
-            println!("LOCKING {}", &uuid);
+            database::clients::update_field(&uuid, "locked", "1").await?;
         }
         Command::ClientUnlock { uuid } => {
-            println!("UNLOCKING {}", &uuid);
+            database::clients::update_field(&uuid, "locked", "0").await?;
         }
         _ => {
             debug!("Command not implemented on the server: {}", command);

@@ -44,9 +44,14 @@ pub async fn run_command(cmd: &str) -> String {
         DaemonCommand::Lock => {
             let uuid = config::get::<String>("uuid").unwrap().unwrap();
             send_to_server(Command::ClientLock { uuid }).await.unwrap();
-            return String::from("Locked");
+            return String::from("Wallpaper locked from server changes");
         }
-        DaemonCommand::Unlock => String::from("Unlocked"),
+        DaemonCommand::Unlock => {
+            let uuid = config::get::<String>("uuid").unwrap().unwrap();
+            send_to_server(Command::ClientUnlock { uuid })
+                .await
+                .unwrap();
+            return String::from("Wallpaper unlocked and allows server changes");
+        }
     };
-    String::from("no command")
 }

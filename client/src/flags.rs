@@ -13,8 +13,12 @@ pub enum Action {
         port: Option<i32>,
     },
     WALLPAPER {
+        /// Lock the wallpaper from changes by server
         #[arg(short, long)]
         lock: bool,
+        /// Unlock the wallpaper and allow changes by server
+        #[arg(short, long)]
+        unlock: bool,
     },
     STOP,
 }

@@ -33,9 +33,15 @@ async fn main() -> Result<()> {
             daemon::listener::start().await?;
             daemon::spawn(server_port).await?;
         }
-        Some(Action::WALLPAPER { lock }) => {
+        Some(Action::WALLPAPER { lock, unlock }) => {
             if lock.to_owned() {
                 command_to_daemon(&DaemonCommand::Lock).await?;
+                return Ok(());
+            }
+
+            if unlock.to_owned() {
+                command_to_daemon(&DaemonCommand::Unlock).await?;
+                return Ok(());
             }
         }
         Some(Action::STOP) => {
