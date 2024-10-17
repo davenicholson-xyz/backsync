@@ -19,7 +19,6 @@ pub async fn handle(command: Command, ip: IpAddr) -> Result<()> {
             http::websocket::client_update().await?;
         }
         Command::RequestWallpaper { code } => {
-            debug!("CLIENT requested wallpaper {}", code);
             files::wallpaper::send_wallpaper(code, ip).await?;
         }
         Command::ConfirmWallpaper { code } => {
