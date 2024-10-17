@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" class="sl-theme-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app">
+      <div x-data="wallpapers">
+    <template x-for="wallpaper in wallpapers" :key="wallpaper.id">
+      <div class="wallpaper" :data-wallpaper-code="wallpaper.code" :draggable="true" @dragstart="dragStart($event)" @dragend="dragEnd">
+            <img :src="`${baseURL}/wallpapers/thumbnail/${wallpaper.code}`" />
+      </div>
+    </template>
+        <sl-button>this is button</sl-button>
+        <sl-button variant="success">Success</sl-button>
+
+      </div>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
