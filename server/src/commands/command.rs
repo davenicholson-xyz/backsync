@@ -34,6 +34,12 @@ pub enum Command {
     ClientConfirm {
         uuid: String,
     },
+    ClientLock {
+        uuid: String,
+    },
+    ClientUnlock {
+        uuid: String,
+    },
 }
 
 impl fmt::Display for Command {

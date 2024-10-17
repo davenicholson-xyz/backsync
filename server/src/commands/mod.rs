@@ -10,10 +10,6 @@ use std::net::SocketAddr;
 pub async fn handle(command: Command) -> Result<()> {
     info!("Received: Command::{}", command);
     match command {
-        //Command::Handshake => {
-        //    let _cmd = Command::Handshake;
-        //    send_to_client(&uuid, &cmd).await?;
-        //}
         Command::ClientInfo { uuid, ip, hostname } => {
             database::clients::insert(&uuid, &ip, &hostname).await?;
             http::websocket::client_update().await?;
@@ -25,6 +21,12 @@ pub async fn handle(command: Command) -> Result<()> {
         Command::ConfirmWallpaper { uuid, code } => {
             database::clients::set_wallpaper(&uuid, &code).await?;
             http::websocket::client_update().await?;
+        }
+        Command::ClientLock { uuid } => {
+            println!("LOCKING {}", &uuid);
+        }
+        Command::ClientUnlock { uuid } => {
+            println!("UNLOCKING {}", &uuid);
         }
         _ => {
             debug!("Command not implemented on the server: {}", command);

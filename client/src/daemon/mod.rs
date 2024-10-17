@@ -34,6 +34,9 @@ pub async fn spawn(server_port: i32) -> Result<()> {
         return Err(anyhow!("Failed to get UDP connection"));
     };
 
+    // START CLIENT LISTENER HERE
+    tokio::spawn(async move {});
+
     tokio::signal::ctrl_c()
         .await
         .expect("Failed to listen for ctrl+c");
