@@ -6,18 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
   </head>
-  <body>
-    <div id="app">
-      <div x-data="wallpapers">
-    <template x-for="wallpaper in wallpapers" :key="wallpaper.id">
-      <div class="wallpaper" :data-wallpaper-code="wallpaper.code" :draggable="true" @dragstart="dragStart($event)" @dragend="dragEnd">
-            <img :src="`${baseURL}/wallpapers/thumbnail/${wallpaper.code}`" />
-      </div>
-    </template>
-        <sl-button>this is button</sl-button>
-        <sl-button variant="success">Success</sl-button>
+  <body x-data="router()">
+    <div class="container">
 
-      </div>
+      <header>
+        <nav>
+          <ul><a href="/" @click.prevent="navigate('home', '/')">home</a></ul>
+          <ul><a href="/wallpaper" @click.prevent="navigate('wallpaper', '/wallpaper')">papers</a></ul>
+        </nav>
+      </header>
+
+      <article>
+        <main x-html="pageContent"></main>
+      </article>
+
+      <aside>
+        <div class="client-list" x-data="clients()">
+          <template x-for="client in clients">
+            <div class="client">
+              <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" />
+
+              <div class="client_info">
+                <iconify-icon icon="wpf:online" :class="{'online': client.connected_at != '', 'connect' : true}"></iconify-icon>
+                <span x-text="client.hostname"></span>
+              </div>
+
+            </div>
+          </template>
+        </div>
+      </aside>
+
+      <footer>
+        <h2>footer</h2>
+      </footer>
+
     </div>
     <script type="module" src="/main.js"></script>
   </body>
