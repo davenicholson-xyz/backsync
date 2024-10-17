@@ -1,3 +1,4 @@
+pub mod listener;
 use std::sync::Arc;
 
 use crate::{
@@ -33,9 +34,6 @@ pub async fn spawn(server_port: i32) -> Result<()> {
     } else {
         return Err(anyhow!("Failed to get UDP connection"));
     };
-
-    // START CLIENT LISTENER HERE
-    tokio::spawn(async move {});
 
     tokio::signal::ctrl_c()
         .await

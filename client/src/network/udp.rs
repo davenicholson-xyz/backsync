@@ -10,7 +10,7 @@ pub fn listen_for_broadcast(port: i32) -> Result<Option<SocketAddr>> {
     let udp_socket = UdpSocket::bind(format!("0.0.0.0:{}", port))?;
     let mut buf = [0; 1024];
 
-    info!("UDP: Wainting for port {}", port);
+    info!("UDP: Waiting for port {}", port);
 
     let (amt, src) = udp_socket.recv_from(&mut buf)?;
     let udp_message = str::from_utf8(&buf[..amt])?;

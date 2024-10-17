@@ -1,4 +1,5 @@
 use anyhow::Result;
+use commands::command::DaemonCommand;
 use flags::Action;
 
 pub mod commands;
@@ -14,6 +15,10 @@ extern crate log;
 extern crate simplelog;
 
 use system::config;
+use tokio::{
+    io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
+    net::TcpStream,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,7 +30,13 @@ async fn main() -> Result<()> {
     match &flags.command {
         Some(Action::INIT { port }) => {
             let server_port = config::flag_file_default(*port, "port", 37878)?;
+            daemon::listener::start().await?;
             daemon::spawn(server_port).await?;
+        }
+        Some(Action::WALLPAPER { lock }) => {
+            if lock.to_owned() {
+                command_to_daemon(&DaemonCommand::Lock).await?;
+            }
         }
         Some(Action::STOP) => {
             info!("DAEMON killing");
@@ -33,5 +44,19 @@ async fn main() -> Result<()> {
         None => {}
     }
 
+    Ok(())
+}
+
+pub async fn command_to_daemon(command: &DaemonCommand) -> Result<()> {
+    if let Ok(mut stream) = TcpStream::connect("127.0.0.1:38040").await {
+        let (reader, mut writer) = stream.split();
+        let mut reader = BufReader::new(reader);
+        let mut response = String::new();
+        let cmd = serde_json::to_string(command)?;
+
+        writer.write_all(cmd.as_bytes()).await.unwrap();
+        reader.read_line(&mut response).await.unwrap();
+        println!("{}", response);
+    }
     Ok(())
 }

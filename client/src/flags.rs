@@ -12,6 +12,10 @@ pub enum Action {
         #[arg(short, long, env)]
         port: Option<i32>,
     },
+    WALLPAPER {
+        #[arg(short, long)]
+        lock: bool,
+    },
     STOP,
 }
 
