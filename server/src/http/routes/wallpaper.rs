@@ -1,6 +1,3 @@
-use std::net::IpAddr;
-use std::str::FromStr;
-
 use crate::commands::command::Command;
 use crate::commands::send_to_client;
 use crate::database::wallpaper::Wallpaper;
@@ -80,12 +77,12 @@ pub async fn set(Path(code): Path<String>) -> impl IntoResponse {
     let filename = format!("{}.{}", wp.code, wp.extension);
     let clients = database::clients::all_online().await.unwrap();
     for client in clients {
-        let ip = IpAddr::from_str(&client.addr).unwrap();
+        //let ip = IpAddr::from_str(&client.addr).unwrap();
         let command = Command::SetWallpaper {
             filename: filename.clone(),
         };
-        send_to_client(ip, &command).await.unwrap();
-        database::clients::set_wallpaper(&ip.to_string(), &wp.code)
+        send_to_client(&client.uuid, &command).await.unwrap();
+        database::clients::set_wallpaper(&client.uuid, &wp.code)
             .await
             .unwrap();
     }

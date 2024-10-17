@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::IpAddr, str::FromStr};
+use std::collections::HashMap;
 
 use axum::{extract::Path, response::IntoResponse, routing::get, Json, Router};
 use hyper::StatusCode;
@@ -46,17 +46,16 @@ pub async fn delete(Path(uuid): Path<String>) -> impl IntoResponse {
     (StatusCode::OK, "this is it").into_response()
 }
 
-pub async fn set_wallpaper(Path((id, code)): Path<(i32, String)>) -> impl IntoResponse {
+pub async fn set_wallpaper(Path((uuid, code)): Path<(String, String)>) -> impl IntoResponse {
     let wp = database::wallpaper::get(&code).await.unwrap();
     let filename = format!("{}.{}", wp.code, wp.extension);
-    let client = database::clients::get_by_id(id).await.unwrap();
+    let client = database::clients::get_by_uuid(&uuid).await.unwrap();
     if client.connected_at != "" {
-        let ip = IpAddr::from_str(&client.addr).unwrap();
         let command = Command::SetWallpaper {
             filename: filename.clone(),
         };
-        send_to_client(ip, &command).await.unwrap();
-        database::clients::set_wallpaper(&ip.to_string(), &wp.code)
+        send_to_client(&uuid, &command).await.unwrap();
+        database::clients::set_wallpaper(&uuid, &wp.code)
             .await
             .unwrap();
     }

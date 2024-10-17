@@ -1,11 +1,17 @@
 use anyhow::Result;
 
-use crate::{commands::command::Command, daemon::send_to_server, system, utils};
+use crate::{
+    commands::command::Command,
+    daemon::send_to_server,
+    system::{self, config},
+    utils,
+};
 
 use super::files;
 
 pub async fn set_wallpaper(img: &str) -> Result<()> {
     info!("SETTING WP to {}", img);
+    let uuid = config::get::<String>("uuid").unwrap().unwrap();
     let mut cachepath = files::cache_path()?;
     cachepath.push(format!("{}", img));
     if !cachepath.exists() {
@@ -13,6 +19,7 @@ pub async fn set_wallpaper(img: &str) -> Result<()> {
         let (code, _ext) =
             utils::paths::split_filename(img).expect("could not get path, ext from filename");
         send_to_server(Command::RequestWallpaper {
+            uuid,
             code: String::from(code),
         })
         .await?;
@@ -33,6 +40,7 @@ pub async fn set_wallpaper(img: &str) -> Result<()> {
         let (code, _ext) =
             utils::paths::split_filename(img).expect("could not get path, ext from filename");
         send_to_server(Command::ConfirmWallpaper {
+            uuid,
             code: code.to_string(),
         })
         .await?;

@@ -65,23 +65,23 @@ pub async fn delete(uuid: &str) -> Result<()> {
     Ok(())
 }
 
-pub async fn set_wallpaper(ip: &str, code: &str) -> Result<()> {
+pub async fn set_wallpaper(uuid: &str, code: &str) -> Result<()> {
     let pool = super::pool();
     sqlx::query(
         r#"
         UPDATE clients
         SET wallpaper = (SELECT id FROM wallpapers WHERE code = ?)
-        WHERE addr = ?
+        WHERE uuid = ?
     "#,
     )
     .bind(&code.to_string())
-    .bind(&ip.to_string())
+    .bind(&uuid)
     .execute(pool)
     .await?;
     Ok(())
 }
 
-pub async fn remove(ip: IpAddr) -> Result<()> {
+pub async fn disconnected_by_ip(ip: IpAddr) -> Result<()> {
     let pool = super::pool();
     sqlx::query(
         r#"
@@ -130,7 +130,7 @@ pub async fn get_by_addr(addr: &str) -> sqlx::Result<Client> {
     let pool = super::pool();
     let client = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
         WHERE addr = ?;
@@ -147,7 +147,7 @@ pub async fn get_by_uuid(uuid: &str) -> sqlx::Result<Client> {
     let pool = super::pool();
     let client = sqlx::query_as::<_, Client>(
     r#"
-        SELECT clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
+        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
         FROM clients 
         LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
         WHERE uuid = ?;

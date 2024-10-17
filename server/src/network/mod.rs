@@ -13,11 +13,11 @@ pub async fn start_tcp(network_port: i32) -> Result<()> {
     info!("TCP listening on {}:{}", local_ip, network_port);
 
     tokio::spawn(async move {
-        while let Some((client_addr, data)) = msg_tx.recv().await {
+        while let Some((_, data)) = msg_tx.recv().await {
             if !data.is_empty() {
                 let data = DataPacket::from_raw(data).unwrap();
                 let command: Command = serde_json::from_slice(data.data()).unwrap();
-                commands::handle(command, client_addr.ip()).await.unwrap();
+                commands::handle(command).await.unwrap();
             }
         }
     });
@@ -25,13 +25,15 @@ pub async fn start_tcp(network_port: i32) -> Result<()> {
     tokio::spawn(async move {
         while let Some(client_event) = client_rx.recv().await {
             match client_event {
-                ClientEvent::Added(addr) => {
-                    commands::send_to_client(addr.ip(), &Command::Handshake)
-                        .await
-                        .unwrap();
+                ClientEvent::Added(_addr) => {
+                    //commands::send_to_client(addr.ip(), &Command::Handshake)
+                    //.await
+                    //.unwrap();
                 }
                 ClientEvent::Removed(addr) => {
-                    database::clients::remove(addr.ip()).await.unwrap();
+                    database::clients::disconnected_by_ip(addr.ip())
+                        .await
+                        .unwrap();
                 }
             }
         }

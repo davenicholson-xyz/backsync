@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::Cursor;
 use std::io::Read;
-use std::net::IpAddr;
 use std::path::Path;
 
 use anyhow::anyhow;
@@ -13,6 +12,7 @@ use axum::extract::Multipart;
 
 use crate::commands::command::Command;
 use crate::commands::send_to_client;
+use crate::database;
 use crate::database::wallpaper::Wallpaper;
 use crate::system::config;
 use crate::system::paths;
@@ -20,8 +20,6 @@ use crate::system::paths::storage_path;
 use crate::utils;
 
 use anyhow::Result;
-
-use crate::database;
 
 pub async fn delete_wallpaper(id: &str, ext: &str) -> Result<()> {
     let wallpaper_path = paths::storage_path(&format!("wallpaper/{}.{}", id, ext));
@@ -31,7 +29,7 @@ pub async fn delete_wallpaper(id: &str, ext: &str) -> Result<()> {
     Ok(())
 }
 
-pub async fn send_wallpaper(code: String, ip: IpAddr) -> Result<()> {
+pub async fn send_wallpaper(code: &str, uuid: &str) -> Result<()> {
     info!("SENDING wallpaper.... {}", code);
     let wallpaper = database::wallpaper::get(&code).await?;
     let storage = config::get::<String>("storage")?.unwrap();
@@ -51,7 +49,9 @@ pub async fn send_wallpaper(code: String, ip: IpAddr) -> Result<()> {
         data: buffer,
         set: true,
     };
-    send_to_client(ip, &command).await?;
+
+    let client = database::clients::get_by_uuid(&uuid).await?;
+    send_to_client(&client.uuid, &command).await?;
 
     Ok(())
 }
@@ -59,7 +59,6 @@ pub async fn send_wallpaper(code: String, ip: IpAddr) -> Result<()> {
 pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
     let upload_dir = storage_path("wallpaper");
     let thumb_dir = storage_path("wallpaper/.thumbs");
-
     let file_id = utils::seed(8);
 
     while let Some(field) = multipart.next_field().await.unwrap() {

@@ -101,10 +101,10 @@ async fn new_client_connection(
                     client_sender
                         .send(ClientEvent::Removed(peer_address))
                         .await?;
-                    {
-                        let mut client_writers = CLIENTS.lock().await;
-                        client_writers.remove(&peer_address.ip());
-                    }
+                    //{
+                    //    let mut client_writers = CLIENTS.lock().await;
+                    //    client_writers.remove(&peer_address.ip());
+                    //}
                     break;
                 }
                 Ok(n) => {
@@ -121,10 +121,10 @@ async fn new_client_connection(
                     client_sender
                         .send(ClientEvent::Removed(peer_address))
                         .await?;
-                    {
-                        let mut client_writers = CLIENTS.lock().await;
-                        client_writers.remove(&peer_address.ip());
-                    }
+                    //{
+                    //    let mut client_writers = CLIENTS.lock().await;
+                    //    client_writers.remove(&peer_address.ip());
+                    //}
                     eprintln!("Error reading from client {}: {:?}", peer_address, e);
                     break;
                 } //Err(e) => {

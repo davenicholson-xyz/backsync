@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use crate::system::config;
 
+#[allow(dead_code)]
 pub trait PathBufExt {
     fn make_string(&self) -> String;
 }
@@ -15,6 +16,7 @@ impl PathBufExt for PathBuf {
     }
 }
 
+#[allow(dead_code)]
 pub fn storage_path(additional_path: &str) -> PathBuf {
     let storage = config::get::<String>("storage").unwrap().unwrap();
     let mut storage_path = PathBuf::new();
@@ -23,6 +25,7 @@ pub fn storage_path(additional_path: &str) -> PathBuf {
     return storage_path;
 }
 
+#[allow(dead_code)]
 pub fn config_path(additional_path: &str) -> PathBuf {
     let crate_name = env!("CARGO_PKG_NAME");
     let homedir = homedir::my_home().unwrap().unwrap().make_string();
@@ -33,6 +36,7 @@ pub fn config_path(additional_path: &str) -> PathBuf {
     return config_path;
 }
 
+#[allow(dead_code)]
 pub fn ext_from_path(path: &str) -> Result<String> {
     Ok(Path::new(path)
         .extension()

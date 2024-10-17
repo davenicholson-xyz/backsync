@@ -5,24 +5,25 @@ use crate::system::files;
 use crate::{database, http, network};
 use anyhow::Result;
 use command::Command;
-use std::net::{IpAddr, SocketAddr};
+use std::net::SocketAddr;
 
-pub async fn handle(command: Command, ip: IpAddr) -> Result<()> {
+pub async fn handle(command: Command) -> Result<()> {
     info!("Received: Command::{}", command);
     match command {
-        Command::Handshake => {
-            let cmd = Command::Handshake;
-            send_to_client(ip, &cmd).await?;
-        }
+        //Command::Handshake => {
+        //    let _cmd = Command::Handshake;
+        //    send_to_client(&uuid, &cmd).await?;
+        //}
         Command::ClientInfo { uuid, ip, hostname } => {
             database::clients::insert(&uuid, &ip, &hostname).await?;
             http::websocket::client_update().await?;
+            send_to_client(&uuid, &Command::Handshake).await?;
         }
-        Command::RequestWallpaper { code } => {
-            files::wallpaper::send_wallpaper(code, ip).await?;
+        Command::RequestWallpaper { uuid, code } => {
+            files::wallpaper::send_wallpaper(&code, &uuid).await?;
         }
-        Command::ConfirmWallpaper { code } => {
-            database::clients::set_wallpaper(&ip.to_string(), &code).await?;
+        Command::ConfirmWallpaper { uuid, code } => {
+            database::clients::set_wallpaper(&uuid, &code).await?;
             http::websocket::client_update().await?;
         }
         _ => {
@@ -32,10 +33,15 @@ pub async fn handle(command: Command, ip: IpAddr) -> Result<()> {
     Ok(())
 }
 
-pub async fn send_to_client(ip: IpAddr, command: &Command) -> Result<()> {
+pub async fn send_to_client(uuid: &str, command: &Command) -> Result<()> {
+    let client = database::clients::get_by_uuid(uuid)
+        .await
+        .expect("could not find client");
+    let socket: SocketAddr = format!("{}:0", client.addr)
+        .parse()
+        .expect("could not generate SocketAddr from client addr");
     let command_string = serde_json::to_string(&command)?;
     let data = DataPacket::from_str(&command_string);
-    let socket = SocketAddr::new(ip, 0);
     network::tcp::server::send_data(&socket, &data.to_raw()).await?;
     Ok(())
 }

@@ -7,11 +7,26 @@ use tokio::{
     sync::mpsc,
 };
 
+use crate::{commands::command::Command, utils};
+
+use super::data::DataPacket;
+
 pub async fn start(
     server_addr: &str,
 ) -> Result<(mpsc::Receiver<Vec<u8>>, impl Fn(Vec<u8>) -> Result<()>)> {
     let server_addr: SocketAddr = server_addr.parse()?;
-    let stream = TcpStream::connect(server_addr).await?;
+    let mut stream = TcpStream::connect(server_addr).await?;
+
+    // Initial message to kick off data transfer with UUID
+    //let uuid = config::get::<String>("uuid").unwrap().unwrap();
+    let uuid = utils::get_seed();
+    let ip = utils::local_ip();
+    let hostname = utils::hostname();
+    let command = Command::ClientInfo { uuid, ip, hostname };
+    let cmd_string = serde_json::to_string(&command)?;
+    let data = DataPacket::from_str(&cmd_string);
+    let raw = &data.to_raw();
+    stream.write_all(raw).await?;
 
     let (mut reader, mut writer) = split(stream);
 
@@ -39,20 +54,6 @@ pub async fn start(
                 eprintln!("failed to send message to the channel: {:?}", e);
                 break;
             }
-
-            //match reader.read(&mut buffer).await {
-            //    Ok(0) => {
-            //        println!("connection closed by server");
-            //        break;
-            //    }
-            //    Ok(n) => {
-            //        incoming_tx.send(buffer[..n].to_vec()).await?;
-            //    }
-            //    Err(e) => {
-            //        eprintln!("error reading from server: {:?}", e);
-            //        break;
-            //    }
-            //}
         }
 
         Ok::<(), anyhow::Error>(())

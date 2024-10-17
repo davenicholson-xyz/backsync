@@ -5,6 +5,7 @@ use std::fmt;
 pub enum Command {
     Handshake,
     RequestWallpaper {
+        uuid: String,
         code: String,
     },
     SetWallpaper {
@@ -16,6 +17,7 @@ pub enum Command {
         set: bool,
     },
     ConfirmWallpaper {
+        uuid: String,
         code: String,
     },
     ClientInfo {
