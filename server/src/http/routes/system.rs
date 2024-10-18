@@ -8,6 +8,7 @@ pub struct SettingsResponse {
     wallhaven_apikey: String,
 }
 
+#[allow(dead_code)]
 impl SettingsResponse {
     fn new() -> Self {
         Self {
