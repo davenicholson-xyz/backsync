@@ -4,6 +4,7 @@ import '@shoelace-style/shoelace/dist/themes/dark.css'
 import '@shoelace-style/shoelace/dist/shoelace.js'
 import router from "./js/router"
 import clients from "./js/clients"
+import search from "./js/search"
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path'
 setBasePath('/node_modules/@shoelace-style/shoelace/dist/')
 
@@ -25,9 +26,6 @@ document.addEventListener('alpine:init', () => {
       this.data = data
     }
   })
-
-  Alpine.data('router', router);
-  Alpine.data('clients', clients);
 
 
   const socket = new WebSocket('ws://127.0.0.1:3002');
@@ -56,4 +54,9 @@ document.addEventListener('alpine:init', () => {
 
 });
 
+  Alpine.data('router', router);
+  Alpine.data('clients', clients);
+  Alpine.data('search', search);
+
 Alpine.start()
+

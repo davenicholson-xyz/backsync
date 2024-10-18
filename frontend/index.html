@@ -9,7 +9,19 @@
   <body x-data="router()">
     <div class="container">
 
-      <load src="html/clients.html"/>
+      <header>
+        <load src="html/clients.html"/>
+      </header>
+
+      <article>
+        <main x-html="pageContent"></main>
+      </article> 
+
+      <aside>
+        <load src="html/sidebar.html"/>
+      </aside>
+      <footer>Footer</footer>
+
 
     </div>
     <script type="module" src="/main.js"></script>

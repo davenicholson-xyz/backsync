@@ -89,6 +89,7 @@ pub async fn set(Path(code): Path<String>) -> impl IntoResponse {
 
     (StatusCode::OK, "this is it").into_response()
 }
+
 pub fn get_routes() -> Router {
     Router::new()
         .route("/wallpapers", get(fetch_all))

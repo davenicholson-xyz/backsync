@@ -25,3 +25,4 @@ tower-http = { version = "0.6.1", features = ["fs", "limit", "cors"] }
 axum-extra = "0.4"
 tokio-tungstenite = "0.18"
 futures = "0.3"
+reqwest = { version = "0.12.8", features = ["json"] }

@@ -23,6 +23,7 @@ pub async fn http_server(port: i32) {
         .route_service("/", ServeFile::new("static/index.html"))
         .merge(routes::clients::get_routes())
         .merge(routes::wallpaper::get_routes())
+        .merge(routes::wallhaven::get_routes())
         .merge(routes::system::get_routes())
         .fallback_service(get_service(ServeFile::new("static/index.html")))
         .layer(cors)
