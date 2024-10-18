@@ -39,8 +39,8 @@
                         Lock
                       </sl-menu-item>
                       <sl-divider></sl-divider>
-                      <sl-menu-item @click="alert('rename')">Rename</sl-menu-item>
-                      <sl-menu-item @click="alert('rename')">Delete</sl-menu-item>
+                      <sl-menu-item @click="renameDialog(client.uuid, client.hostname)">Rename</sl-menu-item>
+                      <sl-menu-item @click="deleteDialog(client.uuid)">Delete</sl-menu-item>
                     </sl-menu>
                   </sl-dropdown>
                 </div>
@@ -54,6 +54,17 @@
       </div>
 
     </div>
+
+    <sl-dialog label="Rename client" class="dialog-overview" id="dialog-rename">
+      <sl-input></sl-input>
+      <sl-button slot="footer" variant="primary">Rename</sl-button>
+    </sl-dialog>
+
+    <sl-dialog label="Delete client" class="dialog-overview" id="dialog-delete">
+      Are you sure you want to delete <span></span>?
+      <sl-button slot="footer" variant="danger">Delete</sl-button>
+    </sl-dialog>
+
     <script type="module" src="/main.js"></script>
   </body>
 </html>
