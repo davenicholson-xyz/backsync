@@ -9,36 +9,49 @@
   <body x-data="router()">
     <div class="container">
 
-      <header>
-        <nav>
-          <ul><a href="/" @click.prevent="navigate('home', '/')">home</a></ul>
-          <ul><a href="/wallpaper" @click.prevent="navigate('wallpaper', '/wallpaper')">papers</a></ul>
-        </nav>
-      </header>
-
-      <article>
-        <main x-html="pageContent"></main>
-      </article>
-
-      <aside>
-        <div class="client-list" x-data="clients()">
-          <template x-for="client in clients">
+      <div id="clients-bar" x-data="clients">
+        <!-- <div class="clients-info"> -->
+        <!--   <p><span x-text="$store.clients.data.length"></span> client online</p> -->
+        <!-- </div> -->
+        <div id="client-list">
+          <template x-for="client in $store.clients.data">
             <div class="client">
-              <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" />
 
-              <div class="client_info">
-                <iconify-icon icon="wpf:online" :class="{'online': client.connected_at != '', 'connect' : true}"></iconify-icon>
-                <span x-text="client.hostname"></span>
+
+              <div class="client-image">
+                <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" />
               </div>
 
+              <div class="client-info">
+                <div class="icons">
+                  <iconify-icon x-show="client.locked" class="locked" icon="uis:lock"></iconify-icon>
+                  <iconify-icon @click="menu(client.uuid)" icon="ri:computer-fill" class="connected" :class="{'online' : client.connected_at != ''}"></iconify-icon>
+                  <sl-dropdown :id="`menu-${client.uuid}`">
+                    <sl-menu>
+                      <sl-menu-item disabled x-text="client.addr"></sl-menu-item>
+                      <sl-divider></sl-divider>
+                      <sl-menu-item x-show="client.locked" @click="alert('rename')">
+                        <sl-icon slot="prefix" name="unlock"></sl-icon>
+                        Unlock
+                      </sl-menu-item>
+                      <sl-menu-item x-show="!client.locked" @click="alert('rename')">
+                        <sl-icon slot="prefix" name="lock"></sl-icon>
+                        Lock
+                      </sl-menu-item>
+                      <sl-divider></sl-divider>
+                      <sl-menu-item @click="alert('rename')">Rename</sl-menu-item>
+                      <sl-menu-item @click="alert('rename')">Delete</sl-menu-item>
+                    </sl-menu>
+                  </sl-dropdown>
+                </div>
+                <div class="host">
+                  <span class="hostname" x-text="truncate(client.hostname, 18)"></span>
+                </div>
+              </div>
             </div>
           </template>
         </div>
-      </aside>
-
-      <footer>
-        <h2>footer</h2>
-      </footer>
+      </div>
 
     </div>
     <script type="module" src="/main.js"></script>

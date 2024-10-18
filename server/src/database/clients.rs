@@ -13,6 +13,7 @@ pub struct Client {
     pub addr: String,
     pub hostname: String,
     pub connected_at: String,
+    pub locked: bool,
     pub wallpaper_code: Option<String>,
 }
 
@@ -100,45 +101,71 @@ pub async fn disconnected_by_ip(ip: IpAddr) -> Result<()> {
 pub async fn all() -> sqlx::Result<Vec<Client>> {
     let pool = super::pool();
     let clients = sqlx::query_as::<_, Client>(
-    r#"
-        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
-        FROM clients 
-        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id;
-    "#
-        )
-        .fetch_all(pool)
-        .await?;
+        r#"
+        SELECT 
+            clients.id, 
+            clients.uuid, 
+            clients.addr, clients.hostname, 
+            clients.connected_at, 
+            clients.locked,
+            wallpapers.code AS wallpaper_code 
+        FROM 
+            clients 
+        LEFT JOIN 
+            wallpapers ON clients.wallpaper = wallpapers.id
+    "#,
+    )
+    .fetch_all(pool)
+    .await?;
     Ok(clients)
 }
 
 pub async fn all_online() -> sqlx::Result<Vec<Client>> {
     let pool = super::pool();
     let clients = sqlx::query_as::<_, Client>(
-    r#"
-        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
-        FROM clients 
-        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+        r#"
+        SELECT 
+            clients.id, 
+            clients.uuid, 
+            clients.addr, 
+            clients.hostname, 
+            clients.connected_at, 
+            clients.locked, 
+            wallpapers.code AS wallpaper_code 
+        FROM 
+            clients 
+        LEFT JOIN 
+            wallpapers ON clients.wallpaper = wallpapers.id
         WHERE connected_at != '';
-    "#
-        )
-        .fetch_all(pool)
-        .await?;
+    "#,
+    )
+    .fetch_all(pool)
+    .await?;
     Ok(clients)
 }
 
 pub async fn get_by_addr(addr: &str) -> sqlx::Result<Client> {
     let pool = super::pool();
     let client = sqlx::query_as::<_, Client>(
-    r#"
-        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
-        FROM clients 
-        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+        r#"
+        SELECT 
+            clients.id, 
+            clients.uuid, 
+            clients.addr, 
+            clients.hostname, 
+            clients.connected_at, 
+            clients.locked,
+            wallpapers.code AS wallpaper_code 
+        FROM 
+            clients 
+        LEFT JOIN 
+            wallpapers ON clients.wallpaper = wallpapers.id
         WHERE addr = ?;
-    "#
-        )
-        .bind(addr)
-        .fetch_one(pool)
-        .await?;
+    "#,
+    )
+    .bind(addr)
+    .fetch_one(pool)
+    .await?;
     Ok(client)
 }
 
@@ -146,35 +173,44 @@ pub async fn get_by_addr(addr: &str) -> sqlx::Result<Client> {
 pub async fn get_by_uuid(uuid: &str) -> sqlx::Result<Client> {
     let pool = super::pool();
     let client = sqlx::query_as::<_, Client>(
-    r#"
-        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
-        FROM clients 
-        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+        r#"
+        SELECT 
+            clients.id, 
+            clients.uuid, 
+            clients.addr, 
+            clients.hostname, 
+            clients.connected_at, 
+            clients.locked,
+            wallpapers.code AS wallpaper_code 
+        FROM 
+            clients 
+        LEFT JOIN 
+            wallpapers ON clients.wallpaper = wallpapers.id
         WHERE uuid = ?;
-    "#
-        )
-        .bind(uuid)
-        .fetch_one(pool)
-        .await?;
+    "#,
+    )
+    .bind(uuid)
+    .fetch_one(pool)
+    .await?;
     Ok(client)
 }
 
-pub async fn get_by_id(id: i32) -> sqlx::Result<Client> {
-    let pool = super::pool();
-    let client = sqlx::query_as::<_, Client>(
-    r#"
-        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code 
-        FROM clients 
-        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
-        WHERE clients.id = ?;
-    "#
-        )
-        .bind(id)
-        .fetch_one(pool)
-        .await?;
-    Ok(client)
-}
-
+//pub async fn get_by_id(id: i32) -> sqlx::Result<Client> {
+//    let pool = super::pool();
+//    let client = sqlx::query_as::<_, Client>(
+//    r#"
+//        SELECT clients.id, clients.uuid, clients.addr, clients.hostname, clients.connected_at, wallpapers.code AS wallpaper_code
+//        FROM clients
+//        LEFT JOIN wallpapers ON clients.wallpaper = wallpapers.id
+//        WHERE clients.id = ?;
+//    "#
+//        )
+//        .bind(id)
+//        .fetch_one(pool)
+//        .await?;
+//    Ok(client)
+//}
+//
 pub async fn startup_clean() -> Result<()> {
     let pool = super::pool();
     sqlx::query(
