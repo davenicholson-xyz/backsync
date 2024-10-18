@@ -9,62 +9,9 @@
   <body x-data="router()">
     <div class="container">
 
-      <div id="clients-bar" x-data="clients">
-        <!-- <div class="clients-info"> -->
-        <!--   <p><span x-text="$store.clients.data.length"></span> client online</p> -->
-        <!-- </div> -->
-        <div id="client-list">
-          <template x-for="client in $store.clients.data">
-            <div class="client">
-
-
-              <div class="client-image">
-                <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" />
-              </div>
-
-              <div class="client-info">
-                <div class="icons">
-                  <iconify-icon x-show="client.locked" class="locked" icon="uis:lock"></iconify-icon>
-                  <iconify-icon @click="menu(client.uuid)" icon="ri:computer-fill" class="connected" :class="{'online' : client.connected_at != ''}"></iconify-icon>
-                  <sl-dropdown :id="`menu-${client.uuid}`">
-                    <sl-menu>
-                      <sl-menu-item disabled x-text="client.addr"></sl-menu-item>
-                      <sl-divider></sl-divider>
-                      <sl-menu-item x-show="client.locked" @click="alert('rename')">
-                        <sl-icon slot="prefix" name="unlock"></sl-icon>
-                        Unlock
-                      </sl-menu-item>
-                      <sl-menu-item x-show="!client.locked" @click="alert('rename')">
-                        <sl-icon slot="prefix" name="lock"></sl-icon>
-                        Lock
-                      </sl-menu-item>
-                      <sl-divider></sl-divider>
-                      <sl-menu-item @click="renameDialog(client.uuid, client.hostname)">Rename</sl-menu-item>
-                      <sl-menu-item @click="deleteDialog(client.uuid)">Delete</sl-menu-item>
-                    </sl-menu>
-                  </sl-dropdown>
-                </div>
-                <div class="host">
-                  <span class="hostname" x-text="truncate(client.hostname, 18)"></span>
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
+      <load src="html/clients.html"/>
 
     </div>
-
-    <sl-dialog label="Rename client" class="dialog-overview" id="dialog-rename">
-      <sl-input></sl-input>
-      <sl-button slot="footer" variant="primary">Rename</sl-button>
-    </sl-dialog>
-
-    <sl-dialog label="Delete client" class="dialog-overview" id="dialog-delete">
-      Are you sure you want to delete <span></span>?
-      <sl-button slot="footer" variant="danger">Delete</sl-button>
-    </sl-dialog>
-
     <script type="module" src="/main.js"></script>
   </body>
 </html>

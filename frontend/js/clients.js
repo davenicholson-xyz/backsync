@@ -1,6 +1,9 @@
 const baseURL = import.meta.env.MODE === 'development' ? 'http://127.0.0.1:3001' : ''
 
 export default () => ({
+  truncate(hostname, l) {
+    return hostname.length > l ? hostname.substring(0, l) + "..." : hostname
+  },
   menu(uuid) {
     let menu = document.getElementById(`menu-${uuid}`)
     menu.show()
@@ -37,7 +40,10 @@ export default () => ({
     const dialog = document.getElementById('dialog-delete');
     dialog.hide();
   },
-  truncate(hostname, l) {
-    return hostname.length > l ? hostname.substring(0, l) + "..." : hostname
+  async lock(uuid) {
+    await fetch(`${baseURL}/clients/${uuid}/update/locked/1`);
+  },
+  async unlock(uuid) {
+    await fetch(`${baseURL}/clients/${uuid}/update/locked/0`);
   }
 })
