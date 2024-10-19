@@ -48,6 +48,10 @@ footer {
       position: relative;
       width: 180px;
 
+     .highlight {
+       filter: saturate(300%);
+      }
+
       img {
         border-radius: 10px;
         border: 2px solid black;
@@ -116,11 +120,25 @@ footer {
       width: 200px;
 
       img {
-      border-radius: 6px;
+        border-radius: 6px;
         width: 100%;
         aspect-ratio: 16/10;
         object-fit: cover;
       }
     }
   }
+}
+
+
+#drag-thumbnail {
+  position: absolute;
+  top: -100px;
+  left: -100px;
+}
+
+#drag-thumbnail img {
+  width: 100px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: none;
 }

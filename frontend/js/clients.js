@@ -1,6 +1,9 @@
 const baseURL = import.meta.env.MODE === 'development' ? 'http://127.0.0.1:3001' : ''
 
 export default () => ({
+
+  hoveredUUID: null,
+
   truncate(hostname, l) {
     return hostname.length > l ? hostname.substring(0, l) + "..." : hostname
   },
@@ -21,29 +24,41 @@ export default () => ({
     dialog.show();
   },
   async rename(uuid, new_name) {
-    await fetch(`${baseURL}/clients/${uuid}/update/hostname/${new_name}`);
+    await fetch(`${baseURL}/clients/${uuid}/update/hostname/${new_name}`)
     const dialog = document.getElementById('dialog-rename');
     dialog.hide();
   },
   deleteDialog(uuid, hostname) {
-    const dialog = document.getElementById('dialog-delete');
-    const nameSpan = dialog.querySelector('span');
-    nameSpan.innerText = hostname;
-    const deleteButton = dialog.querySelector('sl-button[slot="footer"]');
+    const dialog = document.getElementById('dialog-delete')
+    const nameSpan = dialog.querySelector('span')
+    nameSpan.innerText = hostname
+    const deleteButton = dialog.querySelector('sl-button[slot="footer"]')
     deleteButton.addEventListener('click', () => {
-      this.delete(uuid);
-    });
-    dialog.show();
+      this.delete(uuid)
+    })
+    dialog.show()
   },
   async delete(uuid) {
-    await fetch(`${baseURL}/clients/${uuid}/delete`);
-    const dialog = document.getElementById('dialog-delete');
-    dialog.hide();
+    await fetch(`${baseURL}/clients/${uuid}/delete`)
+    const dialog = document.getElementById('dialog-delete')
+    dialog.hide()
   },
   async lock(uuid) {
-    await fetch(`${baseURL}/clients/${uuid}/update/locked/1`);
+    await fetch(`${baseURL}/clients/${uuid}/update/locked/1`)
   },
   async unlock(uuid) {
     await fetch(`${baseURL}/clients/${uuid}/update/locked/0`);
+  },
+
+  dragEnter(uuid) {
+    this.hoveredUUID = uuid;
+  },
+  dragLeave() {
+    this.hoveredUUID = null
+  },
+  dragDrop(event) {
+    let data = event.dataTransfer.getData('text/plain')
+    this.hoveredUUID = null;
   }
+
 })

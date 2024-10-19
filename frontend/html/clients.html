@@ -3,8 +3,16 @@
     <template x-for="client in $store.clients.data">
       <div class="client">
 
-        <div class="client-image">
-          <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" />
+        <div class="client-image"
+          :class="{'highlight': client.uuid == hoveredUUID}"
+        >
+          <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" 
+            @dragenter="dragEnter(client.uuid)"
+            @drop="dragDrop($event)"
+            @dragenter="dragEnter(client.uuid)"
+            @dragleave="dragLeave()"
+            @dragover.prevent
+          />
         </div>
 
         <div class="client-info">

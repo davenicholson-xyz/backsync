@@ -19,10 +19,13 @@
   
   <div id="search-results">
     <template x-for="wallpaper in results">
-      <div class="wallpaper">
-        <img :src="wallpaper.thumbs.small"/>
+      <div class="wallpaper" :draggable="true" @dragstart="dragStart($event)">
+        <img :src="wallpaper.thumbs.small" :data-wallpaper-path="wallpaper.path" />
       </div>
     </template>
   </div>
 </div>
 
+<div id="drag-thumbnail">
+    <img id="drag-thumbnail-image" data-name="dragthumb">
+</div>
