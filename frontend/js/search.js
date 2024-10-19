@@ -12,7 +12,7 @@ export default () => ({
 
     let q = encodeURI(this.query)
     let settings = Alpine.store('settings').data
-    let url = `https://wallhaven.cc/api/v1/search?q=${q}&purity=111&categories=101&sorting=random`
+    let url = `https://wallhaven.cc/api/v1/search?q=${q}&purity=111&categories=101&sorting=random&ratios=landscape`
     if (settings.wallhaven_apikey != "") {
       url = url + `&apikey=${settings.wallhaven_apikey}`
     }

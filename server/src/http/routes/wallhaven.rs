@@ -2,10 +2,11 @@ use axum::{routing::post, Json, Router};
 use hyper::StatusCode;
 use reqwest;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 
 use crate::{
     database::{self, wallpaper::Wallpaper},
+    network::tcp::data,
     system::files,
 };
 
@@ -31,9 +32,14 @@ async fn search(Json(params): Json<SearchParams>) -> Result<Json<Value>, StatusC
 
 async fn upload(Json(params): Json<UploadParams>) -> Result<Json<Wallpaper>, StatusCode> {
     let url = &params.url;
-    let wallpaper = files::wallpaper::save_image_from_url(url).await.unwrap();
-    database::wallpaper::add(&wallpaper).await.unwrap();
-    Ok(Json(wallpaper))
+    if let Ok(wp) = database::wallpaper::get_by_origin(&url).await {
+        return Ok(Json(wp));
+    } else {
+        let mut wallpaper = files::wallpaper::save_image_from_url(url).await.unwrap();
+        wallpaper.origin = url.clone();
+        database::wallpaper::add(&wallpaper).await.unwrap();
+        return Ok(Json(wallpaper));
+    }
 }
 
 pub fn get_routes() -> Router {

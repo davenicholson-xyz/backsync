@@ -91,6 +91,7 @@ pub async fn save_image_bytes(filename: &str, image_data: &[u8]) -> Result<Wallp
         id: 0,
         code: file_id,
         extension: file_ext,
+        origin: String::from(""),
     })
 }
 
@@ -125,6 +126,7 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
             id: 0,
             code: file_id,
             extension: file_ext,
+            origin: String::from(""),
         });
     }
 

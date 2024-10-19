@@ -8,6 +8,7 @@ pub struct Wallpaper {
     pub id: i32,
     pub code: String,
     pub extension: String,
+    pub origin: String,
 }
 
 pub async fn add(wallpaper: &Wallpaper) -> Result<()> {
@@ -15,12 +16,13 @@ pub async fn add(wallpaper: &Wallpaper) -> Result<()> {
     sqlx::query(
         r#"
         INSERT INTO wallpapers 
-        (code, extension)
-        VALUES (?, ?)
+        (code, extension, origin)
+        VALUES (?, ?, ?)
     "#,
     )
     .bind(&wallpaper.code)
     .bind(&wallpaper.extension)
+    .bind(&wallpaper.origin)
     .execute(pool)
     .await?;
     Ok(())
@@ -32,6 +34,15 @@ pub async fn all() -> sqlx::Result<Vec<Wallpaper>> {
         .fetch_all(pool)
         .await?;
     Ok(streams)
+}
+
+pub async fn get_by_origin(origin: &str) -> sqlx::Result<Wallpaper> {
+    let pool = super::pool();
+    let wallpaper = sqlx::query_as::<_, Wallpaper>("SELECT * FROM wallpapers WHERE origin = ?")
+        .bind(origin)
+        .fetch_one(pool)
+        .await?;
+    Ok(wallpaper)
 }
 
 pub async fn get(code: &str) -> sqlx::Result<Wallpaper> {

@@ -3,6 +3,8 @@ const baseURL = import.meta.env.MODE === 'development' ? 'http://127.0.0.1:3001'
 export default () => ({
 
   hoveredUUID: null,
+  uploadingUUID: null,
+  uploadingUUIDs: [],
 
   truncate(hostname, l) {
     return hostname.length > l ? hostname.substring(0, l) + "..." : hostname
@@ -56,7 +58,8 @@ export default () => ({
   dragLeave() {
     this.hoveredUUID = null
   },
-  async dragDrop(event) {
+  async dragDrop(event, uuid) {
+    this.uploadingUUID = uuid;
     let url = event.dataTransfer.getData('text/plain')
     let response = await fetch(`${baseURL}/wallhaven/upload`, {
       method: 'POST',
@@ -66,6 +69,7 @@ export default () => ({
     let data = await response.json()
     await fetch(`${baseURL}/clients/${this.hoveredUUID}/set/${data.code}`)
     this.hoveredUUID = null;
+    this.uploadingUUID = null;
   }
 
 })
