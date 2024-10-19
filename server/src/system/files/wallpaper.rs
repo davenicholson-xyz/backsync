@@ -56,6 +56,44 @@ pub async fn send_wallpaper(code: &str, uuid: &str) -> Result<()> {
     Ok(())
 }
 
+pub async fn save_image_from_url(url: &str) -> Result<Wallpaper> {
+    let response = reqwest::get(url).await?;
+    let bytes = response.bytes().await?;
+    let filename = utils::filename_from_url(&url).unwrap();
+    let wp = save_image_bytes(&filename, &bytes).await?;
+    Ok(wp)
+}
+
+pub async fn save_image_bytes(filename: &str, image_data: &[u8]) -> Result<Wallpaper> {
+    let upload_dir = storage_path("wallpaper");
+    let thumb_dir = storage_path("wallpaper/.thumbs");
+    let file_id = utils::seed(8);
+
+    let file_ext = paths::ext_from_path(&filename)?;
+
+    let file_path = upload_dir.join(format!("{}.{}", file_id, file_ext));
+    let thumb_path = thumb_dir.join(format!("{}.jpg", file_id));
+
+    let mut file_contents = Vec::new();
+    file_contents.extend_from_slice(&image_data);
+    let img = ImageReader::new(Cursor::new(&file_contents))
+        .with_guessed_format()?
+        .decode()?;
+
+    let thumbnail = img.thumbnail(300, 300);
+
+    img.save(&file_path)?;
+    thumbnail
+        .to_rgb8()
+        .save_with_format(&thumb_path, ImageFormat::Jpeg)?;
+
+    Ok(Wallpaper {
+        id: 0,
+        code: file_id,
+        extension: file_ext,
+    })
+}
+
 pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
     let upload_dir = storage_path("wallpaper");
     let thumb_dir = storage_path("wallpaper/.thumbs");
@@ -71,7 +109,6 @@ pub async fn upload_image(mut multipart: Multipart) -> Result<Wallpaper> {
         let thumb_path = thumb_dir.join(format!("{}.jpg", file_id));
 
         let mut file_contents = Vec::new();
-
         file_contents.extend_from_slice(&data);
         let img = ImageReader::new(Cursor::new(&file_contents))
             .with_guessed_format()?

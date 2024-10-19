@@ -56,8 +56,15 @@ export default () => ({
   dragLeave() {
     this.hoveredUUID = null
   },
-  dragDrop(event) {
-    let data = event.dataTransfer.getData('text/plain')
+  async dragDrop(event) {
+    let url = event.dataTransfer.getData('text/plain')
+    let response = await fetch(`${baseURL}/wallhaven/upload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    })
+    let data = await response.json()
+    await fetch(`${baseURL}/clients/${this.hoveredUUID}/set/${data.code}`)
     this.hoveredUUID = null;
   }
 

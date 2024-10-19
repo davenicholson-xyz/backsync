@@ -350,6 +350,7 @@ dependencies = [
  "tokio-tungstenite 0.18.0",
  "toml",
  "tower-http 0.6.1",
+ "url",
 ]
 
 [[package]]

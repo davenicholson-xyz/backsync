@@ -2,10 +2,20 @@ use axum::{routing::post, Json, Router};
 use hyper::StatusCode;
 use reqwest;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{json, Value};
+
+use crate::{
+    database::{self, wallpaper::Wallpaper},
+    system::files,
+};
 
 #[derive(Serialize, Deserialize)]
 struct SearchParams {
+    url: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct UploadParams {
     url: String,
 }
 
@@ -19,6 +29,15 @@ async fn search(Json(params): Json<SearchParams>) -> Result<Json<Value>, StatusC
     }
 }
 
+async fn upload(Json(params): Json<UploadParams>) -> Result<Json<Wallpaper>, StatusCode> {
+    let url = &params.url;
+    let wallpaper = files::wallpaper::save_image_from_url(url).await.unwrap();
+    database::wallpaper::add(&wallpaper).await.unwrap();
+    Ok(Json(wallpaper))
+}
+
 pub fn get_routes() -> Router {
-    Router::new().route("/wallhaven/search", post(search))
+    Router::new()
+        .route("/wallhaven/upload", post(upload))
+        .route("/wallhaven/search", post(search))
 }
