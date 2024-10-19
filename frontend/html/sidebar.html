@@ -3,4 +3,9 @@
     <ul><a href="/" @click.prevent="navigate('home', '/')">home</a></ul>
     <ul><a href="/search" @click.prevent="navigate('search', '/search')">search</a></ul>
   </nav>
+  
+  <div x-data x-show="$store.upload_progress > 0 && $store.upload_progress < 100">
+    <sl-progress-ring :value="$store.upload_progress" style="--track-width: 6px; --indicator-width: 12px;"></sl-progress-ring>
+  </div>
+
 </div>

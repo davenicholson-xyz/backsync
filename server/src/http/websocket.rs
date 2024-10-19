@@ -18,6 +18,12 @@ pub struct ClientUpdate<T> {
     clients: T,
 }
 
+#[derive(Serialize)]
+pub struct ImageUpload {
+    subject: String,
+    progress: i32,
+}
+
 static BROADCAST_TX: Lazy<Arc<Mutex<broadcast::Sender<String>>>> = Lazy::new(|| {
     let (tx, _) = broadcast::channel::<String>(100);
     Arc::new(Mutex::new(tx))
@@ -67,6 +73,17 @@ async fn parse_message(msg: String) {
 pub async fn broadcast_message(message: String) {
     let tx = BROADCAST_TX.clone();
     let _ = tx.lock().await.send(message);
+}
+
+pub async fn upload_progress(prog: i32) -> Result<()> {
+    let upload = ImageUpload {
+        subject: "image_upload".to_string(),
+        progress: prog,
+    };
+    let upload_string = serde_json::to_string(&upload)?;
+    broadcast_message(upload_string).await;
+
+    Ok(())
 }
 
 pub async fn client_update() -> Result<()> {

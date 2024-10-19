@@ -14,6 +14,7 @@ use crate::commands::command::Command;
 use crate::commands::send_to_client;
 use crate::database;
 use crate::database::wallpaper::Wallpaper;
+use crate::http;
 use crate::system::config;
 use crate::system::paths;
 use crate::system::paths::storage_path;
@@ -58,9 +59,12 @@ pub async fn send_wallpaper(code: &str, uuid: &str) -> Result<()> {
 
 pub async fn save_image_from_url(url: &str) -> Result<Wallpaper> {
     let response = reqwest::get(url).await?;
+    http::websocket::upload_progress(40).await.unwrap();
     let bytes = response.bytes().await?;
     let filename = utils::filename_from_url(&url).unwrap();
+    http::websocket::upload_progress(60).await.unwrap();
     let wp = save_image_bytes(&filename, &bytes).await?;
+    http::websocket::upload_progress(80).await.unwrap();
     Ok(wp)
 }
 

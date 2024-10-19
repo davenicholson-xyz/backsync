@@ -6,6 +6,7 @@ use serde_json::Value;
 
 use crate::{
     database::{self, wallpaper::Wallpaper},
+    http,
     system::files,
 };
 
@@ -31,13 +32,14 @@ async fn search(Json(params): Json<SearchParams>) -> Result<Json<Value>, StatusC
 
 async fn upload(Json(params): Json<UploadParams>) -> Result<Json<Wallpaper>, StatusCode> {
     let url = &params.url;
-    dbg!(&url);
     if let Ok(wp) = database::wallpaper::get_by_origin(&url).await {
         return Ok(Json(wp));
     } else {
+        http::websocket::upload_progress(10).await.unwrap();
         let mut wallpaper = files::wallpaper::save_image_from_url(url).await.unwrap();
         wallpaper.origin = url.clone();
         database::wallpaper::add(&wallpaper).await.unwrap();
+        http::websocket::upload_progress(100).await.unwrap();
         return Ok(Json(wallpaper));
     }
 }

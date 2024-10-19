@@ -16,9 +16,8 @@ window.Alpine = Alpine
 document.addEventListener('alpine:init', () => {
 
   Alpine.store('clients', [])
-
   Alpine.store('client_updates', [])
-
+  Alpine.store('upload_progress', 0)
   Alpine.store('settings', {
     data: {},
     async init() {
@@ -51,10 +50,13 @@ document.addEventListener('alpine:init', () => {
 
   socket.onmessage = function(event) {
     let data = JSON.parse(event.data);
+    console.log(data)
     switch (data.subject) {
       case "clients_update":
         Alpine.store('clients', data.clients);
-        console.log(data.clients)
+        break;
+      case "image_upload":
+        Alpine.store('upload_progress', data.progress);
         break;
       default:
         break;

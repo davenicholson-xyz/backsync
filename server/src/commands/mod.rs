@@ -13,7 +13,6 @@ pub async fn handle(command: Command) -> Result<()> {
         Command::ClientInfo { uuid, ip, hostname } => {
             database::clients::insert(&uuid, &ip, &hostname).await?;
             http::websocket::client_update().await?;
-
             let client = database::clients::get_by_uuid(&uuid).await.unwrap();
             if let Some(syncwall) = client.syncwall {
                 let wp = database::wallpaper::get(&syncwall).await.unwrap();
