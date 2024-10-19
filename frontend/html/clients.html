@@ -2,34 +2,42 @@
   <div id="client-list">
 
     <div class="default-client"
-       @dragover.prevent 
-       @drop="dropAll($event)" 
-     > 
-       <p>send to all</p> 
-     </div> 
+      @dragover.prevent 
+      @drop="dropAll($event)" 
+    > 
+      <p>send to all</p> 
+    </div> 
 
     <template x-for="client in $store.clients">
       <div class="client">
         <div class="client-image"
           :class="{'highlight': client.uuid == hoveredUUID}"
+          @dragenter.prevent="dragEnter(client.uuid)"
+          @drop="dragDrop($event, client.uuid)"
+          @dragleave="dragLeave()"
+          @dragover.prevent
         >
-          <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" 
-            @dragenter="dragEnter(client.uuid)"
-            @drop="dragDrop($event, client.uuid)"
-            @dragenter="dragEnter(client.uuid)"
-            @dragleave="dragLeave()"
-            @dragover.prevent
-          />
-          <div class="loading-spinner"
-             x-show="showSpinner(client.uuid, client.wallpaper_code)" 
-           > 
+          <template x-if="client.wallpaper_code">
+            <img :src="`${baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`" />
+          </template>
+
+          <template x-if="!client.wallpaper_code">
+            <div class="no-image">
+              <iconify-icon icon="ic:baseline-wallpaper" class="missing-icon"></iconify-icon>
+            </div>
+          </template>
+
+          <div class="loading-spinner" x-show="showSpinner(client.uuid, client.wallpaper_code)" > 
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"><animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></svg>
           </div>
+
         </div>
 
         <div class="client-info">
           <div class="icons">
-            <iconify-icon x-show="client.syncwall" class="syncwall" icon="fa-solid:sync"></iconify-icon>
+            <template x-if="client.syncwall">
+              <iconify-icon class="syncwall" id="syncwall-anchor" icon="fa-solid:sync"></iconify-icon>
+            </template>
             <iconify-icon x-show="client.locked" class="locked" icon="uis:lock"></iconify-icon>
             <iconify-icon @click="menu(client.uuid)" icon="ri:computer-fill" class="connected" :class="{'online' : client.connected_at != ''}"></iconify-icon>
             <sl-dropdown :id="`menu-${client.uuid}`">

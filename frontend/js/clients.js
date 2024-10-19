@@ -79,6 +79,17 @@ export default () => ({
     Alpine.store('client_updates', [...currentUpdates, { 'uuid': uuid, code: client.wallpaper_code }])
   },
 
+
+  async uploadWallpaper(url) {
+    let response = await fetch(`${baseURL}/wallhaven/upload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    })
+    let data = await response.json()
+    return data
+  },
+
   async dropAll(event) {
     let url = event.dataTransfer.getData('text/plain')
     let clients = Alpine.store('clients').filter(c => c.locked == false)
@@ -93,19 +104,20 @@ export default () => ({
     })
   },
 
-  async uploadWallpaper(url) {
-    let response = await fetch(`${baseURL}/wallhaven/upload`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    })
-    let data = await response.json()
-    return data
-  },
-
   async dragDrop(event, uuid) {
-    let client = Alpine.store('clients').find(c => c.uuid === uuid)
     let url = event.dataTransfer.getData('text/plain')
+
+    let client = Alpine.store('clients').find(c => c.uuid === uuid)
+
+    let current_wp = null
+
+    if (client.wallpaper_code) {
+      let response = await fetch(`${baseURL}/wallpapers/code/${client.wallpaper_code}`)
+      let data = await response.json()
+      current_wp = data.origin
+    }
+
+    if (url === current_wp) { return }
 
     if (client.connected_at != "") {
       this.addToUpdating(uuid)

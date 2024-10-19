@@ -19,7 +19,7 @@ impl SettingsResponse {
 
 pub async fn settings() -> Json<SettingsResponse> {
     let mut settings = SettingsResponse::default();
-    if let Some(wall_api) = config::get::<String>("wallheaven_apikey").unwrap() {
+    if let Some(wall_api) = config::get::<String>("wallhaven_apikey").unwrap() {
         settings.wallhaven_apikey = wall_api;
     }
     Json(settings)

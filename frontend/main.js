@@ -20,7 +20,7 @@ document.addEventListener('alpine:init', () => {
   Alpine.store('client_updates', [])
 
   Alpine.store('settings', {
-    data: { "wallhaven_apikey": null },
+    data: {},
     async init() {
       let response = await fetch(`${baseURL}/settings`)
       let data = await response.json()

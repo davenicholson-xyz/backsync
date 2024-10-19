@@ -25,6 +25,11 @@ pub struct FetchThumbParams {
     code: String,
 }
 
+#[derive(serde::Serialize)]
+pub struct ErrorResponse {
+    pub message: String,
+}
+
 pub async fn upload(multipart: Multipart) -> Json<Wallpaper> {
     let wallpaper = files::wallpaper::upload_image(multipart).await.unwrap();
     database::wallpaper::add(&wallpaper).await.unwrap();
@@ -35,6 +40,19 @@ pub async fn fetch_all() -> Json<WallpapersResponse> {
     let wallpapers = database::wallpaper::all().await.unwrap();
     let response = WallpapersResponse { wallpapers };
     Json(response)
+}
+
+pub async fn fetch(
+    Path(code): Path<String>,
+) -> Result<Json<Wallpaper>, (StatusCode, Json<ErrorResponse>)> {
+    if let Ok(wallpaper) = database::wallpaper::get(&code).await {
+        Ok(Json(wallpaper))
+    } else {
+        let error_response = ErrorResponse {
+            message: format!("Wallpaper not found: {}", code),
+        };
+        Err((StatusCode::NOT_FOUND, Json(error_response)))
+    }
 }
 
 pub async fn fetch_thumbnail(Path(code): Path<String>) -> impl IntoResponse {
@@ -93,8 +111,9 @@ pub async fn set(Path(code): Path<String>) -> impl IntoResponse {
 pub fn get_routes() -> Router {
     Router::new()
         .route("/wallpapers", get(fetch_all))
-        .route("/wallpapers/set/:filename", get(set))
         .route("/wallpapers/upload", post(upload))
+        .route("/wallpapers/code/:code", get(fetch))
+        .route("/wallpapers/set/:filename", get(set))
         .route("/wallpapers/thumbnail/:code", get(fetch_thumbnail))
         .route("/wallpapers/delete/:code", delete(delete_wallpaper))
 }
