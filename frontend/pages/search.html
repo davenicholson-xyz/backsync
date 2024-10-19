@@ -4,11 +4,11 @@
       <sl-button-group label="Purity">
         <sl-button variant="success" size="small">SFW</sl-button>
         <sl-button variant="warning" size="small">Sketchy</sl-button>
-        <sl-button variant="danger" size="small" x-show="$store.settings.data.wallheaven_api != '' ">NSWF</sl-button>
+        <sl-button variant="danger" size="small" x-show="$store.settings && $store.settings.data.wallheaven_api != '' ">NSWF</sl-button>
       </sl-button-group>
     </div>
     <div class="searchbar">
-      <sl-input placeholder="Search..." size="small" id="query">
+      <sl-input placeholder="Search..." size="small" id="query" @keydown="checkEnter">
         <sl-icon name="search" slot="prefix"></sl-icon>
       </sl-input>
       <sl-button variant="default" size="small" @click="search_for()">

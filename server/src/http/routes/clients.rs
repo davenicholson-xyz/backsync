@@ -47,9 +47,15 @@ pub async fn delete(Path(uuid): Path<String>) -> impl IntoResponse {
 }
 
 pub async fn set_wallpaper(Path((uuid, code)): Path<(String, String)>) -> impl IntoResponse {
+    let client = database::clients::get_by_uuid(&uuid).await.unwrap();
+    if client.connected_at == "" {
+        database::clients::update_field(&uuid, "syncwall", &code)
+            .await
+            .unwrap();
+        return (StatusCode::OK, "this is it").into_response();
+    }
     let wp = database::wallpaper::get(&code).await.unwrap();
     let filename = format!("{}.{}", wp.code, wp.extension);
-    let client = database::clients::get_by_uuid(&uuid).await.unwrap();
     if client.connected_at != "" {
         let command = Command::SetWallpaper {
             filename: filename.clone(),

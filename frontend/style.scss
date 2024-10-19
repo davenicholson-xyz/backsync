@@ -43,7 +43,14 @@ footer {
   #client-list {
     display: flex;
     justify-content: center;
+    align-items: flex-start;
     gap: 14px;
+
+    .default-client {
+      width: 180px;
+      aspect-ratio: 16/10;
+      background: goldenrod;
+    }
 
     .client {
       // position: relative;
@@ -90,6 +97,11 @@ footer {
 
         .icons {
           font-size: 14px;
+          
+          .syncwall {
+            font-size: 12px;
+            color: #999;
+          }
 
           .locked {
             color: #E52B50;
@@ -151,7 +163,6 @@ footer {
     }
   }
 }
-
 
 #drag-thumbnail {
   position: absolute;

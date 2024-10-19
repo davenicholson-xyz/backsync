@@ -14,6 +14,7 @@ pub struct Client {
     pub hostname: String,
     pub connected_at: String,
     pub locked: bool,
+    pub syncwall: Option<String>,
     pub wallpaper_code: Option<String>,
 }
 
@@ -30,7 +31,6 @@ pub async fn insert(uuid: &str, ip: &str, hostname: &str) -> Result<()> {
         DO UPDATE SET 
             addr = excluded.addr,
             connected_at = datetime('now')
-
     "#,
     )
     .bind(uuid)
@@ -70,9 +70,13 @@ pub async fn set_wallpaper(uuid: &str, code: &str) -> Result<()> {
     let pool = super::pool();
     sqlx::query(
         r#"
-        UPDATE clients
-        SET wallpaper = (SELECT id FROM wallpapers WHERE code = ?)
-        WHERE uuid = ?
+        UPDATE 
+            clients
+        SET 
+            wallpaper = (SELECT id FROM wallpapers WHERE code = ?),
+            syncwall = NULL
+        WHERE 
+            uuid = ?
     "#,
     )
     .bind(&code.to_string())
@@ -108,6 +112,7 @@ pub async fn all() -> sqlx::Result<Vec<Client>> {
             clients.addr, clients.hostname, 
             clients.connected_at, 
             clients.locked,
+            clients.syncwall,
             wallpapers.code AS wallpaper_code 
         FROM 
             clients 
@@ -131,6 +136,7 @@ pub async fn all_online() -> sqlx::Result<Vec<Client>> {
             clients.hostname, 
             clients.connected_at, 
             clients.locked, 
+            clients.syncwall,
             wallpapers.code AS wallpaper_code 
         FROM 
             clients 
@@ -155,6 +161,7 @@ pub async fn get_by_addr(addr: &str) -> sqlx::Result<Client> {
             clients.hostname, 
             clients.connected_at, 
             clients.locked,
+            clients.syncwall,
             wallpapers.code AS wallpaper_code 
         FROM 
             clients 
@@ -181,6 +188,7 @@ pub async fn get_by_uuid(uuid: &str) -> sqlx::Result<Client> {
             clients.hostname, 
             clients.connected_at, 
             clients.locked,
+            clients.syncwall,
             wallpapers.code AS wallpaper_code 
         FROM 
             clients 

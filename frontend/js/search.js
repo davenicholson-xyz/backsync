@@ -23,7 +23,6 @@ export default () => ({
     })
     let data = await response.json()
     this.results = data.data
-    console.log(data)
   },
 
   dragStart(event) {
@@ -38,6 +37,12 @@ export default () => ({
   dragEnd() {
     this.draggedWallpaper = null;
     document.getElementById('drag-thumbnail-image').style.display = 'none';
+  },
+
+  checkEnter(event) {
+    if (event.key === "Enter") {
+      this.search_for()
+    }
   },
 
   init() {

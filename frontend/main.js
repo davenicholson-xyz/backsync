@@ -14,12 +14,13 @@ import Alpine from 'alpinejs'
 window.Alpine = Alpine
 
 document.addEventListener('alpine:init', () => {
-  Alpine.store('clients', {
-    data: []
-  })
+
+  Alpine.store('clients', [])
+
+  Alpine.store('client_updates', [])
 
   Alpine.store('settings', {
-  data: [],
+    data: { "wallhaven_apikey": null },
     async init() {
       let response = await fetch(`${baseURL}/settings`)
       let data = await response.json()
@@ -27,6 +28,24 @@ document.addEventListener('alpine:init', () => {
     }
   })
 
+  Alpine.effect(() => {
+    let clients = Alpine.store('clients');
+    let clientUpdates = Alpine.store('client_updates');
+
+    clients.forEach(client => {
+      let cu = clientUpdates.find(u => u.uuid == client.uuid)
+      if (cu) {
+        if (cu.code != client.wallpaper_code) {
+          let new_updates = clientUpdates.filter(u => u.uuid != cu.uuid);
+          Alpine.store('client_updates', new_updates);
+        }
+      }
+    })
+  })
+
+  Alpine.data('router', router);
+  Alpine.data('clients', clients);
+  Alpine.data('search', search);
 
   const socket = new WebSocket('ws://127.0.0.1:3002');
 
@@ -34,7 +53,8 @@ document.addEventListener('alpine:init', () => {
     let data = JSON.parse(event.data);
     switch (data.subject) {
       case "clients_update":
-        Alpine.store('clients').data = [...data.clients];
+        Alpine.store('clients', data.clients);
+        console.log(data.clients)
         break;
       default:
         break;
@@ -54,9 +74,7 @@ document.addEventListener('alpine:init', () => {
 
 });
 
-  Alpine.data('router', router);
-  Alpine.data('clients', clients);
-  Alpine.data('search', search);
+
 
 Alpine.start()
 

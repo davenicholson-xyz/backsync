@@ -13,7 +13,19 @@ pub async fn handle(command: Command) -> Result<()> {
         Command::ClientInfo { uuid, ip, hostname } => {
             database::clients::insert(&uuid, &ip, &hostname).await?;
             http::websocket::client_update().await?;
-            send_to_client(&uuid, &Command::Handshake).await?;
+
+            let client = database::clients::get_by_uuid(&uuid).await.unwrap();
+            if let Some(syncwall) = client.syncwall {
+                let wp = database::wallpaper::get(&syncwall).await.unwrap();
+                let filename = format!("{}.{}", wp.code, wp.extension);
+                let command = Command::SetWallpaper {
+                    filename: filename.clone(),
+                };
+                send_to_client(&uuid, &command).await.unwrap();
+                return Ok(());
+            } else {
+                send_to_client(&uuid, &Command::Handshake).await?;
+            }
         }
         Command::RequestWallpaper { uuid, code } => {
             files::wallpaper::send_wallpaper(&code, &uuid).await?;
