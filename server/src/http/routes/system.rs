@@ -1,7 +1,7 @@
 use axum::{routing::get, Json, Router};
 use serde::{Deserialize, Serialize};
 
-use crate::{http::server::HttpError, system::config};
+use crate::{http::error::HttpError, system::config};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct SettingsResponse {

@@ -154,9 +154,14 @@ export default () => ({
     try {
       let eData = event.dataTransfer.getData('application/json')
       let wallpaper = JSON.parse(eData)
+      this.hoveredUUID = null
 
       let client = Alpine.store('clients').find(c => c.uuid === uuid)
       let current_wp = null
+
+      if (client.locked) {
+        return;
+      }
 
       if (client.wallpaper_code) {
         let response = await fetch(`${baseURL}/wallpapers/code/${client.wallpaper_code}`)
@@ -179,15 +184,14 @@ export default () => ({
         throw new Error('Failed to upload wallpaper')
       }
 
-      let set_wallpaper = await fetch(`${baseURL}/clients/${this.hoveredUUID}/set/${wp.code} `)
+      let set_wallpaper = await fetch(`${baseURL}/clients/${client.uuid}/set/${wp.code} `)
       if (!set_wallpaper.ok) {
         throw new Error('Failed to set client wallpaper:', set_wallpaper.statusText)
       }
 
-      this.hoveredUUID = null;
-
     } catch (e) {
       console.error('Error during drag-drop:', e.message)
+      this.hoveredUUID = null;
     }
 
   },

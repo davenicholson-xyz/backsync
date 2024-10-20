@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     commands::{command::Command, send_to_client},
     database::{self, clients::Client},
-    http::server::HttpError,
+    http::error::HttpError,
 };
 
 #[derive(Serialize, Deserialize)]

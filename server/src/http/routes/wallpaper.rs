@@ -1,7 +1,7 @@
 use crate::commands::command::Command;
 use crate::commands::send_to_client;
 use crate::database::wallpaper::Wallpaper;
-use crate::http::server::HttpError;
+use crate::http::error::HttpError;
 use crate::system::{files, paths};
 use crate::{database, utils};
 use axum::body::Bytes;

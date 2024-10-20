@@ -50,7 +50,6 @@ document.addEventListener('alpine:init', () => {
 
   socket.onmessage = function(event) {
     let data = JSON.parse(event.data);
-    console.log(data)
     switch (data.subject) {
       case "clients_update":
         Alpine.store('clients', data.clients);

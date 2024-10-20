@@ -11,7 +11,7 @@
     <template x-for="client in $store.clients">
       <div class="client">
         <div class="client-image"
-          :class="{'highlight': client.uuid == hoveredUUID}"
+          :class="{'highlight-setwallpaper': client.uuid == hoveredUUID && !client.locked}"
           @dragenter.prevent="dragEnter(client.uuid)"
           @drop="dragDrop($event, client.uuid)"
           @dragleave="dragLeave()"

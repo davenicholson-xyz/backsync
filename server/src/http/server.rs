@@ -2,6 +2,7 @@ use axum::extract::DefaultBodyLimit;
 use axum::response::IntoResponse;
 use axum::routing::get_service;
 use axum::Router;
+use hyper::Request;
 use hyper::StatusCode;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
@@ -14,31 +15,8 @@ pub async fn start(port: i32) {
     http_server(port).await;
 }
 
-pub struct HttpError(anyhow::Error);
-impl IntoResponse for HttpError {
-    fn into_response(self) -> axum::response::Response {
-        let mut status_code = StatusCode::INTERNAL_SERVER_ERROR;
-
-        if let Some(reqwest_err) = self.0.downcast_ref::<reqwest::Error>() {
-            if let Some(reqwest_status) = reqwest_err.status() {
-                status_code = StatusCode::from_u16(reqwest_status.as_u16())
-                    .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
-            } else {
-                status_code = StatusCode::BAD_GATEWAY;
-            }
-        }
-
-        (status_code, format!("Something went wrong: {:?}", self.0)).into_response()
-    }
-}
-
-impl<E> From<E> for HttpError
-where
-    E: Into<anyhow::Error>,
-{
-    fn from(err: E) -> Self {
-        Self(err.into())
-    }
+async fn handle_404() -> impl IntoResponse {
+    (StatusCode::NOT_FOUND, "404 - not found")
 }
 
 pub async fn http_server(port: i32) {
@@ -49,12 +27,12 @@ pub async fn http_server(port: i32) {
 
     let app = Router::new()
         .nest_service("/static", ServeDir::new("static"))
-        .route_service("/", ServeFile::new("static/index.html"))
         .merge(routes::clients::get_routes())
         .merge(routes::wallpaper::get_routes())
         .merge(routes::wallhaven::get_routes())
         .merge(routes::system::get_routes())
-        .fallback_service(get_service(ServeFile::new("static/index.html")))
+        .route_service("/", ServeFile::new("static/index.html"))
+        .fallback(handle_404)
         .layer(cors)
         .layer(DefaultBodyLimit::max(10 * 1024 * 1024));
 

@@ -12,8 +12,18 @@ export default () => ({
   },
 
   async loadPageContent(page) {
-    const response = await fetch(`/pages/${page}.html`);
-    this.pageContent = await response.text();
+    try {
+      const response = await fetch(`/pages/${page}.html`);
+      console.log(response)
+      if (response.status === 404) {
+        this.pageContent = '404 not found'
+        return
+      }
+      this.pageContent = await response.text();
+    } catch (e) {
+      console.error("error loading page content", e.message)
+      this.pageContent = "error abound"
+    }
   },
 
   handlePopState(event) {

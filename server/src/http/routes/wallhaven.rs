@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use crate::{
     database::{self, wallpaper::Wallpaper},
-    http::{self, server::HttpError},
+    http::{self, error::HttpError},
     system::files,
 };
 
