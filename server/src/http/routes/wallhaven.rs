@@ -1,12 +1,10 @@
 use axum::{routing::post, Json, Router};
-use hyper::StatusCode;
-use reqwest;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::{
     database::{self, wallpaper::Wallpaper},
-    http,
+    http::{self, server::HttpError},
     system::files,
 };
 
@@ -20,26 +18,22 @@ struct UploadParams {
     url: String,
 }
 
-async fn search(Json(params): Json<SearchParams>) -> Result<Json<Value>, StatusCode> {
-    match reqwest::get(&params.url).await {
-        Ok(response) => match response.json::<Value>().await {
-            Ok(json) => Ok(Json(json)),
-            Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
-        },
-        Err(_) => Err(StatusCode::BAD_REQUEST),
-    }
+async fn search(Json(params): Json<SearchParams>) -> Result<Json<Value>, HttpError> {
+    let response = reqwest::get(&params.url).await?;
+    let json = response.json::<Value>().await?;
+    Ok(Json(json))
 }
 
-async fn upload(Json(params): Json<UploadParams>) -> Result<Json<Wallpaper>, StatusCode> {
+async fn upload(Json(params): Json<UploadParams>) -> Result<Json<Wallpaper>, HttpError> {
     let url = &params.url;
     if let Ok(wp) = database::wallpaper::get_by_origin(&url).await {
         return Ok(Json(wp));
     } else {
-        http::websocket::upload_progress(10).await.unwrap();
-        let mut wallpaper = files::wallpaper::save_image_from_url(url).await.unwrap();
+        http::websocket::upload_progress(10).await?;
+        let mut wallpaper = files::wallpaper::save_image_from_url(url).await?;
         wallpaper.origin = url.clone();
-        database::wallpaper::add(&wallpaper).await.unwrap();
-        http::websocket::upload_progress(100).await.unwrap();
+        database::wallpaper::add(&wallpaper).await?;
+        http::websocket::upload_progress(100).await?;
         return Ok(Json(wallpaper));
     }
 }

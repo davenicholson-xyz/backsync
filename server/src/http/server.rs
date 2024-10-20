@@ -1,6 +1,8 @@
 use axum::extract::DefaultBodyLimit;
+use axum::response::IntoResponse;
 use axum::routing::get_service;
 use axum::Router;
+use hyper::StatusCode;
 use tower_http::cors::Any;
 use tower_http::cors::CorsLayer;
 use tower_http::services::{ServeDir, ServeFile};
@@ -10,6 +12,26 @@ use super::routes;
 pub async fn start(port: i32) {
     info!("HTTP server running: http://127.0.0.1:{}", port);
     http_server(port).await;
+}
+
+pub struct HttpError(anyhow::Error);
+impl IntoResponse for HttpError {
+    fn into_response(self) -> axum::response::Response {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Somethign went wrong: {:?}", self.0),
+        )
+            .into_response()
+    }
+}
+
+impl<E> From<E> for HttpError
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
 }
 
 pub async fn http_server(port: i32) {

@@ -1,7 +1,7 @@
 use axum::{routing::get, Json, Router};
 use serde::{Deserialize, Serialize};
 
-use crate::system::config;
+use crate::{http::server::HttpError, system::config};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct SettingsResponse {
@@ -17,12 +17,12 @@ impl SettingsResponse {
     }
 }
 
-pub async fn settings() -> Json<SettingsResponse> {
+pub async fn settings() -> Result<Json<SettingsResponse>, HttpError> {
     let mut settings = SettingsResponse::default();
-    if let Some(wall_api) = config::get::<String>("wallhaven_apikey").unwrap() {
+    if let Some(wall_api) = config::get::<String>("wallhaven_apikey")? {
         settings.wallhaven_apikey = wall_api;
     }
-    Json(settings)
+    Ok(Json(settings))
 }
 
 pub fn get_routes() -> Router {

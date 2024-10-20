@@ -1,6 +1,7 @@
 use crate::commands::command::Command;
 use crate::commands::send_to_client;
 use crate::database::wallpaper::Wallpaper;
+use crate::http::server::HttpError;
 use crate::system::{files, paths};
 use crate::{database, utils};
 use axum::body::Bytes;
@@ -25,87 +26,58 @@ pub struct FetchThumbParams {
     code: String,
 }
 
-#[derive(serde::Serialize)]
-pub struct ErrorResponse {
-    pub message: String,
+pub async fn upload(multipart: Multipart) -> Result<Json<Wallpaper>, HttpError> {
+    let wallpaper = files::wallpaper::upload_image(multipart).await?;
+    database::wallpaper::add(&wallpaper).await?;
+    Ok(Json(wallpaper))
 }
 
-pub async fn upload(multipart: Multipart) -> Json<Wallpaper> {
-    let wallpaper = files::wallpaper::upload_image(multipart).await.unwrap();
-    database::wallpaper::add(&wallpaper).await.unwrap();
-    Json(wallpaper)
-}
-
-pub async fn fetch_all() -> Json<WallpapersResponse> {
-    let wallpapers = database::wallpaper::all().await.unwrap();
+pub async fn fetch_all() -> Result<Json<WallpapersResponse>, HttpError> {
+    let wallpapers = database::wallpaper::all().await?;
     let response = WallpapersResponse { wallpapers };
-    Json(response)
+    Ok(Json(response))
 }
 
-pub async fn fetch(
-    Path(code): Path<String>,
-) -> Result<Json<Wallpaper>, (StatusCode, Json<ErrorResponse>)> {
-    if let Ok(wallpaper) = database::wallpaper::get(&code).await {
-        Ok(Json(wallpaper))
-    } else {
-        let error_response = ErrorResponse {
-            message: format!("Wallpaper not found: {}", code),
-        };
-        Err((StatusCode::NOT_FOUND, Json(error_response)))
-    }
+pub async fn fetch(Path(code): Path<String>) -> Result<Json<Wallpaper>, HttpError> {
+    let wallpaper = database::wallpaper::get(&code).await?;
+    Ok(Json(wallpaper))
 }
 
-pub async fn fetch_thumbnail(Path(code): Path<String>) -> impl IntoResponse {
+pub async fn fetch_thumbnail(Path(code): Path<String>) -> Result<impl IntoResponse, HttpError> {
     let thumbs_dir = paths::storage_path("wallpaper/.thumbs").make_string();
     let thumb_file = format!("{}/{}.jpg", thumbs_dir, code);
 
-    match File::open(thumb_file).await {
-        Ok(mut file) => {
-            let mut buffer = Vec::new();
-            if let Err(err) = file.read_to_end(&mut buffer).await {
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Failed to read file: {}", err),
-                )
-                    .into_response();
-            }
-
-            let response = (
-                StatusCode::OK,
-                [(header::CONTENT_TYPE, "image/jpeg")],
-                Bytes::from(buffer),
-            );
-            response.into_response()
-        }
-        Err(_) => (StatusCode::NOT_FOUND, "Thumbnail not found".to_string()).into_response(),
-    }
+    let mut file = File::open(thumb_file).await?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).await?;
+    let response = (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "image/jpeg")],
+        Bytes::from(buffer),
+    );
+    Ok(response.into_response())
 }
 
-pub async fn delete_wallpaper(Path(code): Path<String>) -> StatusCode {
+pub async fn delete_wallpaper(Path(code): Path<String>) -> Result<StatusCode, HttpError> {
     let (code, ext) = utils::split_filename(&code).unwrap();
-    files::wallpaper::delete_wallpaper(&code, &ext)
-        .await
-        .unwrap();
-    database::wallpaper::delete(&code).await.unwrap();
-    StatusCode::OK
+    files::wallpaper::delete_wallpaper(&code, &ext).await?;
+    database::wallpaper::delete(&code).await?;
+    Ok(StatusCode::OK)
 }
 
-pub async fn set(Path(code): Path<String>) -> impl IntoResponse {
-    let wp = database::wallpaper::get(&code).await.unwrap();
+pub async fn set(Path(code): Path<String>) -> Result<StatusCode, HttpError> {
+    let wp = database::wallpaper::get(&code).await?;
     let filename = format!("{}.{}", wp.code, wp.extension);
-    let clients = database::clients::all_online().await.unwrap();
+    let clients = database::clients::all_online().await?;
     for client in clients {
-        //let ip = IpAddr::from_str(&client.addr).unwrap();
         let command = Command::SetWallpaper {
             filename: filename.clone(),
         };
-        send_to_client(&client.uuid, &command).await.unwrap();
-        database::clients::set_wallpaper(&client.uuid, &wp.code)
-            .await
-            .unwrap();
+        send_to_client(&client.uuid, &command).await?;
+        database::clients::set_wallpaper(&client.uuid, &wp.code).await?;
     }
 
-    (StatusCode::OK, "this is it").into_response()
+    Ok(StatusCode::OK)
 }
 
 pub fn get_routes() -> Router {
