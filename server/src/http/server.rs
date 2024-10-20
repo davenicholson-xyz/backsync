@@ -17,11 +17,18 @@ pub async fn start(port: i32) {
 pub struct HttpError(anyhow::Error);
 impl IntoResponse for HttpError {
     fn into_response(self) -> axum::response::Response {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Somethign went wrong: {:?}", self.0),
-        )
-            .into_response()
+        let mut status_code = StatusCode::INTERNAL_SERVER_ERROR;
+
+        if let Some(reqwest_err) = self.0.downcast_ref::<reqwest::Error>() {
+            if let Some(reqwest_status) = reqwest_err.status() {
+                status_code = StatusCode::from_u16(reqwest_status.as_u16())
+                    .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
+            } else {
+                status_code = StatusCode::BAD_GATEWAY;
+            }
+        }
+
+        (status_code, format!("Something went wrong: {:?}", self.0)).into_response()
     }
 }
 

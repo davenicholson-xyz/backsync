@@ -35,9 +35,17 @@ export default () => ({
   },
 
   async rename(uuid, new_name) {
-    await fetch(`${baseURL}/clients/${uuid}/update/hostname/${new_name}`)
-    const dialog = document.getElementById('dialog-rename');
-    dialog.hide();
+    try {
+      let rename = await fetch(`${baseURL}/clients/${uuid}/update/hostname/${new_name}`)
+      if (!rename.ok) {
+        throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+      }
+
+      const dialog = document.getElementById('dialog-rename');
+      dialog.hide();
+    } catch (e) {
+      console.error("failed to update client hostname:", e.message)
+    }
   },
 
   deleteDialog(uuid, hostname) {
@@ -52,17 +60,39 @@ export default () => ({
   },
 
   async delete(uuid) {
-    await fetch(`${baseURL}/clients/${uuid}/delete`)
-    const dialog = document.getElementById('dialog-delete')
-    dialog.hide()
+    try {
+      let response = await fetch(`${baseURL}/clients/${uuid}/delete`)
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+      }
+      const dialog = document.getElementById('dialog-delete')
+      dialog.hide()
+    } catch (e) {
+      console.error("failed to delete client:", e.message)
+    }
+
   },
 
   async lock(uuid) {
-    await fetch(`${baseURL}/clients/${uuid}/update/locked/1`)
+    try {
+      let response = await fetch(`${baseURL}/clients/${uuid}/update/locked/1`)
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+      }
+    } catch (e) {
+      console.error("failed to lock client:", e.message)
+    }
   },
 
   async unlock(uuid) {
-    await fetch(`${baseURL}/clients/${uuid}/update/locked/0`);
+    try {
+      let response = await fetch(`${baseURL}/clients/${uuid}/update/locked/0`);
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+      }
+    } catch (e) {
+      console.error("failed to unlock client:", e.message)
+    }
   },
 
   dragEnter(uuid) {
@@ -81,14 +111,26 @@ export default () => ({
 
 
   async uploadWallpaper(url) {
-    console.log(url)
-    let response = await fetch(`${baseURL}/wallhaven/upload`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    })
-    let data = await response.json()
-    return data
+    try {
+      let response = await fetch(`${baseURL}/wallhaven/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      })
+
+      if (!response.ok) {
+        const errData = await response.json()
+        console.error(errData)
+        throw new Error(`Error: ${response.status} - ${errData.message || "Unknow error"}`)
+      }
+
+      let data = await response.json()
+      return data
+
+    } catch (e) {
+      console.error("Failed to upload wallpaper:", e.message)
+      return { success: false, message: error.message }
+    }
   },
 
   // async dropAll(event) {
@@ -109,28 +151,45 @@ export default () => ({
   async dragDrop(event, uuid) {
     event.preventDefault()
 
-    let eData = event.dataTransfer.getData('application/json')
-    let wallpaper = JSON.parse(eData)
+    try {
+      let eData = event.dataTransfer.getData('application/json')
+      let wallpaper = JSON.parse(eData)
 
-    let client = Alpine.store('clients').find(c => c.uuid === uuid)
-    let current_wp = null
+      let client = Alpine.store('clients').find(c => c.uuid === uuid)
+      let current_wp = null
 
-    if (client.wallpaper_code) {
-      let response = await fetch(`${baseURL}/wallpapers/code/${client.wallpaper_code}`)
-      let data = await response.json()
-      current_wp = data.origin
+      if (client.wallpaper_code) {
+        let response = await fetch(`${baseURL}/wallpapers/code/${client.wallpaper_code}`)
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+        }
+        let data = await response.json()
+        current_wp = data.origin
+      }
+
+      if (wallpaper.path === current_wp) { return }
+
+      if (client.connected_at != "") {
+        this.addToUpdating(uuid)
+      }
+
+      Alpine.store('upload').id = wallpaper.id
+      let wp = await this.uploadWallpaper(wallpaper.path)
+      if (!wp || !wp.code) {
+        throw new Error('Failed to upload wallpaper')
+      }
+
+      let set_wallpaper = await fetch(`${baseURL}/clients/${this.hoveredUUID}/set/${wp.code} `)
+      if (!set_wallpaper.ok) {
+        throw new Error('Failed to set client wallpaper:', set_wallpaper.statusText)
+      }
+
+      this.hoveredUUID = null;
+
+    } catch (e) {
+      console.error('Error during drag-drop:', e.message)
     }
 
-    if (wallpaper.path === current_wp) { return }
-
-    if (client.connected_at != "") {
-      this.addToUpdating(uuid)
-    }
-
-    Alpine.store('upload').id = wallpaper.id
-    let wp = await this.uploadWallpaper(wallpaper.path)
-    await fetch(`${baseURL}/clients/${this.hoveredUUID}/set/${wp.code} `)
-    this.hoveredUUID = null;
   },
 
 })
