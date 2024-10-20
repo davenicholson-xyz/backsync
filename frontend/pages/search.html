@@ -20,7 +20,12 @@
   <div id="search-results">
     <template x-for="wallpaper in results">
       <div class="wallpaper" :draggable="true" @dragstart="dragStart($event)">
-        <img :src="wallpaper.thumbs.small" :data-wallpaper-path="wallpaper.path" />
+        <img :src="wallpaper.thumbs.small" :data-wallpaper-path="wallpaper.path" :data-wallpaper-id="wallpaper.id"/>
+        <template x-if="$store.upload.id == wallpaper.id && $store.upload.progress > 0 && $store.upload.progress < 100">
+          <div :id="`download-${wallpaper.id}`" class="downloading" >
+            <iconify-icon icon="line-md:downloading-loop"></iconify-icon>
+          </div>
+        </template>
       </div>
     </template>
   </div>

@@ -81,6 +81,7 @@ export default () => ({
 
 
   async uploadWallpaper(url) {
+    console.log(url)
     let response = await fetch(`${baseURL}/wallhaven/upload`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -90,25 +91,28 @@ export default () => ({
     return data
   },
 
-  async dropAll(event) {
-    let url = event.dataTransfer.getData('text/plain')
-    let clients = Alpine.store('clients').filter(c => c.locked == false)
-    clients.forEach(client => {
-      if (client.connected_at != "") {
-        this.addToUpdating(client.uuid)
-      }
-    })
-    let wp = await this.uploadWallpaper(url)
-    clients.forEach(async client => {
-      await fetch(`${baseURL}/clients/${client.uuid}/set/${wp.code} `)
-    })
-  },
+  // async dropAll(event) {
+  //   let url = event.dataTransfer.getData('text/plain')
+  //   let clients = Alpine.store('clients').filter(c => c.locked == false)
+  //   clients.forEach(client => {
+  //     if (client.connected_at != "") {
+  //       this.addToUpdating(client.uuid)
+  //     }
+  //   })
+  //   let wp = await this.uploadWallpaper(url)
+  //   clients.forEach(async client => {
+  //     await fetch(`${baseURL}/clients/${client.uuid}/set/${wp.code} `)
+  //   })
+  // },
+  //
 
   async dragDrop(event, uuid) {
-    let url = event.dataTransfer.getData('text/plain')
+    event.preventDefault()
+
+    let eData = event.dataTransfer.getData('application/json')
+    let wallpaper = JSON.parse(eData)
 
     let client = Alpine.store('clients').find(c => c.uuid === uuid)
-
     let current_wp = null
 
     if (client.wallpaper_code) {
@@ -117,13 +121,14 @@ export default () => ({
       current_wp = data.origin
     }
 
-    if (url === current_wp) { return }
+    if (wallpaper.path === current_wp) { return }
 
     if (client.connected_at != "") {
       this.addToUpdating(uuid)
     }
 
-    let wp = await this.uploadWallpaper(url)
+    Alpine.store('upload').id = wallpaper.id
+    let wp = await this.uploadWallpaper(wallpaper.path)
     await fetch(`${baseURL}/clients/${this.hoveredUUID}/set/${wp.code} `)
     this.hoveredUUID = null;
   },

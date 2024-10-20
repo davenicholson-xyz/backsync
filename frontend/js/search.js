@@ -26,12 +26,20 @@ export default () => ({
   },
 
   dragStart(event) {
-    this.draggedWallpaper = event.target.closest('[data-wallpaper-path').getAttribute('data-wallpaper-path');
+    let wallpaper = event.target.closest('img');
+
+    let dragging = {
+      path: wallpaper.getAttribute('data-wallpaper-path'),
+      id: wallpaper.getAttribute('data-wallpaper-id')
+    }
+    this.draggedWallpaper = dragging
     const dragThumbnailImage = document.getElementById('drag-thumbnail-image');
     dragThumbnailImage.src = event.target.src;
     dragThumbnailImage.style.display = 'block';
     event.dataTransfer.setDragImage(dragThumbnailImage, 60, 25);
-    event.dataTransfer.setData('text/plain', this.draggedWallpaper)
+
+    let dragData = JSON.stringify(dragging)
+    event.dataTransfer.setData('application/json', dragData)
   },
 
   dragEnd() {

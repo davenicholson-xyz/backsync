@@ -6,35 +6,43 @@ body {
 }
 .container {
   display: grid;
-  grid-template-columns: 200px 3fr;
+  grid-template-columns: 240px 3fr;
   grid-template-rows: auto 1fr auto; /* Fixed height for header and footer, content fills remaining space */
   grid-template-areas: 
   "header  header"
   "sidebar content"
   "footer  footer";
   margin-inline: auto;
+  padding-inline: 50px;
   min-height: 100vh;
 }
 
 header {
   grid-area: header;
   margin-bottom: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 article {
   grid-area: content;
+  margin-left: 50px;
+  overflow: auto;
 }
+
 aside {
   grid-area: sidebar;
   height: 100%;
 }
+
 footer {
   grid-area: footer;
 }
 
 #clients-bar {
   padding: 10px;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.9);
 
   .clients-info {
 
@@ -175,6 +183,21 @@ footer {
 
     .wallpaper {
       width: 280px;
+      position: relative;
+
+      .downloading {
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(0,0,0,1);
+        width: 100%;
+        height: 100%;
+        font-size: 80px;
+        opacity: 0.4;
+      }
 
       img {
         border-radius: 6px;
@@ -198,3 +221,4 @@ footer {
   object-fit: cover;
   display: none;
 }
+

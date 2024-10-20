@@ -1,12 +1,12 @@
 <div id="clients-bar" x-data="clients">
   <div id="client-list">
 
-    <div class="default-client"
-      @dragover.prevent 
-      @drop="dropAll($event)" 
-    > 
-      <p>send to all</p> 
-    </div> 
+    <!-- <div class="default-client" -->
+    <!--   @dragover.prevent  -->
+    <!--   @drop="dropAll($event)"  -->
+    <!-- >  -->
+    <!--   <p>send to all</p>  -->
+    <!-- </div>  -->
 
     <template x-for="client in $store.clients">
       <div class="client">
@@ -54,7 +54,7 @@
                 </sl-menu-item>
                 <sl-divider></sl-divider>
                 <sl-menu-item @click="renameDialog(client.uuid, client.hostname)">Rename</sl-menu-item>
-                <sl-menu-item @click="deleteDialog(client.uuid)">Delete</sl-menu-item>
+                <sl-menu-item @click="deleteDialog(client.uuid, client.hostname)">Delete</sl-menu-item>
               </sl-menu>
             </sl-dropdown>
           </div>

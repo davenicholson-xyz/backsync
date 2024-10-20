@@ -17,7 +17,7 @@ document.addEventListener('alpine:init', () => {
 
   Alpine.store('clients', [])
   Alpine.store('client_updates', [])
-  Alpine.store('upload_progress', 0)
+  Alpine.store('upload', { progress: 0, id: null })
   Alpine.store('settings', {
     data: {},
     async init() {
@@ -56,7 +56,7 @@ document.addEventListener('alpine:init', () => {
         Alpine.store('clients', data.clients);
         break;
       case "image_upload":
-        Alpine.store('upload_progress', data.progress);
+        Alpine.store('upload').progress = data.progress;
         break;
       default:
         break;
