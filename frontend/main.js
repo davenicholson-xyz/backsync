@@ -2,7 +2,6 @@ import './style.scss'
 import 'iconify-icon'
 import '@shoelace-style/shoelace/dist/themes/dark.css'
 import '@shoelace-style/shoelace/dist/shoelace.js'
-import router from "./js/router"
 import clients from "./js/clients"
 import search from "./js/search"
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path'
@@ -42,7 +41,6 @@ document.addEventListener('alpine:init', () => {
     })
   })
 
-  Alpine.data('router', router);
   Alpine.data('clients', clients);
   Alpine.data('search', search);
 

@@ -1,7 +1,6 @@
-use std::fs::File;
-
 use simplelog::CombinedLogger;
 use simplelog::*;
+use std::fs::File;
 
 pub fn start(filename: &str) {
     CombinedLogger::init(vec![

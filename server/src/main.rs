@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
             Ok::<_, anyhow::Error>(())
         },
         async {
-            http::server::start(http_port).await;
+            http::server::start(http_port).await?;
             Ok::<_, anyhow::Error>(())
         },
         async {

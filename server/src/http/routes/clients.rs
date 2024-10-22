@@ -12,7 +12,7 @@ use crate::{
 
 #[derive(Serialize, Deserialize)]
 pub struct ClientResponse {
-    streams: Vec<Client>,
+    pub clients: Vec<Client>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -21,8 +21,8 @@ pub struct ClientParams {
 }
 
 pub async fn fetch_all() -> Result<Json<ClientResponse>, HttpError> {
-    let streams = database::clients::all().await?;
-    let response = ClientResponse { streams };
+    let clients = database::clients::all().await?;
+    let response = ClientResponse { clients };
     Ok(Json(response))
 }
 

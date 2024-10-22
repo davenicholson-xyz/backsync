@@ -4,6 +4,7 @@ export default () => ({
   results: [],
   query: '',
   draggedWallpaper: null,
+  baseURL,
 
   async search_for() {
     if (this.query.trim() == '') { return }

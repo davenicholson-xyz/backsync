@@ -4,6 +4,7 @@ const baseURL = import.meta.env.MODE === 'development' ? 'http://127.0.0.1:3001'
 
 export default () => ({
 
+  baseURL,
   hoveredUUID: null,
 
   truncate(hostname, l) {
