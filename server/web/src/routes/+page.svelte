@@ -1,21 +1,15 @@
 <script>
-  export let data
-  let { clients } = data
-  console.log(clients)
+	import Gallery from '$lib/components/Gallery.svelte';
+	import { makeSeed } from '$lib/utils';
+
+	let { data } = $props();
+	let { settings } = data;
+
+	let seed = makeSeed(6);
+
+	let url = $state(
+		`https://wallhaven.cc/api/v1/search?q=boobs&ratios=landscape&seed=${seed}&sorting=random&purity=111&apikey=${settings.api_key}`
+	);
 </script>
 
-
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
-
-<h1>Clients</h1>
-{#each clients as client}
-<p>{client.hostname}</p>
-{/each}
-
-<style>
-h1 {
-    font-size: 20px;
-    color: red
-  }
-</style>
+<Gallery {url} {settings} />
