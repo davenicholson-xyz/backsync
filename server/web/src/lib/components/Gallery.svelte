@@ -9,6 +9,8 @@
 	let total_pages = $state(1);
 	let is_loading = $state(false);
 
+	$inspect(total_pages);
+
 	let observer;
 
 	async function loadPage() {
@@ -16,6 +18,7 @@
 		if (page > total_pages) return;
 
 		is_loading = true;
+		console.log('loading page ', page);
 
 		let p_url = `${url}&page=${page}`;
 		let response = await fetch(`${settings.baseURL}/wallhaven/search`, {
@@ -27,6 +30,7 @@
 		wallpapers = [...wallpapers, ...data.data];
 		total_pages = data.meta.last_page;
 		page++;
+		console.log(data.meta);
 
 		is_loading = false;
 	}
@@ -82,7 +86,7 @@
 	.gallery {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10px;
+		gap: 18px;
 	}
 
 	#scroll-target {

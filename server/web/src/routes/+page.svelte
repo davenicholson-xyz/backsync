@@ -8,7 +8,7 @@
 	let seed = makeSeed(6);
 
 	let url = $state(
-		`https://wallhaven.cc/api/v1/search?q=boobs&ratios=landscape&seed=${seed}&sorting=random&purity=111&apikey=${settings.api_key}`
+		`https://wallhaven.cc/api/v1/search?q=&ratios=landscape&seed=${seed}&sorting=random&purity=110&apikey=${settings.api_key}`
 	);
 </script>
 

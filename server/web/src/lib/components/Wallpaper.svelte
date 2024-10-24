@@ -10,12 +10,13 @@
 
 <style>
 	.wallpaper {
-		width: 270px;
+		width: 290px;
 	}
 
 	.wallpaper img {
 		width: 100%;
 		aspect-ratio: 16/10;
 		object-fit: cover;
+		border-radius: 10px;
 	}
 </style>
