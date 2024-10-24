@@ -20,10 +20,13 @@
 </div>
 
 <style>
+	@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&display=swap');
+
 	:global(body) {
 		margin: 0;
 		background: black;
 		color: white;
+		font-family: 'Afacad Flux', sans-serif;
 	}
 
 	.container {

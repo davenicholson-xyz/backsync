@@ -82,7 +82,7 @@
 
 <div class="gallery">
 	{#each wallpapers as wallpaper}
-		<Wallpaper src={wallpaper.thumbs.small} code={wallpaper.id} />
+		<Wallpaper src={wallpaper.thumbs.small} code={wallpaper.id} path={wallpaper.path} />
 	{/each}
 </div>
 

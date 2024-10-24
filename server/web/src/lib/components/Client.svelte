@@ -1,5 +1,8 @@
 <script>
-	import { settings } from '../stores/settings';
+	import { settings } from '$lib/stores/settings';
+	import { upload } from '$lib/stores/upload';
+	import Wallpaper from './Wallpaper.svelte';
+
 	let { client } = $props();
 	let { hostname, wallpaper_code } = client;
 
@@ -7,23 +10,46 @@
 
 	function dragEnter(event) {
 		dragover = true;
-		console.log(event);
 	}
 
 	function dragLeave() {
-		console.log('left');
 		dragover = false;
 	}
 
-	function dragDrop(event) {
+	async function dragDrop(event) {
+		dragover = false;
 		let eData = event.dataTransfer.getData('application/json');
 		let wallpaper = JSON.parse(eData);
-		console.log(wallpaper);
-		dragover = false;
+		upload.set({ code: wallpaper.code });
+		let wp = await uploadWallpaper(wallpaper.path);
+		upload.set({ code: null });
+		let set_wallpaper = await fetch(`${$settings.baseURL}/clients/${client.uuid}/set/${wp.code} `);
 	}
 
 	function dragOver(event) {
 		event.preventDefault();
+	}
+
+	async function uploadWallpaper(url) {
+		try {
+			let response = await fetch(`${$settings.baseURL}/wallhaven/upload`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ url })
+			});
+
+			if (!response.ok) {
+				const errData = await response.json();
+				console.error(errData);
+				throw new Error(`Error: ${response.status} - ${errData.message || 'Unknow error'}`);
+			}
+
+			let data = await response.json();
+			return data;
+		} catch (e) {
+			console.error('Failed to upload wallpaper:', e.message);
+			return { success: false, message: error.message };
+		}
 	}
 </script>
 
@@ -34,7 +60,7 @@
 			ondragleave={dragLeave}
 			ondrop={dragDrop}
 			ondragover={dragOver}
-			src={`${$settings.baseURL}/wallpapers/thumbnail/${wallpaper_code}`}
+			src={`${$settings.baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`}
 			alt={`thumb-${wallpaper_code}`}
 			class:dragover
 		/>

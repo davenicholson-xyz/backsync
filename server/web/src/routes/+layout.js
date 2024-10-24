@@ -9,9 +9,10 @@ let socket = new WebSocket("ws://127.0.0.1:3002")
 
 socket.onmessage = (event) => {
   let data = JSON.parse(event.data);
+  console.log(data)
   switch (data.subject) {
     case "clients_update":
-      clients.set(data.clients)
+      clients.update(() => data.clients)
       break
     case "image_upload":
       break;

@@ -1,6 +1,6 @@
 <script>
-	import { clients } from '../stores/clients';
-	import Client from './Client.svelte';
+	import { clients } from '$lib/stores/clients';
+	import Client from '$lib/components/Client.svelte';
 </script>
 
 <div class="client-bar">
