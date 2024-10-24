@@ -5,7 +5,7 @@
 	let { settings, id } = data;
 
 	let url = $state(
-		`https://wallhaven.cc/api/v1/collections/fatnic/${id}?apikey=${settings.api_key}`
+		`https://wallhaven.cc/api/v1/collections/${settings.wallhaven_username}/${id}?apikey=${settings.wallhaven_apikey}`
 	);
 </script>
 

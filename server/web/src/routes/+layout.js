@@ -29,11 +29,23 @@ socket.onmessage = (event) => {
 }
 
 
-export async function load() {
+export async function load({ fetch }) {
   let baseURL = import.meta.env.PROD ? base : "http://127.0.0.1:3001"
-  let api_key = "XXMiYVopgEjJlslkFOWxkmbdM1k4nGEi"
 
-  settings.set({ baseURL, api_key, ...get(settings) })
+  let default_settings = {
+    wallhaven_apikey: null,
+    wallhaven_username: null
+  }
+
+  try {
+    let response = await fetch(`${baseURL}/settings`)
+    let data = await response.json()
+    default_settings = { ...default_settings, ...data }
+  } catch (e) {
+    console.error("could not get settings")
+  }
+
+  settings.set({ baseURL, ...default_settings, ...get(settings) })
   const current_settings = get(settings)
   return { settings: current_settings }
 }

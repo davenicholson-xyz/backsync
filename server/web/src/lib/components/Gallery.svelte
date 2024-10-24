@@ -9,8 +9,6 @@
 	let total_pages = $state(1);
 	let is_loading = $state(false);
 
-	$inspect(total_pages);
-
 	let observer;
 
 	async function loadPage() {
@@ -18,21 +16,27 @@
 		if (page > total_pages) return;
 
 		is_loading = true;
-		console.log('loading page ', page);
 
 		let p_url = `${url}&page=${page}`;
-		let response = await fetch(`${settings.baseURL}/wallhaven/search`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ url: p_url })
-		});
-		let data = await response.json();
-		wallpapers = [...wallpapers, ...data.data];
-		total_pages = data.meta.last_page;
-		page++;
-		console.log(data.meta);
+		try {
+			let response = await fetch(`${settings.baseURL}/wallhaven/search`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ url: p_url })
+			});
+			let data = await response.json();
 
-		is_loading = false;
+			if (data.error) {
+				throw new Error(data.error);
+			}
+			wallpapers = [...wallpapers, ...data.data];
+			total_pages = data.meta.last_page;
+			page++;
+		} catch (e) {
+			console.error('API', e);
+		} finally {
+			is_loading = false;
+		}
 	}
 
 	function observeElement(entries) {
@@ -54,8 +58,10 @@
 
 	async function loadUntilNotInView(target) {
 		await loadPage();
-		while (isVisibleInViewport(target)) {
-			await loadPage();
+		if (total_pages > 1) {
+			while (isVisibleInViewport(target)) {
+				await loadPage();
+			}
 		}
 	}
 
@@ -82,6 +88,10 @@
 
 <div id="scroll-target"></div>
 
+<div id="drag-thumbnail">
+	<img id="drag-thumbnail-image" data-name="dragthumb" />
+</div>
+
 <style>
 	.gallery {
 		display: flex;
@@ -92,5 +102,18 @@
 	#scroll-target {
 		color: red;
 		height: 20px;
+	}
+
+	#drag-thumbnail {
+		position: absolute;
+		top: -100px;
+		left: -100px;
+	}
+
+	#drag-thumbnail img {
+		width: 100px;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+		display: none;
 	}
 </style>

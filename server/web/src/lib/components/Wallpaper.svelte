@@ -1,10 +1,27 @@
 <script>
-	let { src, id, local } = $props();
+	let { src, code, local } = $props();
+	let is_dragging = $state(false);
+
+	function dragStart(event) {
+		is_dragging = true;
+		let dragImg = document.getElementById('drag-thumbnail-image');
+		dragImg.src = src;
+		dragImg.style.display = 'block';
+		event.dataTransfer.setDragImage(dragImg, 60, 25);
+
+		event.dataTransfer.setData('application/json', JSON.stringify({ src, code }));
+	}
+
+	function dragEnd() {
+		is_dragging = false;
+		let dragImg = document.getElementById('drag-thumbnail-image');
+		dragImg.style.display = 'none';
+	}
 </script>
 
-<div class="wallpaper">
+<div class="wallpaper" draggable="true" ondragstart={dragStart} ondragend={dragEnd}>
 	{#if !local}
-		<img {src} alt={id} />
+		<img {src} alt={code} />
 	{/if}
 </div>
 
