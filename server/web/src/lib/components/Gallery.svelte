@@ -1,6 +1,7 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
 	import Wallpaper from './Wallpaper.svelte';
+	import ScrollToTop from './ScrollToTop.svelte';
 
 	let { url, settings } = $props();
 
@@ -66,7 +67,7 @@
 	}
 
 	onMount(async () => {
-		observer = new IntersectionObserver(observeElement, { rootMargin: '200px' });
+		observer = new IntersectionObserver(observeElement, { rootMargin: '300px' });
 		const target = document.querySelector('#scroll-target');
 
 		if (target) {
@@ -84,24 +85,26 @@
 	{#each wallpapers as wallpaper}
 		<Wallpaper src={wallpaper.thumbs.small} code={wallpaper.id} path={wallpaper.path} />
 	{/each}
+	<div id="scroll-target"></div>
 </div>
-
-<div id="scroll-target"></div>
 
 <div id="drag-thumbnail">
-	<img id="drag-thumbnail-image" data-name="dragthumb" />
+	<img id="drag-thumbnail-image" data-name="dragthumb" alt="dragged" />
 </div>
+
+<ScrollToTop />
 
 <style>
 	.gallery {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 18px;
+		justify-content: center;
+		gap: 22px;
 	}
 
 	#scroll-target {
 		color: red;
-		height: 20px;
+		height: 1px;
 	}
 
 	#drag-thumbnail {

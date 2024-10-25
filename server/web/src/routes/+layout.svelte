@@ -13,6 +13,10 @@
 			{@render children()}
 		</article>
 
+		<aside>
+			<p>sidebar</p>
+		</aside>
+
 		<footer>
 			<p>footer</p>
 		</footer>
@@ -31,10 +35,10 @@
 
 	.container {
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: 330px 1fr;
 		grid-template-rows: auto 1fr auto;
-		grid-template-areas: 'header' 'content' 'footer';
-		max-width: 1400px;
+		grid-template-areas: 'header header' 'sidebar content' ' footer footer';
+		max-width: 1800px;
 		margin-inline: auto;
 		min-height: 100vh;
 	}
@@ -50,6 +54,10 @@
 	article {
 		grid-area: content;
 		overflow: auto;
+	}
+
+	aside {
+		grid-area: sidebar;
 	}
 
 	footer {

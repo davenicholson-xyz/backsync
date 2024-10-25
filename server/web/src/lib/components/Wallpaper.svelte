@@ -84,7 +84,7 @@
 <style>
 	.wallpaper {
 		position: relative;
-		width: 290px;
+		width: 250px;
 	}
 
 	.wallpaper img {

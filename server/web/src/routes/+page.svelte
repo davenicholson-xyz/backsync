@@ -5,7 +5,7 @@
 	let { settings } = data;
 
 	let url = $state(
-		`https://wallhaven.cc/api/v1/search?ratios=landscape&sorting=toplist&purity=100&apikey=${settings.wallhaven_apikey}`
+		`https://wallhaven.cc/api/v1/search?ratios=landscape&sorting=toplist&purity=110&apikey=${settings.wallhaven_apikey}`
 	);
 </script>
 
