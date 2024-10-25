@@ -19,6 +19,7 @@ use tokio::io::AsyncReadExt;
 #[derive(Serialize, Deserialize)]
 pub struct WallpapersResponse {
     wallpapers: Vec<Wallpaper>,
+    pages: i64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,13 +35,23 @@ pub async fn upload(multipart: Multipart) -> Result<Json<Wallpaper>, HttpError> 
 
 pub async fn fetch_all() -> Result<Json<WallpapersResponse>, HttpError> {
     let wallpapers = database::wallpaper::all().await?;
-    let response = WallpapersResponse { wallpapers };
+    let total_count = database::wallpaper::count().await? as f64;
+    let pages = (total_count / 24.0).ceil() as i64;
+    let response = WallpapersResponse { wallpapers, pages };
     Ok(Json(response))
 }
 
 pub async fn fetch(Path(code): Path<String>) -> Result<Json<Wallpaper>, HttpError> {
     let wallpaper = database::wallpaper::get(&code).await?;
     Ok(Json(wallpaper))
+}
+
+pub async fn page(Path(page): Path<u32>) -> Result<Json<WallpapersResponse>, HttpError> {
+    let wallpapers = database::wallpaper::page(page).await?;
+    let total_count = database::wallpaper::count().await? as f64;
+    let pages = (total_count / 24.0).ceil() as i64;
+    let response = WallpapersResponse { wallpapers, pages };
+    Ok(Json(response))
 }
 
 pub async fn fetch_thumbnail(Path(code): Path<String>) -> Result<impl IntoResponse, HttpError> {
@@ -85,6 +96,7 @@ pub fn get_routes() -> Router {
         .route("/wallpapers", get(fetch_all))
         .route("/wallpapers/upload", post(upload))
         .route("/wallpapers/code/:code", get(fetch))
+        .route("/wallpapers/page/:page", get(page))
         .route("/wallpapers/set/:filename", get(set))
         .route("/wallpapers/thumbnail/:code", get(fetch_thumbnail))
         .route("/wallpapers/delete/:code", delete(delete_wallpaper))

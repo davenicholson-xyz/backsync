@@ -11,14 +11,12 @@
 
 	let observer;
 
-	$inspect(wallpapers);
-
 	async function loadPage() {
 		if (is_loading) return;
+		console.log(total_pages);
 		if (page > total_pages) return;
 		is_loading = true;
 		const result = await nextPage(page);
-		console.log(result);
 		wallpapers = [...wallpapers, ...result];
 		page++;
 		is_loading = false;
@@ -67,7 +65,12 @@
 
 <div class="gallery">
 	{#each wallpapers as wallpaper}
-		<Wallpaper src={wallpaper.thumbnail} code={wallpaper.code} path={wallpaper.path} />
+		<Wallpaper
+			src={wallpaper.thumbnail}
+			code={wallpaper.code}
+			path={wallpaper.path}
+			local={wallpaper.local}
+		/>
 	{/each}
 	<div id="scroll-target"></div>
 </div>

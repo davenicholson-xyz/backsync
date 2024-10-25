@@ -4,10 +4,6 @@
 	let { url, settings } = $props();
 	let total_pages = $state(1);
 
-	let url2 = $state(
-		`https://wallhaven.cc/api/v1/search?ratios=landscape&sorting=toplist&purity=111&apikey=${settings.wallhaven_apikey}`
-	);
-
 	async function nextPage(p) {
 		let p_url = `${url}&page=${p}`;
 		try {

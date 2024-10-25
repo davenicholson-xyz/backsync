@@ -1,5 +1,6 @@
 <script>
 	import ClientBar from '../lib/components/ClientBar.svelte';
+	import Sidebar from '../lib/components/Sidebar.svelte';
 	let { children } = $props();
 </script>
 
@@ -14,7 +15,7 @@
 		</article>
 
 		<aside>
-			<p>sidebar</p>
+			<Sidebar />
 		</aside>
 
 		<footer>
