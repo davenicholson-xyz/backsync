@@ -68,24 +68,27 @@
 		/>
 	</div>
 	<div class="client-info">
-		<div class="status-dot" class:online>
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48"
-				><path
-					fill="currentColor"
-					stroke="currentColor"
-					stroke-width="4"
-					d="M24 33a9 9 0 1 0 0-18a9 9 0 0 0 0 18Z"
-				/></svg
-			>
-		</div>
-
-		<div class="will_sync">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-				><path
-					fill="currentColor"
-					d="M3 12q0-3.75 2.625-6.375T12 3V2q0-.3.275-.45t.525.05l3.125 2.35q.4.3.4.8t-.4.8L12.8 7.9q-.25.2-.525.05T12 7.5v-1q-2.275 0-3.888 1.613T6.5 12q0 .825.238 1.588T7.4 15q.275.4.225.863T7.2 16.6l-.85.625q-.45.35-1 .275t-.875-.55q-.725-1.075-1.1-2.325T3 12m9 9v1q0 .3-.275.45t-.525-.05l-3.125-2.35q-.4-.3-.4-.8t.4-.8L11.2 16.1q.25-.2.525-.05t.275.45v1q2.275 0 3.888-1.613T17.5 12q0-.825-.238-1.588T16.6 9q-.275-.4-.225-.862T16.8 7.4l.85-.625q.45-.35 1-.263t.875.538q.7 1.075 1.088 2.325T21 12q0 3.75-2.625 6.375T12 21"
-				/></svg
-			>
+		<div class="icons">
+			{#if will_sync}
+				<div class="will_sync">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+						><path
+							fill="currentColor"
+							d="M3 12q0-3.75 2.625-6.375T12 3V2q0-.3.275-.45t.525.05l3.125 2.35q.4.3.4.8t-.4.8L12.8 7.9q-.25.2-.525.05T12 7.5v-1q-2.275 0-3.888 1.613T6.5 12q0 .825.238 1.588T7.4 15q.275.4.225.863T7.2 16.6l-.85.625q-.45.35-1 .275t-.875-.55q-.725-1.075-1.1-2.325T3 12m9 9v1q0 .3-.275.45t-.525-.05l-3.125-2.35q-.4-.3-.4-.8t.4-.8L11.2 16.1q.25-.2.525-.05t.275.45v1q2.275 0 3.888-1.613T17.5 12q0-.825-.238-1.588T16.6 9q-.275-.4-.225-.862T16.8 7.4l.85-.625q.45-.35 1-.263t.875.538q.7 1.075 1.088 2.325T21 12q0 3.75-2.625 6.375T12 21"
+						/></svg
+					>
+				</div>
+			{/if}
+			<div class="status-dot" class:online>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48"
+					><path
+						fill="currentColor"
+						stroke="currentColor"
+						stroke-width="4"
+						d="M24 33a9 9 0 1 0 0-18a9 9 0 0 0 0 18Z"
+					/></svg
+				>
+			</div>
 		</div>
 
 		<span>{hostname}</span>
@@ -108,17 +111,32 @@
 	.client-info {
 		display: flex;
 		align-items: center;
+		gap: 8px;
+	}
+
+	.client-info .icons {
+		color: #777;
+		display: flex;
+		align-items: center;
+		justify-content: space-bwtween;
 	}
 
 	.client-info .status-dot {
+		margin-left: -3px;
 		padding-top: 4px;
-		color: #777;
 	}
+
 	.status-dot.online {
 		color: #5ff83a;
 	}
 
 	.will_sync {
 		font-size: 12px;
+		margin-left: 0px;
+	}
+
+	.will_sync svg {
+		padding-top: 3px;
+		width: 16px;
 	}
 </style>

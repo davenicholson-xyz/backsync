@@ -3,25 +3,41 @@
 	import Wallpaper from './Wallpaper.svelte';
 	import ScrollToTop from './ScrollToTop.svelte';
 
-	let { nextPage, total_pages } = $props();
+	let { url, settings } = $props();
 
 	let wallpapers = $state([]);
 	let page = $state(1);
+	let total_pages = $state(1);
 	let is_loading = $state(false);
 
 	let observer;
 
-	$inspect(wallpapers);
-
 	async function loadPage() {
 		if (is_loading) return;
 		if (page > total_pages) return;
+
 		is_loading = true;
-		const result = await nextPage(page);
-		console.log(result);
-		wallpapers = [...wallpapers, ...result];
-		page++;
-		is_loading = false;
+
+		let p_url = `${url}&page=${page}`;
+		try {
+			let response = await fetch(`${settings.baseURL}/wallhaven/search`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ url: p_url })
+			});
+			let data = await response.json();
+
+			if (data.error) {
+				throw new Error(data.error);
+			}
+			wallpapers = [...wallpapers, ...data.data];
+			total_pages = data.meta.last_page;
+			page++;
+		} catch (e) {
+			console.error('API', e);
+		} finally {
+			is_loading = false;
+		}
 	}
 
 	function observeElement(entries) {
@@ -67,7 +83,7 @@
 
 <div class="gallery">
 	{#each wallpapers as wallpaper}
-		<Wallpaper src={wallpaper.thumbnail} code={wallpaper.code} path={wallpaper.path} />
+		<Wallpaper src={wallpaper.thumbs.small} code={wallpaper.id} path={wallpaper.path} />
 	{/each}
 	<div id="scroll-target"></div>
 </div>

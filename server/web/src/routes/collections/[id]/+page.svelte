@@ -1,5 +1,5 @@
 <script>
-	import Gallery from '$lib/components/Gallery.svelte';
+	import WallhavenGallery from '$lib/components/WallhavenGallery.svelte';
 
 	let { data } = $props();
 	let { settings, id } = data;
@@ -9,4 +9,4 @@
 	);
 </script>
 
-<Gallery {url} {settings} />
+<WallhavenGallery {url} {settings} />

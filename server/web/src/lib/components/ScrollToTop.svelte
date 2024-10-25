@@ -32,15 +32,19 @@
 		right: 50%;
 		cursor: pointer;
 		transition: opacity 0.3s;
-		background: rgba(0, 0, 0, 0.4);
 		padding: 8px 6px;
 		border-radius: 10px;
+		background: black;
+		opacity: 0.6;
+	}
+
+	.scroll-to-top:hover {
+		opacity: 1;
 	}
 
 	.scroll-to-top svg {
 		width: 35px;
 		height: 35px;
-		opacity: 0.6;
 	}
 
 	.hidden {
