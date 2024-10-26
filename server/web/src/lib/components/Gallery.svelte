@@ -12,20 +12,22 @@
 	let observer;
 
 	async function loadPage() {
-		if (is_loading) return;
 		console.log(total_pages);
-		if (page > total_pages) return;
+		if (is_loading || page > total_pages) return;
 		is_loading = true;
 		const result = await nextPage(page);
 		wallpapers = [...wallpapers, ...result];
 		page++;
 		is_loading = false;
+		checkScrollTargetVisibility();
 	}
 
-	function observeElement(entries) {
+	async function observeElement(entries) {
 		const [entry] = entries;
 		if (entry.isIntersecting) {
-			loadPage();
+			await loadPage();
+		} else if (page >= total_pages) {
+			observer.disconnect();
 		}
 	}
 
@@ -39,24 +41,21 @@
 		);
 	};
 
-	async function loadUntilNotInView(target) {
-		await loadPage();
-		if (total_pages > 1) {
-			while (isVisibleInViewport(target)) {
-				await loadPage();
-			}
-		}
-	}
-
 	onMount(async () => {
 		observer = new IntersectionObserver(observeElement, { rootMargin: '300px' });
 		const target = document.querySelector('#scroll-target');
 
 		if (target) {
 			observer.observe(target);
-			loadUntilNotInView(target);
 		}
 	});
+
+	async function checkScrollTargetVisibility() {
+		const target = document.querySelector('#scroll-target');
+		if (target && isVisibleInViewport(target) && page <= total_pages) {
+			await loadPage();
+		}
+	}
 
 	onDestroy(() => {
 		if (observer) observer.disconnect();

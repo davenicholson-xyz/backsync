@@ -10,3 +10,11 @@ export function makeSeed(length) {
   return result;
 }
 
+export function convertToBinary(obj) {
+  let binary = Object.values(obj)
+    .map((v) => (v ? '1' : '0'))
+    .join('');
+
+  return binary == "000" ? "100" : binary;
+}
+

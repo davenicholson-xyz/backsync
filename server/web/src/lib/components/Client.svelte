@@ -5,10 +5,11 @@
 	let { client } = $props();
 	let { hostname, wallpaper_code } = client;
 
+	let dragover = $state(false);
+	let is_setting = $state(false);
+
 	let online = $derived(client.connected_at != '');
 	let will_sync = $derived(client.syncwall != null);
-
-	let dragover = $state(false);
 
 	function dragEnter(event) {
 		dragover = true;
@@ -20,12 +21,15 @@
 
 	async function dragDrop(event) {
 		dragover = false;
+		is_setting = true;
+
 		let eData = event.dataTransfer.getData('application/json');
 		let wallpaper = JSON.parse(eData);
 		upload.set({ code: wallpaper.code });
 		let wp = await uploadWallpaper(wallpaper.path);
 		upload.set({ code: null });
 		let set_wallpaper = await fetch(`${$settings.baseURL}/clients/${client.uuid}/set/${wp.code} `);
+		is_setting = false;
 	}
 
 	function dragOver(event) {
@@ -66,6 +70,61 @@
 			alt={`thumb-${wallpaper_code}`}
 			class:dragover
 		/>
+		{#if is_setting}
+			<div class="client-setting">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+					><g fill="currentColor"
+						><circle cx="12" cy="3.5" r="1.5"
+							><animateTransform
+								attributeName="transform"
+								calcMode="discrete"
+								dur="2.4s"
+								repeatCount="indefinite"
+								type="rotate"
+								values="0 12 12;90 12 12;180 12 12;270 12 12"
+							/><animate
+								attributeName="opacity"
+								dur="0.6s"
+								repeatCount="indefinite"
+								values="1;1;0"
+							/></circle
+						><circle cx="12" cy="3.5" r="1.5" transform="rotate(30 12 12)"
+							><animateTransform
+								attributeName="transform"
+								begin="0.2s"
+								calcMode="discrete"
+								dur="2.4s"
+								repeatCount="indefinite"
+								type="rotate"
+								values="30 12 12;120 12 12;210 12 12;300 12 12"
+							/><animate
+								attributeName="opacity"
+								begin="0.2s"
+								dur="0.6s"
+								repeatCount="indefinite"
+								values="1;1;0"
+							/></circle
+						><circle cx="12" cy="3.5" r="1.5" transform="rotate(60 12 12)"
+							><animateTransform
+								attributeName="transform"
+								begin="0.4s"
+								calcMode="discrete"
+								dur="2.4s"
+								repeatCount="indefinite"
+								type="rotate"
+								values="60 12 12;150 12 12;240 12 12;330 12 12"
+							/><animate
+								attributeName="opacity"
+								begin="0.4s"
+								dur="0.6s"
+								repeatCount="indefinite"
+								values="1;1;0"
+							/></circle
+						></g
+					></svg
+				>
+			</div>
+		{/if}
 	</div>
 	<div class="client-info">
 		<div class="icons">
@@ -96,6 +155,9 @@
 </div>
 
 <style>
+	.client-image {
+		position: relative;
+	}
 	.client-image img {
 		width: 220px;
 		aspect-ratio: 16/10;
@@ -138,5 +200,20 @@
 	.will_sync svg {
 		padding-top: 3px;
 		width: 16px;
+	}
+
+	.client-setting {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		display: grid;
+		place-items: center;
+	}
+
+	.client-setting svg {
+		width: 30%;
 	}
 </style>
