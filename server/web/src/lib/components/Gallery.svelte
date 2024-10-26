@@ -12,7 +12,6 @@
 	let observer;
 
 	async function loadPage() {
-		console.log(total_pages);
 		if (is_loading || page > total_pages) return;
 		is_loading = true;
 		const result = await nextPage(page);

@@ -1,7 +1,10 @@
 <script>
-	import { purity, categories, query } from '$lib/stores/searchparams';
+	import { purity, categories, query, toprange } from '$lib/stores/searchparams';
 	import ToggleButton from './ToggleButton.svelte';
+	import RadioButton from './RadioButton.svelte';
+
 	let { settings, sorting } = $props();
+
 	let authed = $derived(settings.wallhaven_apikey != '');
 	let search_term = $state('');
 
@@ -21,17 +24,29 @@
 <div class="search-params-bar">
 	<div class="button-group purity">
 		<ToggleButton label="sfw" bind:checked={$purity.sfw} --color="#4b934e" />
-		<ToggleButton label="sketchy" bind:checked={$purity.sketchy} --color="#F0E68C" />
+		<ToggleButton label="sketchy" bind:checked={$purity.sketchy} --color="#cec00f" />
 		{#if authed}
-			<ToggleButton label="nsfw" bind:checked={$purity.nsfw} --color="red" />
+			<ToggleButton label="nsfw" bind:checked={$purity.nsfw} --color="#C70039" />
 		{/if}
 	</div>
 
 	<div class="button-group categories">
-		<ToggleButton label="general" bind:checked={$categories.general} --color="blue" />
-		<ToggleButton label="anime" bind:checked={$categories.anime} --color="blue" />
-		<ToggleButton label="people" bind:checked={$categories.people} --color="blue" />
+		<ToggleButton label="general" bind:checked={$categories.general} --color="#009ac7" />
+		<ToggleButton label="anime" bind:checked={$categories.anime} --color="#009ac7" />
+		<ToggleButton label="people" bind:checked={$categories.people} --color="#009ac7" />
 	</div>
+
+	{#if sorting == 'toplist'}
+		<div class="button-group toprange">
+			<RadioButton label="1 day" value="1d" bind:group={$toprange} --color="#4b934e" />
+			<RadioButton label="3 days" value="3d" bind:group={$toprange} --color="#4b934e" />
+			<RadioButton label="1 week" value="1w" bind:group={$toprange} --color="#4b934e" />
+			<RadioButton label="1 month" value="1M" bind:group={$toprange} --color="#4b934e" />
+			<RadioButton label="3 months" value="3M" bind:group={$toprange} --color="#4b934e" />
+			<RadioButton label="6 months" value="6M" bind:group={$toprange} --color="#4b934e" />
+			<RadioButton label="1 year" value="1y" bind:group={$toprange} --color="#4b934e" />
+		</div>
+	{/if}
 
 	{#if sorting == 'search'}
 		<div class="searchbar">
@@ -44,7 +59,7 @@
 <style>
 	.search-params-bar {
 		display: flex;
-		margin-bottom: 24px;
+		margin-bottom: 32px;
 	}
 
 	.button-group {

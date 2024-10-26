@@ -1,5 +1,5 @@
 <script>
-	import { purity, categories, query } from '$lib/stores/searchparams';
+	import { purity, categories, query, toprange } from '$lib/stores/searchparams';
 	import { page } from '$app/stores';
 	import { makeSeed, convertToBinary } from '$lib/utils';
 
@@ -21,8 +21,6 @@
 		`https://wallhaven.cc/api/v1/search?ratios=landscape&purity=${purity_s}&categories=${categories_s}${apikey}`
 	);
 
-	$inspect(purity_s);
-
 	$effect(() => {
 		if ($query !== '') {
 			let query_enc = encodeURI($query);
@@ -37,7 +35,7 @@
 				url = `${base_url}&sorting=hot`;
 				break;
 			case 'toplist':
-				url = `${base_url}&sorting=toplist`;
+				url = `${base_url}&topRange=${$toprange}&sorting=toplist`;
 				break;
 			case 'search':
 				url = '';

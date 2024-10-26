@@ -4,8 +4,6 @@
 	let { settings } = $props();
 	let total_pages = $state(1);
 
-	$inspect(total_pages);
-
 	async function nextPage(p) {
 		try {
 			let response = await fetch(`${settings.baseURL}/wallpapers/page/${p}`);

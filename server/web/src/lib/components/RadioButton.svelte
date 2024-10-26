@@ -1,18 +1,16 @@
 <script>
-	let { label, checked = $bindable() } = $props();
+	let { label, value, group = $bindable() } = $props();
 </script>
 
-<label class="checkbox-button">
-	<input type="checkbox" bind:checked />
-	<span>{label}</span>
-</label>
+<input type="radio" id={value} {value} bind:group />
+<label for={value}>{label}</label>
 
 <style>
-	.checkbox-button input[type='checkbox'] {
+	input[type='radio'] {
 		display: none;
 	}
 
-	.checkbox-button span {
+	label {
 		display: inline-block;
 		padding: 6px 8px;
 		color: rgba(255, 255, 255, 0.6);
@@ -24,7 +22,7 @@
 		color: rgba(255, 255, 255, 0.6);
 	}
 
-	.checkbox-button input[type='checkbox']:checked + span {
+	input[type='radio']:checked + label {
 		background-color: var(--color);
 		color: white;
 		color: var(--text-color);
