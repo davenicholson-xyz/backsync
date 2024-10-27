@@ -27,6 +27,10 @@
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&display=swap');
 
+	:root {
+		--client-height: 240px;
+	}
+
 	:global(body) {
 		margin: 0;
 		background: black;
@@ -46,6 +50,7 @@
 
 	header {
 		grid-area: header;
+		height: var(--client-height);
 		margin-block: 0;
 		position: sticky;
 		top: 0;
@@ -59,6 +64,10 @@
 
 	aside {
 		grid-area: sidebar;
+		position: sticky;
+		top: var(--client-height);
+		height: calc(100vh - var(--client-height));
+		overflow-y: auto;
 	}
 
 	footer {

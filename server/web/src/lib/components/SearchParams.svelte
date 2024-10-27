@@ -88,4 +88,16 @@
 		display: flex;
 		margin-right: 20px;
 	}
+
+	.searchbar input {
+		background: transparent;
+		border: none;
+		width: 300px;
+		padding: 2px 4px;
+		color: white;
+	}
+
+	.searchbar input:blur {
+		border: none;
+	}
 </style>
