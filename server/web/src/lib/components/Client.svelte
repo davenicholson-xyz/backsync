@@ -150,7 +150,9 @@
 			</div>
 		</div>
 
-		<span>{hostname}</span>
+		<a href={`/clients/${client.uuid}`}>
+			{hostname}
+		</a>
 	</div>
 </div>
 
@@ -215,5 +217,14 @@
 
 	.client-setting svg {
 		width: 30%;
+	}
+
+	.client-info a {
+		color: white;
+		text-decoration: none;
+	}
+
+	.client-info a:hover {
+		color: #f39c12;
 	}
 </style>

@@ -29,7 +29,10 @@
 		>
 		local
 	</a>
-	<h2>wallhaven</h2>
+
+	<div class="spacer"></div>
+
+	<h2>Wallhaven</h2>
 
 	<a href="/wallhaven?sorting=search" class:active={sorting == '?sorting=search'}>
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -68,45 +71,53 @@
 		>
 		collections
 	</a>
+
+	<div class="spacer"></div>
+
+	<a href="/settings" class:active={pathname == '/settings'}>
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+			><path
+				fill="currentColor"
+				d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5"
+			/></svg
+		>
+		settings
+	</a>
 </div>
 
 <style>
 	.sidebar {
-		width: 200px;
-		background-color: #2c3e50;
 		padding: 20px;
+		background-color: transparent;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
-		border-radius: 8px;
+		gap: 2px;
 	}
 
 	.sidebar h2 {
-		color: #ecf0f1;
-		font-size: 20px;
-		margin-top: 15px;
-		margin-bottom: 1px;
-		padding-left: 5px;
-		font-weight: bold;
+		font-size: 18px;
+		text-align: center;
+		margin-top: 0px;
+		margin-bottom: 4px;
+		padding: 0;
 	}
+
 	.sidebar a {
 		display: flex;
 		align-items: center;
 		gap: 8px;
 		text-decoration: none;
 		color: #ecf0f1;
-		padding: 10px 15px;
+		padding: 3px 15px;
 		border-radius: 5px;
 		font-size: 18px;
 		transition:
 			background-color 0.3s ease,
 			color 0.3s ease;
-		font-weight: bold;
 	}
 
 	.sidebar a svg {
-		width: 26px;
-		margin-right: 10px;
+		width: 18px;
 	}
 
 	.sidebar a:hover {
@@ -115,7 +126,10 @@
 	}
 
 	.sidebar a.active {
-		background-color: #f39c12;
-		color: #2c3e50;
+		color: #f39c12;
+	}
+
+	.sidebar .spacer {
+		height: 50px;
 	}
 </style>

@@ -48,12 +48,13 @@ pub async fn page(p: u32) -> sqlx::Result<Vec<Wallpaper>> {
     let pool = super::pool();
     let per_page = 24;
     let offset = (p.saturating_sub(1) * per_page) as i64;
-    let wallpapers =
-        sqlx::query_as::<_, Wallpaper>("SELECT * FROM wallpapers ORDER BY id LIMIT $1 OFFSET $2")
-            .bind(per_page as i64)
-            .bind(offset)
-            .fetch_all(pool)
-            .await?;
+    let wallpapers = sqlx::query_as::<_, Wallpaper>(
+        "SELECT * FROM wallpapers ORDER BY id DESC LIMIT $1 OFFSET $2",
+    )
+    .bind(per_page as i64)
+    .bind(offset)
+    .fetch_all(pool)
+    .await?;
     Ok(wallpapers)
 }
 

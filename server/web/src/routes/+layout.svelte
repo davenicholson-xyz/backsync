@@ -36,7 +36,7 @@
 
 	.container {
 		display: grid;
-		grid-template-columns: 330px 1fr;
+		grid-template-columns: 220px 1fr;
 		grid-template-rows: auto 1fr auto;
 		grid-template-areas: 'header header' 'sidebar content' ' footer footer';
 		max-width: 1800px;
