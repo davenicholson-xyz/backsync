@@ -69,6 +69,22 @@ pub async fn fetch_thumbnail(Path(code): Path<String>) -> Result<impl IntoRespon
     Ok(response.into_response())
 }
 
+pub async fn fetch_full(Path(code): Path<String>) -> Result<impl IntoResponse, HttpError> {
+    let wp = database::wallpaper::get(&code).await?;
+    let image_dir = paths::storage_path("wallpaper").make_string();
+    let image_file = format!("{}/{}.{}", image_dir, wp.code, wp.extension);
+
+    let mut file = File::open(image_file).await?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).await?;
+    let response = (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, format!("image/{}", wp.extension))],
+        Bytes::from(buffer),
+    );
+    Ok(response.into_response())
+}
+
 pub async fn delete_wallpaper(Path(code): Path<String>) -> Result<StatusCode, HttpError> {
     let (code, ext) = utils::split_filename(&code).unwrap();
     files::wallpaper::delete_wallpaper(&code, &ext).await?;
@@ -99,5 +115,6 @@ pub fn get_routes() -> Router {
         .route("/wallpapers/page/:page", get(page))
         .route("/wallpapers/set/:filename", get(set))
         .route("/wallpapers/thumbnail/:code", get(fetch_thumbnail))
+        .route("/wallpapers/full/:code", get(fetch_full))
         .route("/wallpapers/delete/:code", delete(delete_wallpaper))
 }

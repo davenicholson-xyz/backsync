@@ -11,6 +11,7 @@ socket.onmessage = (event) => {
   let data = JSON.parse(event.data);
   switch (data.subject) {
     case "clients_update":
+      console.log(data.clients)
       clients.update(() => data.clients)
       break
     case "image_upload":
