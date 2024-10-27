@@ -17,10 +17,6 @@
 		<aside>
 			<Sidebar />
 		</aside>
-
-		<footer>
-			<p>footer</p>
-		</footer>
 	</div>
 </div>
 
@@ -41,8 +37,8 @@
 	.container {
 		display: grid;
 		grid-template-columns: 220px 1fr;
-		grid-template-rows: auto 1fr auto;
-		grid-template-areas: 'header header' 'sidebar content' ' footer footer';
+		grid-template-rows: auto 1fr;
+		grid-template-areas: 'header header' 'sidebar content';
 		max-width: 1800px;
 		margin-inline: auto;
 		min-height: 100vh;
@@ -68,9 +64,5 @@
 		top: var(--client-height);
 		height: calc(100vh - var(--client-height));
 		overflow-y: auto;
-	}
-
-	footer {
-		grid-area: footer;
 	}
 </style>

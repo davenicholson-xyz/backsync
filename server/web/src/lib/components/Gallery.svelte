@@ -11,6 +11,10 @@
 
 	let observer;
 
+	function removeWallpaper(code) {
+		wallpapers = wallpapers.filter((w) => w.code != code);
+	}
+
 	async function loadPage() {
 		if (is_loading || page > total_pages) return;
 		is_loading = true;
@@ -69,6 +73,7 @@
 			path={wallpaper.path}
 			link={wallpaper.link}
 			local={wallpaper.local}
+			remove={removeWallpaper}
 		/>
 	{/each}
 	<div id="scroll-target"></div>

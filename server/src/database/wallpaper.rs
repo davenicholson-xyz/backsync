@@ -3,6 +3,8 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
+use crate::http;
+
 #[derive(Serialize, Deserialize, FromRow, Debug)]
 pub struct Wallpaper {
     pub id: i32,
@@ -82,5 +84,6 @@ pub async fn delete(code: &str) -> Result<()> {
         .bind(code)
         .execute(pool)
         .await?;
+    http::websocket::client_update().await?;
     Ok(())
 }

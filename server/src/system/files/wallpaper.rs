@@ -25,8 +25,12 @@ use anyhow::Result;
 pub async fn delete_wallpaper(id: &str, ext: &str) -> Result<()> {
     let wallpaper_path = paths::storage_path(&format!("wallpaper/{}.{}", id, ext));
     let thumbnail_path = paths::storage_path(&format!("wallpaper/.thumbs/{}.jpg", id));
-    std::fs::remove_file(wallpaper_path)?;
-    std::fs::remove_file(thumbnail_path)?;
+    if wallpaper_path.exists() {
+        std::fs::remove_file(wallpaper_path)?;
+    }
+    if thumbnail_path.exists() {
+        std::fs::remove_file(thumbnail_path)?;
+    }
     Ok(())
 }
 

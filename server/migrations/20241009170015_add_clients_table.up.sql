@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS clients (
     addr TEXT NOT NULL UNIQUE,
     hostname TEXT NOT NULL,
     connected_at TEXT,
-    wallpaper INTEGER, FOREIGN KEY(wallpaper) REFERENCES wallpapers(id)
+    wallpaper INTEGER, 
+    FOREIGN KEY(wallpaper) REFERENCES wallpapers(id) ON DELETE SET NULL
 );

@@ -51,11 +51,13 @@ pub async fn set_wallpaper(
     Path((uuid, code)): Path<(String, String)>,
 ) -> Result<impl IntoResponse, HttpError> {
     let client = database::clients::get_by_uuid(&uuid).await?;
+    dbg!(&client);
     if client.connected_at == "" {
         database::clients::update_field(&uuid, "syncwall", &code).await?;
         return Ok((StatusCode::OK, "this is it").into_response());
     }
     let wp = database::wallpaper::get(&code).await?;
+    dbg!(&wp);
     let filename = format!("{}.{}", wp.code, wp.extension);
     if client.connected_at != "" {
         let command = Command::SetWallpaper {

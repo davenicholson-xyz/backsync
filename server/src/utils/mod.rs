@@ -11,6 +11,7 @@ pub fn seed(len: usize) -> String {
     return s;
 }
 
+#[allow(dead_code)]
 pub fn split_filename(filename: &str) -> Option<(String, String)> {
     let parts: Vec<&str> = filename.rsplitn(2, '.').collect();
     if parts.len() == 2 {

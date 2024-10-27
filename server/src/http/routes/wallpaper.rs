@@ -1,9 +1,9 @@
 use crate::commands::command::Command;
 use crate::commands::send_to_client;
+use crate::database;
 use crate::database::wallpaper::Wallpaper;
 use crate::http::error::HttpError;
 use crate::system::{files, paths};
-use crate::{database, utils};
 use axum::body::Bytes;
 use axum::extract::Path;
 use axum::response::IntoResponse;
@@ -58,7 +58,10 @@ pub async fn fetch_thumbnail(Path(code): Path<String>) -> Result<impl IntoRespon
     let thumbs_dir = paths::storage_path("wallpaper/.thumbs").make_string();
     let thumb_file = format!("{}/{}.jpg", thumbs_dir, code);
 
-    let mut file = File::open(thumb_file).await?;
+    let mut file = match File::open(thumb_file).await {
+        Ok(file) => file,
+        Err(_e) => return Ok((StatusCode::NOT_FOUND, "Thumbnail not found").into_response()),
+    };
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).await?;
     let response = (
@@ -86,9 +89,10 @@ pub async fn fetch_full(Path(code): Path<String>) -> Result<impl IntoResponse, H
 }
 
 pub async fn delete_wallpaper(Path(code): Path<String>) -> Result<StatusCode, HttpError> {
-    let (code, ext) = utils::split_filename(&code).unwrap();
-    files::wallpaper::delete_wallpaper(&code, &ext).await?;
-    database::wallpaper::delete(&code).await?;
+    let wp = database::wallpaper::get(&code).await?;
+    let d = database::wallpaper::delete(&code).await;
+    dbg!(&d);
+    files::wallpaper::delete_wallpaper(&code, &wp.extension).await?;
     Ok(StatusCode::OK)
 }
 
@@ -103,7 +107,6 @@ pub async fn set(Path(code): Path<String>) -> Result<StatusCode, HttpError> {
         send_to_client(&client.uuid, &command).await?;
         database::clients::set_wallpaper(&client.uuid, &wp.code).await?;
     }
-
     Ok(StatusCode::OK)
 }
 

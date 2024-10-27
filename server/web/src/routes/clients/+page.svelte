@@ -10,32 +10,60 @@
 	{#each $clients as client}
 		<div class="client">
 			<div class="wallpaper">
-				<img src={`${settings.baseURL}/wallpapers/full/${client.wallpaper_code}`} />
+				{#if client.wallpaper_code}
+					<img
+						src={`${settings.baseURL}/wallpapers/full/${client.wallpaper_code}`}
+						alt={client.wallpaper_code}
+					/>
+				{:else}
+					<img src="/missing.jpeg" />
+				{/if}
 				{#if client.syncwall}
 					<div class="sync-wallpaper">
-						<img src={`${settings.baseURL}/wallpapers/thumbnail/${client.syncwall}`} />
+						<img
+							src={`${settings.baseURL}/wallpapers/thumbnail/${client.syncwall}`}
+							alt={client.syncwa}
+						/>
 					</div>
 				{/if}
 			</div>
-		</div>
-		<div>
-			<span>{client.hostname}</span>
-			<span>{client.addr}</span>
-			{#if client.connected_at}
-				<span>Connected {moment(client.connected_at).fromNow()}</span>
-			{/if}
+			<div class="details">
+				{#if client.connected_at}
+					<span class="online">Connected {moment(client.connected_at).fromNow()}</span>
+				{:else}
+					<span class="offline">offline</span>
+				{/if}
+				<span class="hostname">{client.hostname}</span>
+				<span class="addr">{client.addr}</span>
+			</div>
 		</div>
 	{/each}
 </div>
 
 <style>
+	.client {
+		display: flex;
+		gap: 30px;
+		background-color: rgba(255, 255, 255, 0.1);
+		border-radius: 20px;
+		padding: 20px;
+		margin-inline: 60px;
+		margin-bottom: 20px;
+	}
+	.details {
+		display: grid;
+		align-items: start;
+		justify-content: start;
+	}
+	.hostname {
+		font-size: 28px;
+	}
 	.wallpaper {
-		width: 450px;
 		position: relative;
 	}
 
 	.wallpaper img {
-		width: 450px;
+		width: 350px;
 		overflow: hidden;
 		border-radius: 12px;
 		aspect-ratio: 16/10;

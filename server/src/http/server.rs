@@ -37,7 +37,7 @@ pub async fn http_server(port: i32) {
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_headers(Any)
-        .allow_headers(Any);
+        .allow_methods(Any);
 
     let app = Router::new()
         .route("/", get(index_handler))
