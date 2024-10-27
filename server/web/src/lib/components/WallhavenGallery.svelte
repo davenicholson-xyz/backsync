@@ -21,7 +21,8 @@
 			let wallhaven_data = data.data.map((w) => ({
 				path: w.path,
 				code: w.id,
-				thumbnail: w.thumbs.small
+				thumbnail: w.thumbs.small,
+				link: w.url
 			}));
 
 			total_pages = data.meta.last_page;

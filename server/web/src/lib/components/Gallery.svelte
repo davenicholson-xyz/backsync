@@ -67,6 +67,7 @@
 			src={wallpaper.thumbnail}
 			code={wallpaper.code}
 			path={wallpaper.path}
+			link={wallpaper.link}
 			local={wallpaper.local}
 		/>
 	{/each}
