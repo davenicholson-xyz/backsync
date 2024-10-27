@@ -28,6 +28,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@svelte-plugins/tooltips": "^3.0.1",
 		"iconify-icon": "^2.1.0",
 		"normalize.css": "^8.0.1"
 	}

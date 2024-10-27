@@ -9,4 +9,6 @@
 	);
 </script>
 
+<h2>Collection Name</h2>
+
 <WallhavenGallery {url} {settings} />

@@ -4,7 +4,9 @@
 	let is_dragging = $state(false);
 	let is_downloading = $derived($upload.code == code);
 
-	function gotoLink() {}
+	function gotoLink() {
+		window.location.href = link;
+	}
 
 	function dragStart(event) {
 		is_dragging = true;
@@ -106,16 +108,16 @@
 	.wallpaper {
 		position: relative;
 		width: 250px;
+		overflow: hidden;
 	}
 
 	.actions {
-		padding-top: 10px;
 		position: absolute;
 		top: 0;
 		height: 100%;
 		background: rgba(0, 0, 0, 0.5);
 		display: grid;
-		align-content: start;
+		align-content: center;
 		opacity: 0;
 		transform: translateX(-100%);
 		transition: all 0.5s;
@@ -132,13 +134,12 @@
 		color: white;
 	}
 
-	.actions a svg {
-		width: 18px;
+	.actions a:hover {
+		color: #f39c12;
 	}
 
-	.actions button:hover {
-		color: green;
-		cursor: pointer;
+	.actions a svg {
+		width: 18px;
 	}
 
 	.wallpaper img {

@@ -69,6 +69,7 @@
 			src={`${$settings.baseURL}/wallpapers/thumbnail/${client.wallpaper_code}`}
 			alt={`thumb-${wallpaper_code}`}
 			class:dragover
+			class:online
 		/>
 		{#if is_setting}
 			<div class="client-setting">
@@ -138,6 +139,16 @@
 					>
 				</div>
 			{/if}
+			{#if client.locked}
+				<div class="locked">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 8 8"
+						><path
+							fill="currentColor"
+							d="M4 0C2.9 0 2 .9 2 2v1H1v4h6V3H6V2c0-1.1-.9-2-2-2m0 1c.56 0 1 .44 1 1v1H3V2c0-.56.44-1 1-1"
+						/></svg
+					>
+				</div>
+			{/if}
 			<div class="status-dot" class:online>
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48"
 					><path
@@ -160,22 +171,28 @@
 	.client-image {
 		position: relative;
 	}
+
 	.client-image img {
 		width: 220px;
 		aspect-ratio: 16/10;
 		object-fit: cover;
 		border-radius: 10px;
-		border: 2px solid white;
+		outline: 4px solid black;
+		border: 4px solid black;
 	}
 
 	.client-image img.dragover {
-		border: 2px solid green;
+		outline: 4px dashed rgba(255, 255, 255, 0.3);
+	}
+
+	.client-image img.dragover.online {
+		outline: 4px dashed #7cb9e8;
 	}
 
 	.client-info {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: 2px;
 	}
 
 	.client-info .icons {
@@ -187,6 +204,7 @@
 
 	.client-info .status-dot {
 		margin-left: -3px;
+		margin-right: -3px;
 		padding-top: 4px;
 	}
 
@@ -200,6 +218,16 @@
 	}
 
 	.will_sync svg {
+		padding-top: 3px;
+		width: 16px;
+	}
+
+	.locked {
+		font-size: 12px;
+		margin-left: 0px;
+	}
+
+	.locked svg {
 		padding-top: 3px;
 		width: 16px;
 	}

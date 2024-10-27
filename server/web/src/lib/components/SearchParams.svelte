@@ -2,6 +2,7 @@
 	import { purity, categories, query, toprange } from '$lib/stores/searchparams';
 	import ToggleButton from './ToggleButton.svelte';
 	import RadioButton from './RadioButton.svelte';
+	import { onMount } from 'svelte';
 
 	let { settings, sorting } = $props();
 
@@ -72,8 +73,14 @@
 
 	{#if sorting == 'search'}
 		<div class="searchbar">
-			<input type="text" bind:value={search_term} onkeypress={handleKeys} />
-			<button onclick={doSearch}>search</button>
+			<input
+				type="text"
+				id="search-input"
+				bind:value={search_term}
+				onkeypress={handleKeys}
+				autofocus
+			/>
+			<button onclick={doSearch}> search </button>
 		</div>
 	{/if}
 </div>
@@ -89,15 +96,22 @@
 		margin-right: 20px;
 	}
 
-	.searchbar input {
-		background: transparent;
-		border: none;
-		width: 300px;
-		padding: 2px 4px;
-		color: white;
+	input[type='text'] {
+		background-color: #222;
+		color: #fff;
+		border: 1px solid #555;
+		padding: 3px 15px;
+		border-radius: 5px;
+		font-size: 18px;
+		outline: none;
+		width: 220px;
+		transition:
+			border-color 0.3s ease,
+			box-shadow 0.3s ease;
 	}
 
-	.searchbar input:blur {
-		border: none;
+	input[type='text']:focus {
+		border-color: #888;
+		box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
 	}
 </style>
