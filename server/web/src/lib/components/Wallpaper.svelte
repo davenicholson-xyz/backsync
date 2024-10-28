@@ -2,7 +2,7 @@
 	import { upload } from '$lib/stores/upload';
 	import { settings } from '$lib/stores/settings';
 
-	let { src, code, path, link = '', local, remove } = $props();
+	let { src, code, path, link = '', local, remove, preview } = $props();
 	let is_dragging = $state(false);
 	let is_downloading = $derived($upload.code == code);
 
@@ -60,23 +60,23 @@
 				>
 			</a>
 		{/if}
+		<button aria-label="view" onclick={preview(path)}>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32"
+				><circle cx="16" cy="16" r="4" fill="currentColor" /><path
+					fill="currentColor"
+					d="M30.94 15.66A16.69 16.69 0 0 0 16 5A16.69 16.69 0 0 0 1.06 15.66a1 1 0 0 0 0 .68A16.69 16.69 0 0 0 16 27a16.69 16.69 0 0 0 14.94-10.66a1 1 0 0 0 0-.68M16 22.5a6.5 6.5 0 1 1 6.5-6.5a6.51 6.51 0 0 1-6.5 6.5"
+				/></svg
+			>
+		</button>
+		<button aria-label="set-all">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20"
+				><path
+					fill="currentColor"
+					d="M6 3a3 3 0 0 0-3 3v6c0 .648.205 1.248.555 1.738l4.03-4.03a2 2 0 0 1 2.83 0l4.03 4.03c.35-.49.555-1.09.555-1.738V6a3 3 0 0 0-3-3zm6.5 3.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0m1.238 7.945l-4.03-4.03a1 1 0 0 0-1.415 0l-4.031 4.03c.49.35 1.09.555 1.738.555h6a2.98 2.98 0 0 0 1.738-.555M5.764 16c.55.614 1.348 1 2.236 1h4.5a4.5 4.5 0 0 0 4.5-4.5V8c0-.888-.386-1.687-1-2.236V12.5q0 .18-.018.358A3.5 3.5 0 0 1 12.5 16z"
+				/></svg
+			>
+		</button>
 		{#if local}
-			<button aria-label="view">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32"
-					><circle cx="16" cy="16" r="4" fill="currentColor" /><path
-						fill="currentColor"
-						d="M30.94 15.66A16.69 16.69 0 0 0 16 5A16.69 16.69 0 0 0 1.06 15.66a1 1 0 0 0 0 .68A16.69 16.69 0 0 0 16 27a16.69 16.69 0 0 0 14.94-10.66a1 1 0 0 0 0-.68M16 22.5a6.5 6.5 0 1 1 6.5-6.5a6.51 6.51 0 0 1-6.5 6.5"
-					/></svg
-				>
-			</button>
-			<button aria-label="set-all">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20"
-					><path
-						fill="currentColor"
-						d="M6 3a3 3 0 0 0-3 3v6c0 .648.205 1.248.555 1.738l4.03-4.03a2 2 0 0 1 2.83 0l4.03 4.03c.35-.49.555-1.09.555-1.738V6a3 3 0 0 0-3-3zm6.5 3.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0m1.238 7.945l-4.03-4.03a1 1 0 0 0-1.415 0l-4.031 4.03c.49.35 1.09.555 1.738.555h6a2.98 2.98 0 0 0 1.738-.555M5.764 16c.55.614 1.348 1 2.236 1h4.5a4.5 4.5 0 0 0 4.5-4.5V8c0-.888-.386-1.687-1-2.236V12.5q0 .18-.018.358A3.5 3.5 0 0 1 12.5 16z"
-					/></svg
-				>
-			</button>
 			<button aria-label="delete" class="delete" onclick={del}
 				><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
 					><path

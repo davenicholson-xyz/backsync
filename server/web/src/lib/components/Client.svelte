@@ -269,6 +269,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		margin-right: 6px;
 	}
 
 	.status-online {

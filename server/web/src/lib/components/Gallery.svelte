@@ -2,6 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import Wallpaper from './Wallpaper.svelte';
 	import ScrollToTop from './ScrollToTop.svelte';
+	import WallpaperPreview from './WallpaperPreview.svelte';
 
 	let { nextPage, total_pages } = $props();
 
@@ -9,10 +10,20 @@
 	let page = $state(1);
 	let is_loading = $state(false);
 
+	let preview_img = $state(null);
+
 	let observer;
 
 	function removeWallpaper(code) {
 		wallpapers = wallpapers.filter((w) => w.code != code);
+	}
+
+	function previewImage(src) {
+		preview_img = src;
+	}
+
+	function previewClose() {
+		preview_img = null;
 	}
 
 	async function loadPage() {
@@ -74,6 +85,7 @@
 			link={wallpaper.link}
 			local={wallpaper.local}
 			remove={removeWallpaper}
+			preview={previewImage}
 		/>
 	{/each}
 	<div id="scroll-target"></div>
@@ -84,6 +96,10 @@
 </div>
 
 <ScrollToTop />
+
+{#if preview_img}
+	<WallpaperPreview src={preview_img} close={previewClose} />
+{/if}
 
 <style>
 	.gallery {
