@@ -96,12 +96,26 @@
 		margin-right: 20px;
 	}
 
+	.searchbar {
+		display: flex;
+	}
+	.searchbar button {
+		border-radius: 0 5px 5px 0px;
+		border: none;
+		background: #4b934e;
+		color: white;
+		text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.5);
+	}
+	.searchbar button:hover {
+		cursor: pointer;
+	}
+
 	input[type='text'] {
 		background-color: #222;
 		color: #fff;
 		border: 1px solid #555;
 		padding: 3px 15px;
-		border-radius: 5px;
+		border-radius: 5px 0 0 5px;
 		font-size: 18px;
 		outline: none;
 		width: 220px;
