@@ -91,6 +91,7 @@
 		flex-wrap: wrap;
 		justify-content: center;
 		gap: 22px;
+		margin-bottom: 110px;
 	}
 
 	#scroll-target {
