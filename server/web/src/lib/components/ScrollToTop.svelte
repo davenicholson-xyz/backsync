@@ -1,4 +1,5 @@
 <script>
+	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 
 	let show = $state(false);
@@ -18,9 +19,7 @@
 </script>
 
 <div class="scroll-to-top {show ? '' : 'hidden'}" onclick={scrollToTop}>
-	<svg xmlns="http://www.w3.org/2000/svg" width="" height="" viewBox="0 0 24 24"
-		><path fill="currentColor" d="M5 15h4v6h6v-6h4l-7-8zM4 3h16v2H4z" /></svg
-	>
+	<Icon icon="tdesign:align-top" />
 </div>
 
 <style>
@@ -32,19 +31,15 @@
 		right: 50%;
 		cursor: pointer;
 		transition: opacity 0.3s;
-		padding: 8px 6px;
+		padding: 8px 16px;
 		border-radius: 10px;
 		background: black;
 		opacity: 0.6;
+		font-size: 40px;
 	}
 
 	.scroll-to-top:hover {
 		opacity: 1;
-	}
-
-	.scroll-to-top svg {
-		width: 35px;
-		height: 35px;
 	}
 
 	.hidden {

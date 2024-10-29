@@ -1,5 +1,5 @@
 <script>
-  import Icon from '@iconify/svelte';
+	import Icon from '@iconify/svelte';
 	import { upload } from '$lib/stores/upload';
 	import { settings } from '$lib/stores/settings';
 
@@ -44,30 +44,27 @@
 	ondragend={dragEnd}
 	role="application"
 >
-	<img {src} alt={code} />
+	<img {src} alt={code} onclick={() => preview(path)} />
 
 	<div class="actions">
 		{#if link}
 			<a href={link} target="_blank" aria-label="wallpaper link">
-      <Icon icon="mingcute:link-fill" />
+				<Icon icon="mingcute:link-fill" />
 			</a>
 		{/if}
-		<button aria-label="view" onclick={() => preview(path)}>
-      <Icon icon="lets-icons:view-fill" />
-		</button>
 		<button aria-label="set-all">
-      <Icon icon="solar:gallery-download-bold" />
+			<Icon icon="solar:gallery-download-bold" />
 		</button>
 		{#if local}
 			<button aria-label="delete" class="delete" onclick={del}>
-        <Icon icon="material-symbols:delete" />
-      </button>
+				<Icon icon="material-symbols:delete" />
+			</button>
 		{/if}
 	</div>
 
 	{#if is_downloading}
 		<div class="downloading">
-      <Icon icon="line-md:downloading-loop" />
+			<Icon icon="line-md:downloading-loop" />
 		</div>
 	{/if}
 </div>
@@ -124,15 +121,16 @@
 		color: #f39c12;
 	}
 
-	.actions  {
-    font-size: 18px;
-}
+	.actions {
+		font-size: 18px;
+	}
 
 	.wallpaper img {
 		width: 100%;
 		aspect-ratio: 16/10;
 		object-fit: cover;
 		border-radius: 4px;
+		cursor: pointer;
 	}
 
 	.wallpaper .downloading {
@@ -144,8 +142,7 @@
 		display: grid;
 		place-items: center;
 		background: rgba(0, 0, 0, 0.5);
-    font-size: 100px;
-    color: rgba(255,255,255,0.5);
+		font-size: 100px;
+		color: rgba(255, 255, 255, 0.5);
 	}
-
 </style>
