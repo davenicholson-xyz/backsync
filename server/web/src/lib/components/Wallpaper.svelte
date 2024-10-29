@@ -1,4 +1,5 @@
 <script>
+  import Icon from '@iconify/svelte';
 	import { upload } from '$lib/stores/upload';
 	import { settings } from '$lib/stores/settings';
 
@@ -48,95 +49,25 @@
 	<div class="actions">
 		{#if link}
 			<a href={link} target="_blank" aria-label="wallpaper link">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-					><g fill="none"
-						><path
-							d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"
-						/><path
-							fill="currentColor"
-							d="m17.303 9.524l3.182 3.182a5.5 5.5 0 1 1-7.778 7.778l-1.06-1.06a1.5 1.5 0 1 1 2.12-2.122l1.062 1.061a2.5 2.5 0 0 0 3.535-3.536l-3.182-3.182a2.5 2.5 0 0 0-2.681-.56q-.242.096-.454.196l-.464.217c-.62.28-1.097.4-1.704-.206c-.872-.872-.646-1.677.417-2.41a5.5 5.5 0 0 1 7.007.642m-6.01-6.01l1.06 1.06a1.5 1.5 0 0 1-2.12 2.122l-1.061-1.06A2.5 2.5 0 1 0 5.636 9.17l3.182 3.182a2.5 2.5 0 0 0 2.681.56q.242-.096.454-.196l.464-.217c.62-.28 1.098-.4 1.704.206c.872.872.646 1.677-.417 2.41a5.5 5.5 0 0 1-7.007-.642l-3.182-3.182a5.5 5.5 0 1 1 7.778-7.778Z"
-						/></g
-					></svg
-				>
+      <Icon icon="mingcute:link-fill" />
 			</a>
 		{/if}
-		<button aria-label="view" onclick={preview(path)}>
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32"
-				><circle cx="16" cy="16" r="4" fill="currentColor" /><path
-					fill="currentColor"
-					d="M30.94 15.66A16.69 16.69 0 0 0 16 5A16.69 16.69 0 0 0 1.06 15.66a1 1 0 0 0 0 .68A16.69 16.69 0 0 0 16 27a16.69 16.69 0 0 0 14.94-10.66a1 1 0 0 0 0-.68M16 22.5a6.5 6.5 0 1 1 6.5-6.5a6.51 6.51 0 0 1-6.5 6.5"
-				/></svg
-			>
+		<button aria-label="view" onclick={() => preview(path)}>
+      <Icon icon="lets-icons:view-fill" />
 		</button>
 		<button aria-label="set-all">
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20"
-				><path
-					fill="currentColor"
-					d="M6 3a3 3 0 0 0-3 3v6c0 .648.205 1.248.555 1.738l4.03-4.03a2 2 0 0 1 2.83 0l4.03 4.03c.35-.49.555-1.09.555-1.738V6a3 3 0 0 0-3-3zm6.5 3.5a1 1 0 1 1-2 0a1 1 0 0 1 2 0m1.238 7.945l-4.03-4.03a1 1 0 0 0-1.415 0l-4.031 4.03c.49.35 1.09.555 1.738.555h6a2.98 2.98 0 0 0 1.738-.555M5.764 16c.55.614 1.348 1 2.236 1h4.5a4.5 4.5 0 0 0 4.5-4.5V8c0-.888-.386-1.687-1-2.236V12.5q0 .18-.018.358A3.5 3.5 0 0 1 12.5 16z"
-				/></svg
-			>
+      <Icon icon="solar:gallery-download-bold" />
 		</button>
 		{#if local}
-			<button aria-label="delete" class="delete" onclick={del}
-				><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-					><path
-						fill="currentColor"
-						d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6z"
-					/></svg
-				></button
-			>
+			<button aria-label="delete" class="delete" onclick={del}>
+        <Icon icon="material-symbols:delete" />
+      </button>
 		{/if}
 	</div>
 
 	{#if is_downloading}
 		<div class="downloading">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-				><g
-					fill="none"
-					stroke="currentColor"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					><path
-						stroke-dasharray="2 4"
-						stroke-dashoffset="6"
-						d="M12 3c4.97 0 9 4.03 9 9c0 4.97 -4.03 9 -9 9"
-						><animate
-							attributeName="stroke-dashoffset"
-							dur="0.6s"
-							repeatCount="indefinite"
-							values="6;0"
-						/></path
-					><path
-						stroke-dasharray="32"
-						stroke-dashoffset="32"
-						d="M12 21c-4.97 0 -9 -4.03 -9 -9c0 -4.97 4.03 -9 9 -9"
-						><animate
-							fill="freeze"
-							attributeName="stroke-dashoffset"
-							begin="0.1s"
-							dur="0.4s"
-							values="32;0"
-						/></path
-					><path stroke-dasharray="10" stroke-dashoffset="10" d="M12 8v7.5"
-						><animate
-							fill="freeze"
-							attributeName="stroke-dashoffset"
-							begin="0.5s"
-							dur="0.2s"
-							values="10;0"
-						/></path
-					><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 15.5l3.5 -3.5M12 15.5l-3.5 -3.5"
-						><animate
-							fill="freeze"
-							attributeName="stroke-dashoffset"
-							begin="0.7s"
-							dur="0.2s"
-							values="6;0"
-						/></path
-					></g
-				></svg
-			>
+      <Icon icon="line-md:downloading-loop" />
 		</div>
 	{/if}
 </div>
@@ -193,15 +124,15 @@
 		color: #f39c12;
 	}
 
-	.actions a svg {
-		width: 18px;
-	}
+	.actions  {
+    font-size: 18px;
+}
 
 	.wallpaper img {
 		width: 100%;
 		aspect-ratio: 16/10;
 		object-fit: cover;
-		border-radius: 10px;
+		border-radius: 4px;
 	}
 
 	.wallpaper .downloading {
@@ -213,10 +144,8 @@
 		display: grid;
 		place-items: center;
 		background: rgba(0, 0, 0, 0.5);
+    font-size: 100px;
+    color: rgba(255,255,255,0.5);
 	}
 
-	.wallpaper .downloading svg {
-		width: 100px;
-		opacity: 0.6;
-	}
 </style>

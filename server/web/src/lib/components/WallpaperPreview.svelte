@@ -2,7 +2,7 @@
 	let { src, close } = $props();
 </script>
 
-<div class="wallpaper-preview" onclick={close}>
+<div class="wallpaper-preview" onclick={() => close()}>
 	<img {src} alt={src} />
 </div>
 

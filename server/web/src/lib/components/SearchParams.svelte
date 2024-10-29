@@ -28,7 +28,7 @@
 		<ToggleButton
 			label="sketchy"
 			bind:checked={$purity.sketchy}
-			--color="#cec00f"
+			--color="rgb(244,187,68)"
 			klass={!authed ? 'last' : ''}
 		/>
 		{#if authed}
