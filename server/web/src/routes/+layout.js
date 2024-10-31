@@ -48,6 +48,7 @@ export async function load({ fetch }) {
 
   settings.set({ baseURL, ...default_settings, ...get(settings) })
   const current_settings = get(settings)
+  console.log(current_settings)
   return { settings: current_settings }
 }
 

@@ -1,4 +1,9 @@
-use axum::{routing::get, Json, Router};
+use axum::{
+    response::IntoResponse,
+    routing::{get, post},
+    Json, Router,
+};
+use hyper::StatusCode;
 use serde::{Deserialize, Serialize};
 
 use crate::{http::error::HttpError, system::config};
@@ -33,6 +38,14 @@ pub async fn settings() -> Result<Json<SettingsResponse>, HttpError> {
     Ok(Json(settings))
 }
 
+pub async fn update(
+    Json(settings): Json<SettingsResponse>,
+) -> Result<impl IntoResponse, HttpError> {
+    config::set("wallhaven_username", &settings.wallhaven_username)?;
+    config::set("wallhaven_apikey", &settings.wallhaven_apikey)?;
+    Ok((StatusCode::OK, "Yum"))
+}
+
 pub fn get_routes() -> Router {
-    Router::new().route("/settings", get(settings))
+    Router::new().route("/settings", get(settings).post(update))
 }
