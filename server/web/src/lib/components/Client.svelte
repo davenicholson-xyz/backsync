@@ -1,4 +1,6 @@
 <script>
+	import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+	import '@shoelace-style/shoelace/dist/components/popup/popup.js';
 	import Icon from '@iconify/svelte';
 
 	import { clients, updating } from '$lib/stores/clients';
@@ -13,6 +15,7 @@
 
 	let online = $derived(client.connected_at != '');
 	let will_sync = $derived(client.syncwall != null);
+	let sync_preview = $state(false);
 
 	updating.subscribe((updates) => {
 		if (updates.some((u) => u.uuid == client.uuid)) {
@@ -102,7 +105,17 @@
 	<div class="client-info">
 		<div class="icons">
 			{#if will_sync}
-				<Icon icon="fluent:arrow-sync-12-filled" width="18px" />
+				<div class="sync-icon">
+					<Icon
+						icon="fluent:arrow-sync-12-filled"
+						width="18px"
+						onmouseenter={() => (sync_preview = true)}
+						onmouseleave={() => (sync_preview = false)}
+					/>
+					<div class:active={sync_preview} class="sync-preview">
+						<img src={`${$settings.baseURL}/wallpapers/thumbnail/${client.syncwall}`} />
+					</div>
+				</div>
 			{/if}
 
 			{#if client.locked}
@@ -116,7 +129,9 @@
 
 		{#if online}
 			<div class="status-online">
-				<Icon icon="heroicons-outline:status-online" />
+				<sl-tooltip content="Online" placement="right" trigger="hover">
+					<Icon icon="heroicons-outline:status-online" />
+				</sl-tooltip>
 			</div>
 		{/if}
 	</div>
@@ -164,6 +179,7 @@
 		gap: 3px;
 	}
 
+
 	.status-online {
 		margin-left: auto;
 		color: lightgreen;
@@ -194,4 +210,35 @@
 	.client-info a:hover {
 		color: #f39c12;
 	}
+
+  .client .sync-icon {
+      position: relative;
+	  display: inline-block;
+	  padding: 0px;
+	  margin: 0px;
+	  border: 1px solid red;
+    }
+
+  .client .sync-preview {
+      padding: 6px;
+      background: black;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 10px;
+      display: none;
+      position: absolute;
+      top: 20px;
+      left: 0;
+      transform: translateX(-50%);
+    }
+
+    .client .sync-preview.active {
+      display: grid;
+      }
+
+  .client .sync-preview img {
+      width: 100px;
+      aspect-ratio: 16/10;
+      object-fit: cover;
+      border-radius: 6px;
+    }
 </style>

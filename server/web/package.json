@@ -28,6 +28,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@shoelace-style/shoelace": "^2.18.0",
 		"@svelte-plugins/tooltips": "^3.0.1",
 		"iconify-icon": "^2.1.0",
 		"moment": "^2.30.1",

@@ -1,4 +1,11 @@
 <script>
+
+
+import "@shoelace-style/shoelace/dist/themes/dark.css";
+import { setBasePath } from "@shoelace-style/shoelace/dist/utilities/base-path.js";
+
+setBasePath('../../node_modules/@shoelace-style/shoelace/dist');
+
 	import ClientBar from '../lib/components/ClientBar.svelte';
 	import Sidebar from '../lib/components/Sidebar.svelte';
 	let { children } = $props();

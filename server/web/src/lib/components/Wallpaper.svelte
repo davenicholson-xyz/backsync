@@ -1,4 +1,5 @@
 <script>
+  import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 	import Icon from '@iconify/svelte';
 	import { upload } from '$lib/stores/upload';
 	import { settings } from '$lib/stores/settings';
@@ -47,18 +48,32 @@
 	<img {src} alt={code} onclick={() => preview(path)} />
 
 	<div class="actions">
+
+      <sl-tooltip content="Preview" placement="right">
+			<button aria-label="preview" onclick={() => preview(path)}> 
+				<Icon icon="icon-park-solid:preview-open" />
+			</button>
+      </sl-tooltip>
+
 		{#if link}
+      <sl-tooltip content="Link to Wallhaven page" placement="right">
 			<a href={link} target="_blank" aria-label="wallpaper link">
 				<Icon icon="mingcute:link-fill" />
 			</a>
+      </sl-tooltip>
 		{/if}
+
+      <sl-tooltip content="Send to all clients" placement="right">
 		<button aria-label="set-all">
 			<Icon icon="solar:gallery-download-bold" />
 		</button>
+    </sl-tooltip>
 		{#if local}
-			<button aria-label="delete" class="delete" onclick={del}>
+      <sl-tooltip content="Delete" placement="right">
+			<button aria-label="delete" class="delete" onclick={del}> 
 				<Icon icon="material-symbols:delete" />
 			</button>
+      </sl-tooltip>
 		{/if}
 	</div>
 
